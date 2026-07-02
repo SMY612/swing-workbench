@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th" data-theme-default="light" data-shell-root="." data-nav="home" data-skin="terminal">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swing Workbench</title>
+<script src="shared/_kit/theme-boot.js?v=1782967287"></script>
+<script>document.documentElement.classList.add('js')</script>
+<script src="shared/_kit/reveal.js?v=1782967287" defer></script>
+<style>
+/* critical fallback — กันจอขาว/ฟอนต์เพี้ยนถ้า kit โหลดไม่ขึ้น */
+html { background: #f5f5f7; }
+html[data-theme="dark"] { background: #000; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", "Noto Sans Thai", system-ui, sans-serif; color: #1c1d22; }
+html[data-theme="dark"] body { color: #f5f5f7; }
+</style>
+<link rel="stylesheet" href="shared/_kit/tokens.css?v=1782967287">
+<link rel="stylesheet" href="shared/_kit/components.css?v=1782967287">
+<link rel="stylesheet" href="shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="shared/_kit/signals.css?v=1782967287">
+<link rel="stylesheet" href="shared/_kit/chart.css?v=1782967287c">
+<link rel="stylesheet" href="shared/_kit/masonry.css?v=1782967287">
+<link rel="stylesheet" href="shared/_kit/skin-terminal.css?v=1782967287c">
+<style>
+  /* ====================================================================
+     ภาพรวม (home) — Liquid-Glass overview (สเปกล็อก: tint .26 / blur 25)
+     เปลือก/ฉากร่วมจาก shared/_kit (shell.js ฉีด .sw-scene ให้) · กฎสี เขียว/แดง
+     = ขึ้น/ลง + สัญญาณ เท่านั้น · การ์ด hue ไม่สื่อความหมาย (เดียวกับ briefing)
+     ==================================================================== */
+  :root{
+    --g-pk:rgba(245,168,206,.26); --pk-ink:#8a2f5e;
+    --g-y:rgba(240,214,96,.26);   --y-ink:#6b5a0e;
+    --g-bl:rgba(150,190,245,.26); --bl-ink:#1c4a86;
+    --g-tl:rgba(110,200,206,.26); --tl-ink:#0c5a66;
+    --g-lv:rgba(190,165,235,.26); --lv-ink:#4a3585;
+    --g-gr:rgba(150,205,150,.26); --gr-ink:#2f6b30;
+    --g-co:rgba(245,152,140,.26); --co-ink:#8a3328;
+    --g-or:rgba(245,190,120,.26); --or-ink:#7a4a14;
+    --g-white:rgba(255,255,255,.52);
+    --rim:linear-gradient(140deg,rgba(255,255,255,.5),rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 56%,rgba(255,255,255,.16));
+    --sheen:linear-gradient(125deg,rgba(255,255,255,.26),rgba(255,255,255,0) 40%);
+    --bevel:inset 0 1px 1px rgba(255,255,255,.4),inset 0 -10px 20px rgba(255,255,255,.05);
+    --drop:0 5px 16px rgba(40,52,84,.09);
+    --hair:rgba(0,0,0,.07);
+  }
+  html[data-theme="dark"]{
+    --g-pk:rgba(191,64,121,.30); --pk-ink:#f7b6d3;
+    --g-y:rgba(157,134,18,.30);  --y-ink:#f0d65f;
+    --g-bl:rgba(44,111,208,.30); --bl-ink:#9cc4ff;
+    --g-tl:rgba(15,125,140,.32); --tl-ink:#6fe0ec;
+    --g-lv:rgba(122,91,208,.32); --lv-ink:#cdbef0;
+    --g-gr:rgba(48,160,80,.30);  --gr-ink:#86e6a0;
+    --g-co:rgba(200,90,70,.30);  --co-ink:#ffb0a4;
+    --g-or:rgba(180,120,40,.30); --or-ink:#f2c97a;
+    --g-white:rgba(58,58,64,.42);
+    --rim:linear-gradient(140deg,rgba(255,255,255,.4),rgba(255,255,255,.08) 28%,rgba(255,255,255,0) 56%,rgba(255,255,255,.14));
+    --sheen:linear-gradient(125deg,rgba(255,255,255,.12),rgba(255,255,255,0) 42%);
+    --bevel:inset 0 1px 1px rgba(255,255,255,.18),inset 0 -10px 20px rgba(255,255,255,.03);
+    --drop:0 6px 22px rgba(0,0,0,.5);
+    --hair:rgba(255,255,255,.08);
+  }
+
+  body{ font-family:var(--font); line-height:1.6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  #sw-content{ position:relative; z-index:1; background:transparent; }   /* ลอยเหนือ .sw-scene */
+  a{ color:var(--accent-ink); text-decoration:none; }
+  .ov-wrap{ max-width:1180px; margin:0 auto; padding:1.4rem 1.5rem 2.4rem; }
+
+  /* ---- hero ---- */
+  .ov-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1.3rem; flex-wrap:wrap; }
+  .eyebrow{ font-size:.8rem; font-weight:600; color:var(--accent-ink); margin:0 0 4px; letter-spacing:.01em; }
+  .ov-hello{ font-size:clamp(1.7rem,3.4vw,2.4rem); font-weight:700; letter-spacing:-.025em; line-height:1.05; margin:0; }
+  .ov-sub{ font-size:.92rem; color:var(--text-muted); margin:.45rem 0 0; max-width:60ch; line-height:1.6; }
+  .ov-asof{ font-size:.8rem; color:var(--text-faint); margin:.5rem 0 0; }
+  .regime{ display:inline-flex; align-items:center; gap:7px; padding:5px 13px; border-radius:999px;
+    font-size:.8rem; font-weight:700; background:rgba(36,138,61,.16); color:var(--up); }
+  .regime.is-down{ background:rgba(215,0,21,.14); color:var(--down); }
+  .regime.is-flat{ background:var(--g-white); color:var(--text-muted); }
+  .regime .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; }
+
+  /* ---- layout: bento แพ็คแน่น (3 คอลัมน์เดสก์ท็อป · auto-arrange · มือถือ stack) ---- */
+  .ov-bento{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; grid-auto-flow:row dense; }
+  .ov-bento>.sp1{ grid-column:span 1; } .ov-bento>.sp2{ grid-column:span 2; } .ov-bento>.sp3{ grid-column:span 3; }
+  /* การ์ด wrapper (SPY/โดนัท/backtest) ให้ .ccard ข้างในเต็มช่อง = ไทล์ ไม่เว้นช่อง */
+  #zoneMain,#zoneSide,#zoneBacktest{ display:flex; }
+  #zoneMain>.ccard,#zoneSide>.ccard,#zoneBacktest>.ccard{ flex:1; width:100%; }
+
+  /* ---- การ์ดกระจกร่วม (rim หักเหแสง + sheen + bevel) ---- */
+  .bcard,.ccard,.mtile,.bf-rail,.hubcard{ position:relative; overflow:hidden;
+    box-shadow:var(--drop),var(--bevel);
+    backdrop-filter:blur(25px) saturate(165%); -webkit-backdrop-filter:blur(25px) saturate(165%); }
+  .bcard::before,.ccard::before,.mtile::before,.bf-rail::before,.hubcard::before{ content:""; position:absolute; inset:0; border-radius:inherit; background:var(--sheen); pointer-events:none; }
+  .bcard::after,.ccard::after,.mtile::after,.bf-rail::after,.hubcard::after{ content:""; position:absolute; inset:0; border-radius:inherit; padding:1.3px; background:var(--rim);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; pointer-events:none; z-index:3; }
+  .bcard>*,.ccard>*,.mtile>*,.bf-rail>*,.hubcard>*{ position:relative; z-index:2; }
+  .bcard{ border-radius:22px; padding:1.05rem 1.2rem; background:var(--g-white); color:var(--text); }
+  .c-pk{ background:var(--g-pk); color:var(--pk-ink); }
+  .c-y{ background:var(--g-y); color:var(--y-ink); }
+  .c-bl{ background:var(--g-bl); color:var(--bl-ink); }
+  .c-tl{ background:var(--g-tl); color:var(--tl-ink); }
+  .c-lv{ background:var(--g-lv); color:var(--lv-ink); }
+  .c-gr{ background:var(--g-gr); color:var(--gr-ink); }
+  .c-co{ background:var(--g-co); color:var(--co-ink); }
+  .c-or{ background:var(--g-or); color:var(--or-ink); }
+  .ctitle{ font-size:.82rem; font-weight:700; margin:0 0 .7rem; display:flex; align-items:center; gap:7px; }
+
+  /* ---- metrics → กระเบื้องกระจก (ไล่สี bento ผ่าน nth-child · เลขขึ้น/ลง คงเขียว/แดง) ---- */
+  .metrics{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .mtile{ border-radius:18px; padding:.9rem 1.05rem; background:var(--g-white); color:var(--text); }
+  a.mtile{ display:block; color:inherit; cursor:pointer; transition:transform .14s ease, box-shadow .14s ease; }
+  a.mtile:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(40,52,84,.16),var(--bevel); }
+  .metrics .mtile:nth-child(1){ background:var(--g-bl); color:var(--bl-ink); }
+  .metrics .mtile:nth-child(2){ background:var(--g-tl); color:var(--tl-ink); }
+  .metrics .mtile:nth-child(3){ background:var(--g-lv); color:var(--lv-ink); }
+  .metrics .mtile:nth-child(4){ background:var(--g-y);  color:var(--y-ink); }
+  .metrics .mtile:nth-child(5){ background:var(--g-co); color:var(--co-ink); }
+  .mtile .k{ font-size:.8rem; font-weight:600; margin:0 0 5px; opacity:.92; }
+  .mtile .v{ font-size:1.6rem; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; margin:0; line-height:1.05; }
+  .mtile .s{ font-size:.72rem; margin:4px 0 0; opacity:.82; }
+  .mtile .v.up{ color:var(--up); } .mtile .v.down{ color:var(--down); }
+
+  /* ---- การ์ดกราฟ (SPY + โดนัท) — .ccard เป็นกระจกขาว · ภายในกราฟคงเดิม ---- */
+  /* การ์ด backtest (เส้นทุน+drawdown+R) — แถวเต็มความกว้าง ใต้สัญญาณ */
+  .bt-stat{ display:flex; flex-wrap:wrap; gap:.35rem 1.2rem; margin:-.15rem 0 .15rem; font-size:.78rem; color:var(--text-muted); }
+  .bt-stat b{ color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+  .bt-charts{ display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem 1.1rem; }   /* 3 ช่องเท่ากัน · กราฟขนาดธรรมชาติ ไม่ยืดเต็มจอ */
+  @media (max-width:880px){ .bt-charts{ grid-template-columns:1fr; } }
+  .ccard{ border-radius:22px; padding:1.05rem 1.2rem; background:var(--g-white); color:var(--text); }
+  /* chart internals (.cx-* / .seg / .donut-* / .legend / .sector-*) → shared/_kit/chart.css */
+
+  /* สัญญาณ → shared component: shared/_kit/signals.{js,css} (.swsig) */
+
+  /* ---- รางปฏิทิน (timeline จาก WB.calendar) · กระจกใส (การ์ดเนื้อหาใหญ่ไม่ลงสี) ---- */
+  .bf-rail{ border-radius:22px; padding:1.1rem 1.15rem; background:var(--g-white); color:var(--text); }
+  .tl{ position:relative; padding-left:1rem; margin-top:.3rem; }
+  .tl::before{ content:""; position:absolute; left:4px; top:4px; bottom:6px; width:2px; background:var(--hair); }
+  .ev{ position:relative; padding:0 0 .9rem; }
+  .ev:last-child{ padding-bottom:0; }
+  .ev::before{ content:""; position:absolute; left:-1rem; top:3px; width:9px; height:9px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); margin-left:-.5px; }
+  .ev.warn::before{ background:var(--down); }
+  .ev .t{ font-size:.7rem; color:var(--text-faint); font-variant-numeric:tabular-nums; }
+  .ev .e{ font-size:.84rem; font-weight:600; margin:1px 0 0; }
+  .empty{ font-size:.82rem; color:var(--text-faint); padding:.4rem 0; }
+
+  .pfoot{ margin-top:2rem; padding-top:1rem; border-top:1px solid var(--hair);
+    font-size:.75rem; color:var(--text-faint); line-height:1.7; }
+
+  @media (max-width:1080px){ .ov-bento{ grid-template-columns:1fr 1fr; } .ov-bento>.sp2,.ov-bento>.sp3{ grid-column:span 2; } }
+  @media (max-width:720px){ .ov-bento{ grid-template-columns:1fr; } .ov-bento>.sp1,.ov-bento>.sp2,.ov-bento>.sp3{ grid-column:span 1; } .metrics{ grid-template-columns:1fr 1fr; } }
+</style>
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   TERMINAL skin — ภาพรวม (index) page-local · phase 2
+   ลุค: "กล่องเส้นขอบ" — เนื้อหา/กราฟวางบนพื้นเว็บเลย (โปร่ง ไม่มีพื้นของตัวเอง)
+   มีแค่เส้นขอบสี่เหลี่ยมรอบ ๆ (user 2026-06-30 · เลิกกรอบรูป/พาเนลดำ)
+   *ไม่แตะไฟล์สกินส่วนกลาง* — override เฉพาะที่นี่ (briefing คงกรอบรูปเดิม)
+   ════════════════════════════════════════════════════════════════════ */
+
+  /* ---- hero → mono terminal (mirror .bf-* ของ briefing) ---- */
+  [data-skin="terminal"] .ov-wrap{ max-width:1280px; padding:2.4rem 2.6rem 3.6rem; }
+  [data-skin="terminal"] .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--text-faint); margin:0 0 16px; font-weight:500;
+  }
+  [data-skin="terminal"] .ov-hello{ font-weight:600; letter-spacing:-.035em; font-size:2.5rem; line-height:1.04; }
+  [data-skin="terminal"] .ov-sub{ font-size:1rem; margin-top:1rem; line-height:1.7; max-width:64ch; color:var(--text-muted); }
+  [data-skin="terminal"] .ov-asof{ font-family:var(--mono); font-size:.74rem; margin-top:.85rem; color:var(--text-faint); }
+  [data-skin="terminal"] .ov-top{ margin-bottom:0; }
+  [data-skin="terminal"] .regime{
+    border-radius:0; border:1px solid currentColor; font-weight:500;
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.02em; text-transform:uppercase;
+  }
+  [data-skin="terminal"] .ov-hatch{
+    height:22px; margin:34px 0 30px;
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    background:repeating-linear-gradient(135deg,var(--border) 0 1px,transparent 1px 7px);
+  }
+  /* masonry: คอลัมน์คงที่ (flex) → ยกขึ้นโมดูลกลาง shared/_kit/masonry.css (.sw-cols/.sw-col)
+     ใช้ร่วมกับ briefing · การ์ดโตดันเฉพาะใบใต้มันในคอลัมน์เดียวกัน คอลัมน์อื่นไม่ขยับ */
+  [data-skin="terminal"] .metrics{ gap:14px; }
+
+  /* .bf-rail = การ์ด (เฉพาะหน้านี้ · briefing คือคอนเทนเนอร์ ไม่ใส่กรอบ) → กล่องโปร่ง
+     ลุคการ์ดโปร่ง / ตัด pseudo / รีเซ็ต token = ยกขึ้น shared/_kit/skin-terminal.css (ก้อนที่ 3) แล้ว
+     สกินกลางเว้น .bf-rail ไว้ให้คุมราย-หน้า เพราะคนละความหมาย 2 หน้า (กับดักที่ต้องระวัง) */
+  [data-skin="terminal"] #sw-content .bf-rail{
+    background:transparent; border:1px solid var(--border);
+    border-radius:0; box-shadow:none;
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+  }
+  [data-skin="terminal"] #sw-content .bf-rail::before,
+  [data-skin="terminal"] #sw-content .bf-rail::after{ display:none; }
+
+  /* ตัวเลข (.mtile) → ฟอนต์ mono · hover ไฮไลต์ขอบ (ไม่มีเงา) */
+  [data-skin="terminal"] #sw-content a.mtile:hover{ transform:translateY(-1px); border-color:var(--accent); box-shadow:none; }
+  [data-skin="terminal"] .mtile .k{ font-family:var(--mono); font-size:.66rem; letter-spacing:.06em; text-transform:uppercase; opacity:.72; }
+  [data-skin="terminal"] .mtile .v{ font-family:var(--mono); font-weight:500; }
+  [data-skin="terminal"] .mtile .s{ font-family:var(--mono); font-size:.66rem; opacity:.72; }
+
+  /* footer → mono จาง */
+  [data-skin="terminal"] .pfoot{ font-family:var(--mono); font-size:.68rem; }
+
+  /* nav กลืนพื้น · กราฟเส้น minimal (ตัด gradient/non-scaling-stroke) · โดนัทขอบล้วน + ป้ายเหลี่ยม
+     = ยกขึ้น shared/_kit/skin-terminal.css (ก้อนที่ 3) แล้ว → ใช้ร่วมกับ briefing */
+  /* การ์ด backtest: เส้นแบ่งใต้แถวสถิติ (ก่อนหัวกราฟ 3 อัน) เต็มกว้างเหมือนเส้นใต้ชื่อการ์ด + เว้นช่องเพิ่ม */
+  [data-skin="terminal"] #sw-content .bt-stat{ padding-bottom:.95rem; border-bottom:1px solid var(--border-soft); margin:.25rem 0 1.35rem; }
+</style>
+</head>
+<body data-nav="home">
+<div id="sw-content">
+  <div class="ov-wrap">
+
+    <header class="ov-top reveal" data-reveal="left"><!-- ทิศ: header สไลด์ซ้าย (ให้ตรง briefing) -->
+      <div>
+        <p class="eyebrow">MyInvest · Active Portfolio (swing)</p>
+        <h1 class="ov-hello">ภาพรวม</h1>
+        <p class="ov-sub">เฝ้าดูสัญญาณ breakout · สภาพตลาด · กลุ่มหุ้น — สรุปจากแท่งปิดรายวัน</p>
+        <p class="ov-asof">ข้อมูล ณ <span id="asOf">2026-07-02 04:41</span></p>
+      </div>
+      <span class="regime" id="regimePill"><span class="dot"></span>กำลังโหลดสภาพตลาด…</span>
+    </header>
+
+    <div class="ov-hatch" aria-hidden="true"></div>
+
+    <!-- การ์ดสถานะ render จากทะเบียน window.CARDS (สคริปต์ท้ายไฟล์) — เพิ่ม/ลบ/แก้ = แก้ 1 entry -->
+    <!-- เลย์เอาต์ masonry: metrics เต็มแถว · 3 คอลัมน์คงที่ · backtest เต็มแถว (user 2026-06-30)
+         col1 = SPY + สัญญาณ · col2 = โดนัท · col3 = ปฏิทิน → ความสูงสมดุล
+         การ์ดโตในคอลัมน์ไหน ดันเฉพาะใบใต้มัน "ในคอลัมน์นั้น" — คอลัมน์อื่นไม่ขยับ -->
+    <div class="metrics reveal" id="zoneMetric"></div>
+
+    <div class="sw-cols">
+      <div class="sw-col">
+        <div class="reveal" id="zoneMain"></div>
+        <div class="bcard reveal">
+          <p class="ctitle"><span><svg viewBox="0 0 24 24"><path d="M13 2L5 13h6l-1 9 9-12h-6z"/></svg></span> สัญญาณ swing วันนี้</p>
+          <div id="zoneSignals"></div>
+        </div>
+      </div>
+      <div class="sw-col">
+        <div class="reveal" id="zoneSide"></div>
+      </div>
+      <div class="sw-col">
+        <div class="bf-rail reveal">
+          <p class="ctitle"><span><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4zM4 9h16M8 3v4M16 3v4"/></svg></span> งบ + เหตุการณ์ใกล้</p>
+          <div class="tl" id="calTl"><span class="empty">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" id="zoneBacktest" data-reveal="scale"></div><!-- ทิศ: การ์ด backtest ซูมเข้า -->
+
+    <footer class="pfoot">ฉบับเผยแพร่: ตัวเลขพอร์ตส่วนตัวถูกถอดออก · ปรัชญา daily-bar — ตัดสินใจจากแท่งปิดรายวัน · ออฟไลน์ · สร้างเมื่อ 2026-07-02 04:41</footer>
+
+  </div>
+</div>
+
+<!-- ข้อมูล + ตัวช่วย (เหมือนหน้า board: window.WB + window.WBUtil) — อ่านอย่างเดียว ไม่รันกฎใหม่ -->
+<script src="workbench/kit/util.js?v=1782967287"></script>
+<script src="workbench/data/data.js?v=1782967287"></script>
+<script src="shared/_kit/signals.js?v=1782967287"></script>
+<script src="shared/_kit/chart.js?v=1782967287a"></script>
+<script>
+/* ============================================================================
+   Landing dashboard — render การ์ดจาก window.WB จริง ผ่านทะเบียน window.CARDS
+   หลักการ: ดึงเฉพาะข้อมูล public-safe (regime / sectors / tickers+verdict) ·
+   ห้ามแตะ meta.port.value_* / positions (ฉบับ public ถูก null อยู่แล้ว) ·
+   คำตัดสินทั้งหมดมาจาก engine (verdict ใน data.js) — ที่นี่แค่ "นับ + วาด"
+   ============================================================================ */
+(function () {
+  "use strict";
+  var U = window.WBUtil, WB = window.WB || {};
+  var $ = function (id) { return document.getElementById(id); };
+  if (!U || !WB.meta) { return; }                       // ไม่มีข้อมูล → ปล่อยข้อความกำลังโหลด
+  var esc = U.esc;
+
+  // (สีหมวด ramp ย้ายไป shared/_kit/chart.js — donut เลือกสีเอง)
+
+  // ---- ปฏิทิน spy_spark (วันที่ไทยใช้ SWChart.thDate จาก chart.js) ----
+  // spy_spark ไม่มีวันที่ในตัว → ยืมปฏิทินวันทำการจาก ticker (ทุกตัวแชร์ปฏิทินเดียวกัน จบที่ as_of)
+  function sparkCalendar(n) {
+    var ts = U.get(WB, "tickers", []) || [];
+    for (var i = 0; i < ts.length; i++) {
+      var d = ts[i] && ts[i].ohlcv && ts[i].ohlcv.dates;
+      if (Array.isArray(d) && d.length >= n) return d.slice(-n);
+    }
+    return null;
+  }
+
+  // ---- regime → ป้ายไทย (mirror ตรรกะ board ใน app.js) ----
+  function regimeInfo() {
+    var rg = U.get(WB, "regime", {}) || {};
+    var st = typeof rg.status === "string" ? rg.status : "";
+    var spy = U.get(rg, "spy.pct_vs_sma50", null);
+    var m;
+    if (st === "bull_strong") m = { t: "ตลาดเปิดรับ · เทรนด์แรง", c: "up" };
+    else if (st === "bull_mild") m = { t: "ตลาดเปิดรับ · เทรนด์เบา", c: "up" };
+    else if (st.indexOf("bull") === 0) m = { t: "ตลาดเปิดรับ", c: "up" };
+    else if (st === "bear") m = { t: "ห้ามเปิดไม้ใหม่ · SPY ใต้ SMA50", c: "down" };
+    else m = { t: "สภาพตลาดไม่ทราบ", c: "flat" };
+    return { label: m.t, cls: m.c, spy: spy };
+  }
+
+  // ---- นับคำตัดสินจาก tickers จริง (ผ่าน WBUtil.verdictInfo — ไม่รันกฎเอง) ----
+  var _tally = null;
+  function tally() {
+    if (_tally) return _tally;
+    var ts = U.get(WB, "tickers", []) || [];
+    var pass = [], near = [], total = 0;
+    ts.forEach(function (t) {
+      if (!t) return; total++;
+      var cls = U.verdictInfo(t).cls;
+      if (cls === "vb-pass") pass.push(t.ticker);
+      else if (cls === "vb-near") near.push(t.ticker);
+    });
+    _tally = { pass: pass, near: near, total: total };
+    return _tally;
+  }
+
+  // ---- จัดกลุ่ม tickers ตาม sector_etf (สำหรับ donut) ----
+  function sectorGroups() {
+    var ts = U.get(WB, "tickers", []) || [];
+    var sectors = U.get(WB, "sectors", []) || [];
+    var thMap = {}, allEtfs = [];
+    sectors.forEach(function (s) { if (s && s.etf) { thMap[s.etf] = s.th || s.etf; allEtfs.push(s.etf); } });
+    var bucket = {}, total = 0;
+    ts.forEach(function (t) { if (!t) return; var e = t.sector_etf || "—"; (bucket[e] || (bucket[e] = [])).push(t.ticker); total++; });
+    var arr = Object.keys(bucket).map(function (e) {
+      var list = bucket[e];
+      return { etf: e, th: thMap[e] || e, count: list.length, pct: total ? list.length / total * 100 : 0, tickers: list };
+    }).sort(function (a, b) { return b.count - a.count; });
+    var missing = allEtfs.filter(function (e) { return !bucket[e]; }).map(function (e) { return thMap[e] || e; });
+    return { groups: arr, total: total, missing: missing };
+  }
+
+  // ============================ การ์ด ============================
+  // กราฟ SPY → SWChart.area (chart.js) · mount ใน CARDS ข้างล่าง
+
+  // โดนัทหมวด → SWChart.donut (chart.js) · mount ใน CARDS ข้างล่าง
+
+  // สัญญาณ → shared component (shared/_kit/signals.js · window.SWSignals) — mount ผ่าน CARDS entry "signals"
+
+  // ============================ ทะเบียนการ์ด ============================
+  // เพิ่มการ์ด = เพิ่ม 1 entry · zone: metric | main | side | signals
+  window.CARDS = [
+    { id: "spy", zone: "metric", metric: function () {
+        var r = regimeInfo(); return { k: "ตลาด (SPY)", v: U.fmtPct(r.spy), vcls: U.pctClass(r.spy), s: "เทียบ SMA50" }; } },
+    { id: "qqq", zone: "metric", metric: function () {
+        var q = U.get(WB, "regime.qqq.pct_vs_sma50", null);
+        return { k: "เทคโนฯ (QQQ)", v: U.fmtPct(q), vcls: U.pctClass(q), s: "เทียบ SMA50" }; } },
+    { id: "vix", zone: "metric", metric: function () {
+        var vx = U.get(WB, "regime.vix", null) || {};
+        if (!U.isNum(vx.value)) return { k: "VIX (ความกลัวตลาด)", v: "—", s: "ไม่มีข้อมูล" };
+        var MAP = { low: { s: "สงบ", c: "up" }, normal: { s: "ปกติ", c: "up" },
+                    elevated: { s: "ระวังตัว", c: "down" }, extreme: { s: "วิกฤต", c: "down" } };
+        var m = MAP[vx.level] || { s: "", c: "" };
+        return { k: "VIX (ความกลัวตลาด)", v: vx.value.toFixed(2), vcls: m.c, s: m.s }; } },
+    { id: "pass", zone: "metric", metric: function () {
+        var t = tally(); return { k: "เข้าเกณฑ์วันนี้", v: String(t.pass.length), s: "จาก " + t.total + " ตัว", href: "workbench/index.html#filter=pass" }; } },
+    { id: "near", zone: "metric", metric: function () {
+        var t = tally(); return { k: "ใกล้ (ขาด 1)", v: String(t.near.length), s: "รอเงื่อนไขเสริม", href: "workbench/index.html#filter=near" }; } },
+    { id: "spychart", zone: "main", render: function () {
+        return { html: '<div class="ccard" id="spyHost"></div>', mount: function () {
+          var spark = U.get(WB, "regime.spy_spark", []) || [];
+          window.SWChart.area($("spyHost"), {
+            title: "ตลาด — SPY (" + spark.length + " แท่งล่าสุด · USD)",
+            series: spark, dates: sparkCalendar(spark.length), size: "full",
+            color: "var(--accent)", valueFmt: function (v) { return "$" + U.fmtPrice(v); },
+            empty: "ยังไม่มีข้อมูลซีรีส์ราคา"
+          });
+        } };
+    } },
+    { id: "donut", zone: "side", render: function () {
+        return { html: '<div class="ccard" id="donutHost"></div>', mount: function () {
+          var d = sectorGroups();
+          // โดนัท terminal: ฉีดพาเลตสีมิวต์ให้เข้าธีม (ตามธีมมืด/สว่าง) แทน ramp สีสดของไลบรารี
+          var _dark = document.documentElement.getAttribute("data-theme") === "dark";
+          var _pal = _dark
+            ? ["#84a98c","#9cc4ff","#cdbef0","#edafb8","#b8b8ff","#cad2c5","#52796f","#a8c0d8","#c0a8b8","#90a890"]
+            : ["#5f7064","#5a6f8a","#6d5f7a","#8a6a5a","#7a6a4a","#6e6e62","#3f5249","#8a8a7e","#9a7a6a","#5a5a52"];
+          window.SWChart.hbars($("donutHost"), {
+            title: "หมวดที่เฝ้าดู (" + d.total + " ตัว)",
+            groups: d.groups.map(function (g, i) {
+              return { label: g.th, value: g.count, pct: g.pct, tickers: g.tickers, color: _pal[i % _pal.length],
+                       href: "workbench/index.html#sector=" + encodeURIComponent(g.etf) };
+            }),
+            clickable: true, center: { value: d.total, label: "ตัว" },
+            note: d.missing.length ? "ยังไม่มีหุ้นในหมวด: " + d.missing.join(" · ") : "ครอบคลุมครบทุกหมวด S&P",
+            empty: "ไม่มีข้อมูลหุ้น"
+          });
+        } };
+    } },
+    { id: "signals", zone: "signals", render: function () {
+        return { html: '<div id="sigList"></div>', mount: function () {
+          if (window.SWSignals) window.SWSignals.render(document.getElementById("sigList"), { nearCap: 6 });
+        } };
+    } },
+    // การ์ดผลทดสอบย้อนหลัง (Sully · breakout · OOS) — equity + drawdown + การกระจาย R จาก WB.backtest
+    { id: "backtest", zone: "backtest", render: function () {
+        var runs = U.get(WB, "backtest.runs", []) || [];
+        var run = runs.filter(function (r) { return r.kind === "OOS"; })[0] || runs[0] || null;
+        return { html:
+            '<div class="ccard">' +
+              '<p class="ctitle"><span><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a1.8 1.8 0 0 0 1.6 2.7h10.8a1.8 1.8 0 0 0 1.6-2.7l-5-9V3"/><path d="M7.5 15h9"/></svg></span> ผลทดสอบย้อนหลังกลยุทธ์ Sully — breakout · OOS (ช่วงที่กลยุทธ์ไม่เคยเห็น)</p>' +
+              '<div class="bt-stat" id="btStat"></div>' +
+              '<div class="bt-charts"><div id="btEquity"></div><div id="btDD"></div><div id="btHist"></div></div>' +
+            '</div>',
+          mount: function () {
+            if (!run) { var s = $("btStat"); if (s) s.innerHTML = '<span>ยังไม่มีผลทดสอบ (รอ backtest)</span>'; return; }
+            var ci = run.ci90 || [];
+            $("btStat").innerHTML =
+              '<span>ไม้ทดสอบ <b>' + (run.n != null ? run.n : "—") + '</b></span>' +
+              '<span>อัตราชนะ <b>' + (U.isNum(run.win_pct) ? run.win_pct + "%" : "—") + '</b></span>' +
+              '<span>คาดหวัง/ไม้ <b>' + (U.isNum(run.exp_r) ? run.exp_r + " R" : "—") + '</b></span>' +
+              (ci.length === 2 ? '<span>ช่วงมั่นใจ 90% <b>[' + ci[0] + ", " + ci[1] + '] R</b></span>' : "");
+            var eq = run.equity || {}, nav = eq.nav || [], dates = eq.dates || [];
+            window.SWChart.area($("btEquity"), {
+              title: "เส้นทุน (equity · USD)", series: nav, dates: dates, size: "full",
+              color: "var(--accent)", valueFmt: function (v) { return "$" + U.fmtPrice(v); },
+              empty: "ยังไม่มีเส้นทุน" });
+            var peak = -Infinity, dd = nav.map(function (v) {
+              if (v > peak) peak = v; return peak > 0 ? Math.round((v / peak - 1) * 10000) / 100 : 0; });
+            var maxDD = dd.length ? Math.min.apply(null, dd) : 0;
+            window.SWChart.area($("btDD"), {
+              title: "ช่วงขาดทุน (drawdown · %)", series: dd, dates: dates, size: "full",
+              baseline: 0, color: "var(--down)", valueFmt: function (v) { return (Math.round(v * 100) / 100) + "%"; },
+              note: "ขาดทุนลึกสุด " + (Math.round(maxDD * 100) / 100) + "%", empty: "ยังไม่มีข้อมูล" });
+            var rs = (run.trades || []).map(function (t) { return t.r; }).filter(U.isNum);
+            window.SWChart.histogram($("btHist"), {
+              title: "การกระจายผลต่อไม้ (R-multiple)", values: rs, unit: "ไม้",
+              valueFmt: function (v) { return (Math.round(v * 100) / 100) + "R"; },
+              note: rs.length + " ไม้ · แดง = ขาดทุน · เขียว = กำไร", empty: "ยังไม่มีไม้" });
+          } };
+    } }
+  ];
+
+  // ============================ ตัว render ทะเบียน ============================
+  function renderZone(zoneId, kind) {
+    var el = $(zoneId); if (!el) return;
+    var cards = window.CARDS.filter(function (c) { return c.zone === kind; });
+    if (kind === "metric") {
+      el.innerHTML = cards.map(function (c) {
+        var m = c.metric();
+        var inner = '<p class="k">' + esc(m.k) + '</p><p class="v ' + (m.vcls || "") + '">' + esc(m.v) +
+          '</p><p class="s">' + esc(m.s || "") + "</p>";
+        return m.href ? '<a class="mtile" href="' + m.href + '">' + inner + "</a>" : '<div class="mtile">' + inner + "</div>";
+      }).join("");
+    } else {
+      var mounts = [];
+      el.innerHTML = cards.map(function (c) {
+        var res = c.render(); if (res && res.mount) mounts.push(res.mount); return res ? res.html : "";
+      }).join("");
+      mounts.forEach(function (fn) { try { fn(); } catch (e) { /* การ์ดเดียวพังไม่ล้มทั้งหน้า */ } });
+    }
+  }
+
+  function fillRegime() {
+    var r = regimeInfo(), pill = $("regimePill");
+    if (!pill) return;
+    pill.className = "regime" + (r.cls === "down" ? " is-down" : r.cls === "flat" ? " is-flat" : "");
+    pill.innerHTML = '<span class="dot"></span>' + esc(r.label) + (U.isNum(r.spy) ? " · SPY " + U.fmtPct(r.spy) : "");
+  }
+
+  // ปฏิทินงบ ≤ N วันข้างหน้า (จาก WB.calendar) — รางขวา · mirror briefing
+  function fillCalendar() {
+    var el = $("calTl"); if (!el) return;
+    var cal = (U.get(WB, "calendar", []) || []).filter(function (c) { return c && U.isNum(c.days_to) && c.days_to >= 0; })
+      .sort(function (a, b) { return a.days_to - b.days_to; }).slice(0, 4);
+    if (!cal.length) { el.innerHTML = '<span class="empty">ไม่มีงบ/เหตุการณ์ใกล้ในรายการเฝ้าดู</span>'; return; }
+    el.innerHTML = cal.map(function (c) {
+      var warn = c.blocked ? " warn" : "";
+      var note = c.blocked ? "ใกล้งบ — เลี่ยงเปิดไม้ใหม่" : "ประกาศงบ";
+      return '<div class="ev' + warn + '"><p class="t">' + esc(SWChart.thDate(c.date, false)) + ' · อีก ' + c.days_to + ' วัน</p>' +
+        '<p class="e">' + esc(c.ticker) + ' — ' + esc(note) + '</p></div>';
+    }).join("");
+  }
+
+  function renderAll() {
+    _tally = null;                                       // ล้าง cache เผื่อ re-render
+    fillRegime();
+    var as = U.get(WB, "meta.as_of", null);
+    if (as) { var e = $("asOf"); if (e) e.textContent = as + " (แท่งปิด)"; }
+    renderZone("zoneMetric", "metric");
+    renderZone("zoneMain", "main");
+    renderZone("zoneSide", "side");
+    renderZone("zoneSignals", "signals");
+    renderZone("zoneBacktest", "backtest");
+    fillCalendar();
+  }
+
+  renderAll();
+  // สลับธีม → invalidatePalette + วาดใหม่ (สีหมวดที่ fallback มาจาก palette จะตามธีม)
+  window.addEventListener("sw:themechange", function () { U.invalidatePalette(); renderAll(); });
+})();
+</script>
+
+<script src="shared/_kit/nav.js?v=1782967287"></script>
+<script src="shared/_kit/shell.js?v=1782967287"></script>
+<!-- momentum scroll (Lenis) ย้ายไปต่อที่ shell.js ส่วนกลางแล้ว → ทุกหน้า terminal ได้ฟีลเดียวกัน -->
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>Stop · Target · ออกเมื่อไหร่ | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  .ostep { display:flex; gap:.875rem; align-items:flex-start; padding:.85rem 1rem; background:var(--bg2); border-radius:var(--radius); margin-bottom:.6rem; }
+  .ostep .n { flex:none; width:30px; height:30px; border-radius:50%; background:var(--blue); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:.9rem; }
+  .ostep .b { flex:1; }
+  .ostep .b h4 { font-size:1rem; line-height:1.35; }
+  .ostep .b p { font-size:.9rem; color:var(--ink2); margin-top:.25rem; }
+  .cutbanner { display:flex; gap:.75rem; align-items:flex-start; background:var(--bad-bg); border-radius:var(--radius); padding:.875rem 1.125rem; margin-top:.875rem; }
+  .cutbanner b { color:var(--bad-ink); }
+  .cutbanner p { font-size:.9rem; color:var(--bad-ink); max-width:none; }
+  .verdictline { margin:.5rem 0 .25rem; }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">Stop · Target · ออกเมื่อไหร่</h1>
+    <p class="lead">เปิดไม้ (การเทรดหนึ่งรายการ) ต้องตอบได้ครบสามข้อก่อนกดซื้อ:
+      ยอมเสียถึงตรงไหน (stop) · จะขายทำกำไรตรงไหน (target) · ถ้าราคาไม่ไปไหนจะถือนานแค่ไหน (time-stop)
+      · หน้านี้เดินด้วยตัวอย่างเลขกลมชุดเดียวตลอดทั้งบท และเลขกติกาทุกตัวดึงจากกล่องกติกากลาง (canon)
+      ตัวเดียวกับที่เครื่องตรวจใช้จริง</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#why" class="on">ทำไม stop สำคัญ</a>
+    <a href="#band">กรอบ stop 3 กรณี</a>
+    <a href="#target">เป้า r2</a>
+    <a href="#timestop">Time-stop</a>
+    <a href="#exits">ทางออกครบ 5 ทาง</a>
+    <a href="#quiz">แบบทดสอบ</a>
+  </nav>
+
+  <!-- ===== A · WHY ===== -->
+  <section id="why" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">stop คือเลขสำคัญที่สุดของไม้</h2>
+      <p class="lead">กฎบ้านเขียนไว้ตรง ๆ ว่า stop ผิด = ไม้ผิด · จุดตัดขาดทุน (stop)
+        ต้องถูกเขียนลงตั๋วก่อนเข้าเสมอ ไม่ใช่ค่อยไปคิดเอาตอนราคาลง</p>
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3>1R = หน่วยวัดของทั้งระบบ</h3>
+          <p class="muted" style="margin-top:8px">1R คือระยะจากราคาเข้า (entry) ถึง stop ·
+            ตัวอย่างเลขกลมสมมุติ: เข้า $100 ตั้ง stop ที่ $96 จะได้ 1R = $4 ต่อหุ้น ·
+            จากนั้นทุกอย่างวัดเป็นหน่วย R หมด: กำไร $8 บนไม้นี้คือ +2R (8 ÷ 4)
+            ส่วนขาดทุนเต็ม stop คือ −1R เสมอ ไม่ว่าหุ้นแพงหรือถูก</p>
+          <div class="note">จำนวนหุ้นที่ซื้อก็คำนวณต่อจากระยะนี้ · ดูบท
+            <a href="./position-sizing.html">Position Sizing</a></div>
+        </div>
+        <div class="card col">
+          <h3>หาแนวโครงสร้างก่อน (structure-first)</h3>
+          <p class="muted" style="margin-top:8px">จุดวาง stop เริ่มจากแนวรับเชิงโครงสร้าง:
+            แนวต้านเดิมที่ราคาเพิ่งทะลุขึ้นมา มักกลายเป็นแนวรับใหม่
+            เพราะคนที่พลาดรอบแรกมารอซื้อแถวนั้น · วาง stop ใต้แนวนี้
+            แล้วค่อยเช็กระยะกับกรอบ ATR (ค่าความผันผวนเฉลี่ยต่อวัน) ว่าไม่ชิดเกินและไม่กว้างเกิน</p>
+        </div>
+        <div class="card col">
+          <h3>ชิดไป / กว้างไป เจ็บคนละแบบ</h3>
+          <p class="muted" style="margin-top:8px">stop ชิดเกิน: คลื่นแกว่งปกติของหุ้นกวาดหลุดทั้งที่มองถูกทาง ·
+            stop กว้างเกิน: ผิดทีเดียวเสียหนัก · กรอบ ATR ในหัวข้อถัดไปคือกรรมการตัดสินเรื่องนี้แทนความรู้สึก</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B · BAND (centerpiece) ===== -->
+  <section id="band" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">กรอบ stop · ตัวอย่างเดียว ลอง 3 กรณี</h2>
+      <p class="lead">กติกาปัจจุบันคือ โครงสร้างนำ อยู่ในกรอบ ATR: ลองใช้ stop เทคนิค (แนวรับโครงสร้าง) ก่อน
+        ถ้าระยะอยู่ในกรอบที่ยอมรับก็ใช้เลย · ชิดเกินให้ถอยไปใช้สูตรสำรอง (fallback) ·
+        กว้างเกินคือไม่เทรด · กดสลับ 3 กรณีแล้วดูว่าเส้นไหนขยับ</p>
+      <div class="card" style="margin-top:22px">
+        <div style="margin-bottom:.6rem">
+          <span class="pill y">ตัวอย่างเลขกลมสมมุติ (hypothetical): เข้า $100 · ATR $2 · ไม่ใช่ราคาตลาดจริง</span>
+          <span class="pill g">เลขกรอบคิดสดจาก canon ของจริง</span>
+        </div>
+        <div class="stepper" id="caseBtns">
+          <button data-ci="0" class="on">กรณี 1 · stop เทคนิค $96</button>
+          <button data-ci="1">กรณี 2 · stop เทคนิค $98.50</button>
+          <button data-ci="2">กรณี 3 · stop เทคนิค $93</button>
+        </div>
+        <div class="chartwrap"><svg id="ladder" viewBox="0 0 700 360" width="100%" aria-label="บันไดราคา: entry กรอบ stop และเป้า"></svg></div>
+        <div class="legend" id="ladderLegend"></div>
+        <p class="muted verdictline" id="bandStory"></p>
+        <div id="bandResult"></div>
+        <div class="eq b" id="bandRule"></div>
+        <div class="note">สูตรเก่า <span class="eq">max(ATR_stop, technical_stop)</span> ถูกแทนด้วยกรอบนี้แล้ว
+          เพราะเคยขัดกับร้อยแก้วและตัวอย่างของตัวเองถึง 3 จุด (พบ 2026-06-10) ·
+          ของจริงเครื่องคำนวณให้ใน <span class="eq">src/backtest/signals.py::resolve_stop()</span>
+          ผ่านคำสั่ง <span class="eq">/swing-checklist</span> ไม่ต้องกดเครื่องคิดเลขเอง</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== C · TARGET ===== -->
+  <section id="target" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เป้า r2 · R:R คงที่โดยสร้าง</h2>
+      <p class="lead">เป้าขาย (target) ไม่ใช่เรื่องความหวัง แต่เป็นสูตรตายตัวที่คูณจากระยะเสี่ยงของไม้เอง
+        ทำให้อัตรากำไรต่อความเสี่ยง (R:R) เท่ากันทุกไม้โดยอัตโนมัติ</p>
+      <div class="eq b" id="targetEq" style="margin-top:18px"></div>
+      <div class="row" style="margin-top:18px">
+        <div class="card col">
+          <h3 class="down">เป้าโครงสร้างแบบเก่า (เลิกใช้)</h3>
+          <p class="muted" style="margin-top:8px">ผูกเป้ากับยอดเดิม (swing high) หรือความสูงของฐานราคา (measured move) ·
+            ฟังดูมีหลักการ แต่เรขาคณิตขัดกับ stop ขั้นต่ำ: หลายไม้เป้าอยู่ใกล้กว่าระยะเสี่ยงเสียอีก
+            ทำให้ R:R ไม่ผ่านเกณฑ์แทบทุกครั้ง ระบบรุ่น v1 จึงเหลือไม้ให้เทรดแค่ 0.7 ไม้ต่อปี (แทบไม่ได้เทรดเลย)</p>
+        </div>
+        <div class="card col">
+          <h3 class="up">เป้า r2 (ปัจจุบัน)</h3>
+          <p class="muted" style="margin-top:8px" id="r2Why"></p>
+        </div>
+      </div>
+      <div class="note" id="targetNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== D · TIME-STOP ===== -->
+  <section id="timestop" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">Time-stop · ไม้ที่ไม่ไปไหนก็มีต้นทุน</h2>
+      <p class="lead">ทางออกไม่ได้มีแค่กำไรกับขาดทุน · ไม้ที่แช่นิ่งนานเกินไปต้องคืนเงินมาให้โอกาสถัดไป
+        เพราะเงินที่จมอยู่คือค่าเสียโอกาส (opportunity cost)</p>
+      <div class="eq b" id="tsRule" style="margin-top:18px"></div>
+      <div class="row" style="margin-top:18px" id="tsCases"></div>
+      <div class="note" id="tsNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== E · EXITS ===== -->
+  <section id="exits" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทางออกของไม้มีครบ 5 ทาง ไม่มีทางที่ 6</h2>
+      <p class="lead">ห้าทางนี้คือรายการปิด · อะไรที่ไม่อยู่ในรายการ ไม่ใช่เหตุผลให้ขาย
+        (และกฎเก่าสองข้อที่อาจเคยได้ยิน ถูกตัดออกแล้วด้วยผลทดสอบ)</p>
+      <div style="margin-top:20px" id="exitList"></div>
+      <div class="cutbanner"><span>✂️</span><p id="cutBox"></p></div>
+      <div class="card" style="margin-top:1.125rem">
+        <h3 class="down">กฎศักดิ์สิทธิ์ของ stop (stop honor rule)</h3>
+        <p class="muted" style="margin-top:8px">ชน stop = จบไม้ ทันที · ห้ามรอเด้ง ห้ามขยับ stop หนี ห้ามต่อรอง ·
+          ละเมิดหนึ่งครั้ง = หัก 1 คะแนน (−1) ในแกนวินัย (D-axis) ของสกอร์กระบวนการ ·
+          ละเมิดติดกัน 3 ครั้ง = พักทั้งระบบแล้วทบทวนกับ Kim ·
+          ระบบนี้อยู่รอดได้เพราะยอมแพ้ทีละเล็กเสมอ</p>
+        <div class="note">ชนแล้วเด้งกลับก็ไม่เปลี่ยนคำตอบ: ออกตามกฎ แล้วจดบทเรียนลงสมุดเทรด (journal)
+          ผ่าน <span class="eq">/swing-journal</span> · แพ้เล็กที่จดไว้ดีกว่าแพ้ใหญ่ที่อธิบายไม่ได้</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== F · QUIZ ===== -->
+  <section id="quiz" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ · stop เป้า และทางออก</h2>
+      <p class="lead">8 ข้อ ตอบแล้วเฉลยทันที (ตัวเลือกหลอกหลายตัวคือกติกาเวอร์ชันเก่า v1 ที่เลิกใช้แล้ว) · ผ่านที่ 80%</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var E=window.ENGINE, CH=window.CHARTS, C=CH.C;
+    var B=window.CANON.breakout, SR=window.CANON.stop, EX=window.CANON.exit;
+
+    /* ---------- helpers ---------- */
+    function f1(n){ return E.fmt(n,1); }                      // 1.5 / 3.0
+    function m(n){ var r=Math.round(n*100); return E.fmt(n, r%100===0?0:2); }  // เงิน: 4 / 98.50
+    function rd(n){ return String(parseFloat(n.toFixed(3))); }                  // หน่วย R: 0.25 / 0.625
+    var bandStr='['+f1(SR.min_atr_mult)+', '+f1(SR.max_atr_mult)+']×ATR';
+
+    /* ---------- worked example (สมมุติ เลขกลม · hypothetical) ---------- */
+    var ENTRY=100, ATR=2;
+    var LO=SR.min_atr_mult*ATR, HI=SR.max_atr_mult*ATR;       // กรอบเป็นดอลลาร์
+    var bandTop=ENTRY-LO, bandBot=ENTRY-HI;                   // ขอบบน/ล่างของโซน stop
+
+    function resolve(tech){                                   // ตรรกะเดียวกับ resolve_stop()
+      var dist=ENTRY-tech;
+      if(dist>HI) return {verdict:'no', tech:tech, dist:dist};
+      if(dist<LO){
+        var st=ENTRY-B.k_atr*ATR;
+        return {verdict:'fallback', tech:tech, dist:dist, stop:st, risk:ENTRY-st, target:ENTRY+B.rr_gate*(ENTRY-st)};
+      }
+      return {verdict:'structure', tech:tech, dist:dist, stop:tech, risk:dist, target:ENTRY+B.rr_gate*dist};
+    }
+    var CASES=[resolve(96), resolve(98.5), resolve(93)];
+    var state={ci:0};
+
+    /* ---------- SVG ladder ---------- */
+    function hl(sc,val,color,label,o){
+      o=o||{};
+      var y=sc.sy(val).toFixed(1);
+      var s='<line x1="'+sc.x+'" y1="'+y+'" x2="'+(sc.x+sc.w)+'" y2="'+y+'" stroke="'+color+'" stroke-width="'+(o.w||1.8)+'"'+(o.dash?' stroke-dasharray="5 4"':'')+'/>';
+      if(o.side==='l'){
+        s+='<text x="'+(sc.x+8)+'" y="'+(sc.sy(val)-6).toFixed(1)+'" class="vlbl" fill="'+color+'" style="font-weight:700">'+label+'</text>';
+      } else {
+        s+='<text x="'+(sc.x+sc.w-6)+'" y="'+(sc.sy(val)-6).toFixed(1)+'" text-anchor="end" class="vlbl" fill="'+color+'" style="font-weight:700">'+label+'</text>';
+      }
+      return s;
+    }
+    function vbr(sc,x,v1,v2,color,label,side){
+      var y1=sc.sy(v1), y2=sc.sy(v2);
+      var top=Math.min(y1,y2).toFixed(1), bot=Math.max(y1,y2).toFixed(1);
+      var mid=((y1+y2)/2+4).toFixed(1);
+      var txt=side==='l'
+        ? '<text x="'+(x-9)+'" y="'+mid+'" text-anchor="end" class="vlbl" fill="'+color+'" style="font-weight:700">'+label+'</text>'
+        : '<text x="'+(x+9)+'" y="'+mid+'" class="vlbl" fill="'+color+'" style="font-weight:700">'+label+'</text>';
+      return '<line x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+bot+'" stroke="'+color+'" stroke-width="2"/>'+
+        '<line x1="'+(x-5)+'" y1="'+top+'" x2="'+(x+5)+'" y2="'+top+'" stroke="'+color+'" stroke-width="2"/>'+
+        '<line x1="'+(x-5)+'" y1="'+bot+'" x2="'+(x+5)+'" y2="'+bot+'" stroke="'+color+'" stroke-width="2"/>'+txt;
+    }
+
+    function renderBand(){
+      var r=CASES[state.ci];
+      var sc=CH.makeScale({x:84,y:18,w:540,h:296,yMin:91.5,yMax:111.5,n:2});
+      var svg=CH.axis({scale:sc,yTicks:[{v:95,label:'95'},{v:100,label:'100',strong:true},{v:105,label:'105'},{v:110,label:'110'}]});
+
+      // โซนกรอบ stop (entry − max×ATR ถึง entry − min×ATR)
+      var bt=sc.sy(bandTop).toFixed(1), bb=sc.sy(bandBot).toFixed(1), bh=(sc.sy(bandBot)-sc.sy(bandTop)).toFixed(1);
+      svg+='<rect x="'+sc.x+'" y="'+bt+'" width="'+sc.w+'" height="'+bh+'" fill="'+C.adx+'" opacity=".08"/>'+
+        '<line x1="'+sc.x+'" y1="'+bt+'" x2="'+(sc.x+sc.w)+'" y2="'+bt+'" stroke="'+C.adx+'" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>'+
+        '<line x1="'+sc.x+'" y1="'+bb+'" x2="'+(sc.x+sc.w)+'" y2="'+bb+'" stroke="'+C.adx+'" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>'+
+        '<text x="'+(sc.x+10)+'" y="'+(sc.sy(bandBot)-8).toFixed(1)+'" class="vlbl" fill="'+C.adx+'">โซน stop ที่ยอมรับ '+bandStr+' = $'+m(bandBot)+' ถึง $'+m(bandTop)+'</text>';
+
+      svg+=hl(sc,ENTRY,C.adx,'เข้า $'+m(ENTRY),{w:2.2});
+
+      if(r.verdict==='structure'){
+        svg+=hl(sc,r.stop,C.down,'stop จริง = stop เทคนิค $'+m(r.stop),{w:2.6});
+      } else {
+        svg+=hl(sc,r.tech,C.cross,'stop เทคนิค $'+m(r.tech),{dash:1,side:'l'});
+        if(r.stop!=null) svg+=hl(sc,r.stop,C.down,'stop จริง (fallback) $'+m(r.stop),{w:2.6});
+      }
+      if(r.target!=null){
+        svg+=hl(sc,r.target,C.up,'เป้า r2 = $'+m(r.target),{dash:1});
+        svg+=vbr(sc,215,ENTRY,r.stop,C.down,'1R = $'+m(r.risk));
+        svg+=vbr(sc,450,ENTRY,r.target,C.up,'+'+B.rr_gate+'R = $'+m(r.risk*B.rr_gate));
+      } else {
+        svg+=vbr(sc,520,ENTRY,r.tech,C.down,'ระยะ $'+m(r.dist)+' กว้างเกินเพดาน $'+m(HI),'l');
+        svg+='<text x="350" y="150" text-anchor="middle" fill="'+C.down+'" style="font-weight:700;font-size:19px;font-family:inherit">ไม่เทรดไม้นี้</text>'+
+          '<text x="350" y="172" text-anchor="middle" class="vlbl">setup หลวมเกิน ไปหาตัวอื่น</text>';
+      }
+      document.getElementById('ladder').innerHTML=svg;
+
+      document.getElementById('ladderLegend').innerHTML=
+        '<span><i style="background:'+C.adx+'"></i>ราคาเข้า</span>'+
+        '<span><i style="background:'+C.cross+'"></i>stop เทคนิค (โครงสร้าง)</span>'+
+        '<span><i style="background:'+C.down+'"></i>stop จริงที่ใช้</span>'+
+        '<span><i style="background:'+C.up+'"></i>เป้า r2</span>'+
+        '<span><i style="background:'+C.adx+';opacity:.25;height:10px"></i>โซนกรอบ '+bandStr+'</span>';
+
+      var stories=[
+        'แนวรับโครงสร้างอยู่พอดีในระยะที่คลื่นปกติของหุ้นไม่กวาดโดน → เคารพโครงสร้าง',
+        'แนวรับอยู่ชิดราคาเข้าเกินไป แค่แกว่งปกติวันเดียวก็โดนกวาด → ถอยลงไปที่ระยะขั้นต่ำตามสูตรสำรอง',
+        'กว่าจะถึงแนวรับต้องยอมเสียกว้างเกินกว่าที่ระบบรับได้ → ไม่ใช่ไม้ของเรา'
+      ];
+      document.getElementById('bandStory').innerHTML='<b>เล่าเป็นภาษาคน:</b> '+stories[state.ci];
+
+      var html='';
+      if(r.verdict==='structure'){
+        html='<div class="verdictline"><span class="badge pass">ใช้ stop เทคนิค</span></div>'+
+          '<div class="eq b">ระยะเทคนิค = entry − stop เทคนิค = '+m(ENTRY)+' − '+m(r.tech)+' = $'+m(r.dist)+'<br>'+
+          'กรอบที่ยอมรับ = '+bandStr+' = [$'+m(LO)+', $'+m(HI)+'] → $'+m(r.dist)+' อยู่ในกรอบ ✓<br>'+
+          'stop จริง = $'+m(r.stop)+' (1R = $'+m(r.risk)+') · เป้า = '+m(ENTRY)+' + '+B.rr_gate+'×'+m(r.risk)+' = $'+m(r.target)+'</div>';
+      } else if(r.verdict==='fallback'){
+        html='<div class="verdictline"><span class="badge warn">ถอยไปใช้สูตรสำรอง (fallback)</span></div>'+
+          '<div class="eq b">ระยะเทคนิค = '+m(ENTRY)+' − '+m(r.tech)+' = $'+m(r.dist)+' → แคบกว่าขั้นต่ำ '+f1(SR.min_atr_mult)+'×ATR = $'+m(LO)+' ✗<br>'+
+          'stop จริง = entry − '+B.k_atr+'×ATR = '+m(ENTRY)+' − '+m(B.k_atr*ATR)+' = $'+m(r.stop)+' (1R = $'+m(r.risk)+')<br>'+
+          'เป้า = '+m(ENTRY)+' + '+B.rr_gate+'×'+m(r.risk)+' = $'+m(r.target)+'</div>';
+      } else {
+        html='<div class="verdictline"><span class="badge fail">ไม่เทรด</span></div>'+
+          '<div class="eq b">ระยะเทคนิค = '+m(ENTRY)+' − '+m(r.tech)+' = $'+m(r.dist)+' → กว้างกว่าเพดาน '+f1(SR.max_atr_mult)+'×ATR = $'+m(HI)+' ✗<br>'+
+          'คำตอบของกติกา = ไม่เทรดไม้นี้ · ห้ามฝืนบีบ stop ให้แคบลงเพื่อให้ได้เข้า</div>';
+      }
+      document.getElementById('bandResult').innerHTML=html;
+
+      document.querySelectorAll('#caseBtns button').forEach(function(b){
+        b.classList.toggle('on',+b.dataset.ci===state.ci);
+      });
+    }
+
+    /* ---------- target ---------- */
+    function renderTarget(){
+      document.getElementById('targetEq').innerHTML=
+        'target = entry + '+B.rr_gate+' × (entry − stop)<br>'+
+        'R:R = (target − entry) ÷ (entry − stop) = '+B.rr_gate+' เป๊ะทุกไม้ โดยโครงสร้างของสูตรเอง';
+      var c1=CASES[0], c2=CASES[1];
+      document.getElementById('r2Why').innerHTML=
+        'คูณจากระยะเสี่ยงของไม้เอง → R:R เท่ากับ '+B.rr_gate+' ทุกไม้อัตโนมัติ ไม่ต้องลุ้นว่าเป้าผ่านเกณฑ์ไหม · '+
+        'และระยะเป้าขนาดนี้ไปถึงได้จริงภายในกรอบเวลา time-stop '+EX.time_stop_days+' วัน (สอบผ่านรอบ P0 แล้ว)';
+      document.getElementById('targetNote').innerHTML=
+        'ลองกับตัวอย่างเดิม: กรณี 1 (stop $'+m(c1.stop)+') เป้า = '+m(ENTRY)+' + '+B.rr_gate+'×'+m(c1.risk)+' = <b>$'+m(c1.target)+'</b> · '+
+        'กรณี 2 (stop $'+m(c2.stop)+') เป้า = '+m(ENTRY)+' + '+B.rr_gate+'×'+m(c2.risk)+' = <b>$'+m(c2.target)+'</b> · '+
+        'ทำไมระบบยอมรับเฉพาะ R:R สูง อ่านต่อใน <a href="./rr-expectancy.html">R:R &amp; Expectancy</a>';
+    }
+
+    /* ---------- time-stop ---------- */
+    function renderTimestop(){
+      document.getElementById('tsRule').innerHTML=
+        'ออกเมื่อครบทั้ง 2 เงื่อนไข: ถือเกิน '+EX.time_stop_days+' วัน <b>และ</b> กำไรยังไม่ถึง +'+EX.time_stop_min_r+'R';
+      var risk=4, days=22;
+      var cases=[
+        {profit:1.00, label:'เคสแรก'},
+        {profit:2.50, label:'อีกเคส'}
+      ];
+      document.getElementById('tsCases').innerHTML=cases.map(function(cs){
+        var rr=cs.profit/risk;
+        var out=rr<EX.time_stop_min_r;
+        return '<div class="card col"><h3>'+cs.label+' · ถือมา '+days+' วัน <span class="pill '+(out?'r':'g')+'">'+(out?'ออก':'ถือต่อได้')+'</span></h3>'+
+          '<p class="muted" style="margin-top:8px">เสี่ยงไว้ (1R) $'+m(risk)+' ต่อหุ้น · ตอนนี้กำไร $'+m(cs.profit)+' ต่อหุ้น (ตัวเลขสมมุติ เลขกลม)</p>'+
+          '<div class="eq b">กำไรเป็นหน่วย R = '+m(cs.profit)+' ÷ '+m(risk)+' = +'+rd(rr)+'R '+(out
+            ? '&lt; +'+EX.time_stop_min_r+'R → เกิน '+EX.time_stop_days+' วันแล้วและยังไปไม่ถึงไหน → ออก'
+            : '≥ +'+EX.time_stop_min_r+'R → เงื่อนไข time-stop ไม่ครบ → ถือต่อ รอชนเป้าหรือชน stop')+'</div></div>';
+      }).join('');
+      document.getElementById('tsNote').innerHTML=
+        'สังเกต: ต้องครบทั้งสองเงื่อนไข · แค่เกิน '+EX.time_stop_days+' วันอย่างเดียวแต่กำไรวิ่งแล้ว (≥ +'+EX.time_stop_min_r+'R) ไม่ต้องออก · '+
+        'และไม่มีการขยับ stop ตามราคา (trailing stop) ในกติกาขั้นนี้ · เหตุผลของกฎ: ไม้ที่พิสูจน์ตัวเองไม่ได้ภายในเวลา กินทั้งเงินและสมาธิที่ควรไปอยู่กับ setup ตัวถัดไป';
+    }
+
+    /* ---------- exits ---------- */
+    function renderExits(){
+      var rows=[
+        ['ชน stop','ราคาแตะจุดตัดขาดทุน → ออกทันทีที่ทำได้ (ชนข้ามคืนก็ออกที่ราคาเปิดถัดไป) · จบไม้ จดบันทึก แล้วไปต่อ'],
+        ['ชนเป้า (target)','ราคาแตะเป้า r2 → ขายออก · การทยอยขายบางส่วน (scale-out) เป็นของขั้นถัดไป ยังไม่อยู่ในกติกาตอนนี้'],
+        ['Time-stop','ถือเกิน '+EX.time_stop_days+' วัน และกำไรยังไม่ถึง +'+EX.time_stop_min_r+'R → ออก เพราะ setup ไม่พิสูจน์ตัวเองในเวลา'],
+        ['Thesis แตก','เหตุผลที่เข้าพังไปเอง เช่น งบ (ผลประกอบการ) พลาดแรง หรือข่าวใหญ่เปลี่ยนเกมธุรกิจ → ออก เพราะสมมุติฐานเดิมหายไปแล้ว แม้ราคายังไม่ชน stop'],
+        ['ETF กลุ่มร่วงแรง','กองทุนดัชนีของกลุ่ม (sector ETF) ร่วงเกิน 5% ในวันเดียว → ทบทวนความเสี่ยงของไม้ในกลุ่มนั้นภายใน 24 ชั่วโมง']
+      ];
+      document.getElementById('exitList').innerHTML=rows.map(function(r,i){
+        return '<div class="ostep"><div class="n">'+(i+1)+'</div><div class="b"><h4>'+r[0]+'</h4><p>'+r[1]+'</p></div></div>';
+      }).join('');
+      document.getElementById('cutBox').innerHTML=
+        '<b>ไม่มี "หลุด SMA'+EX.sma_exit_len+'" และไม่มี "DI flip" ในกติกา v2</b> · '+
+        'ทั้งคู่ถูกทดสอบแล้วพบว่าไม่ช่วย (ทำค่าคาดหวังต่อไม้แย่ลง) จึงถูกตัดออกตามมติ ค1 (2026-06-11) · '+
+        'ในกล่องกติกา canon เขียนชัด: <span class="eq">sma_exit = '+EX.sma_exit+'</span> · '+
+        'DI flip (เส้นแรงซื้อตัดลงใต้เส้นแรงขาย ในเครื่องมือ <a href="./adx.html">ADX</a>) ก็เช่นกัน · อย่าเอากฎรุ่นเก่ากลับมาใช้เอง';
+    }
+
+    /* ---------- hero ---------- */
+    function renderHero(){
+      document.getElementById('heroKpis').innerHTML=[
+        ['['+f1(SR.min_atr_mult)+', '+f1(SR.max_atr_mult)+']','กรอบ stop ×ATR','โครงสร้างนำ เช็กกรอบทีหลัง'],
+        [String(B.rr_gate),'R:R ตรึงโดยสูตร','เป้า r2'],
+        [EX.time_stop_days+' วัน','time-stop','ออกถ้ากำไร &lt; +'+EX.time_stop_min_r+'R'],
+        ['5','ทางออกของไม้','ไม่มีทางที่ 6']
+      ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+' · '+k[2]+'</span></div>';}).join('');
+      document.getElementById('bandRule').innerHTML=
+        'สรุปกติกาสามทาง: ระยะเทคนิคอยู่ใน '+bandStr+' → ใช้ stop เทคนิค · แคบกว่า '+f1(SR.min_atr_mult)+'×ATR → stop = entry − '+B.k_atr+'×ATR · กว้างกว่า '+f1(SR.max_atr_mult)+'×ATR → ไม่เทรด';
+    }
+
+    /* ---------- quiz bank ---------- */
+    var QUIZ_BANK={
+      id:'stop-target-exit', pass:0.8,
+      questions:[
+        { q:'เข้า $100 · stop $96 · เป้าขาย (target) อยู่ตรงไหน?',
+          choices:['$104','$108','$110','$120'], answer:2,
+          why:'target = entry + '+B.rr_gate+' × (entry − stop) = 100 + '+B.rr_gate+'×4 = 110 (R:R '+B.rr_gate+' คงที่โดยสูตร)',
+          ref:'soul-swing.md §Target · rules.py rr_gate=2.5' },
+        { q:'เข้า $100 · ATR $2 · stop เทคนิคอยู่ $98.50 · stop จริงอยู่ตรงไหน?',
+          choices:['$98.50 ตามโครงสร้าง','$97 (fallback entry − '+B.k_atr+'×ATR เพราะระยะเทคนิคแคบกว่ากรอบ)','$94 ('+f1(SR.max_atr_mult)+'×ATR)','ไม่เทรด'], answer:1,
+          why:'ระยะเทคนิค $1.50 &lt; ขั้นต่ำ '+f1(SR.min_atr_mult)+'×ATR = $'+m(SR.min_atr_mult*ATR)+' → ใช้ fallback',
+          ref:'soul-swing.md §Stop (band rule)' },
+        { q:'เข้า $100 · ATR $2 · stop เทคนิคอยู่ $93 · ทำยังไง?',
+          choices:['ใช้ $93 ตามโครงสร้าง','ถอยมาใช้ $97','ไม่เทรดไม้นี้ เพราะระยะกว้างกว่า '+f1(SR.max_atr_mult)+'×ATR = setup หลวมเกิน','ใช้ $94 พอดีขอบ'], answer:2,
+          why:'กว้างเกินขอบบนของกรอบ → กติกาให้ "ไม่เทรด" ไม่ใช่ฝืนแคบลง',
+          ref:'rules.py StopRules max_atr_mult=3.0' },
+        { q:'สูตร stop แบบเก่า max(ATR_stop, technical_stop) ตอนนี้สถานะคืออะไร?',
+          choices:['ยังเป็นสูตรหลัก','ถูกแทนด้วยกรอบ '+bandStr+' เพราะเคยขัดกับร้อยแก้ว+ตัวอย่างของตัวเอง 3 จุด','ใช้เฉพาะท่า pullback','เป็นสูตรของ target ไม่ใช่ stop'], answer:1,
+          why:'ปมขัดแย้ง 3 จุดถูกพบ 2026-06-10 → กติกากรอบ (band) แทนทุกชั้น เครื่องคิดให้ใน resolve_stop()',
+          ref:'soul-swing.md §Stop hierarchy note' },
+        { q:'เงื่อนไข time-stop คือข้อไหน?',
+          choices:['ถือเกิน '+EX.time_stop_days+' วัน → ออกทันทีทุกกรณี','ถือเกิน '+EX.time_stop_days+' วัน และ กำไรยังไม่ถึง +'+EX.time_stop_min_r+'R → ออก','ถือเกิน 30 วัน → ออก','กำไรติดลบเมื่อไหร่ก็ออก'], answer:1,
+          why:'ต้องครบทั้ง 2 เงื่อนไข · ไม้ที่กำไรวิ่งแล้ว (≥ +'+EX.time_stop_min_r+'R) ถือต่อได้',
+          ref:'rules.py time_stop_days=21, time_stop_min_r=0.5' },
+        { q:'ถือมา 22 วัน เสี่ยงไว้ $4/หุ้น ตอนนี้กำไร $2.50/หุ้น · ออกไหม?',
+          choices:['ออก เพราะเกิน '+EX.time_stop_days+' วันแล้ว','ไม่ออก · กำไร +'+rd(2.5/4)+'R ≥ +'+EX.time_stop_min_r+'R เงื่อนไข time-stop ไม่ครบ','ออก เพราะยังไม่ถึงเป้า','ขยับ stop ขึ้นตามราคา (trailing)'], answer:1,
+          why:'2.50 ÷ 4 = +'+rd(2.5/4)+'R ผ่านเกณฑ์ +'+EX.time_stop_min_r+'R → time-stop ไม่ทำงาน · trailing stop ไม่มีในกติกา MVP',
+          ref:'soul-swing.md §Exit + §No trailing stops' },
+        { q:'ข้อไหน "ไม่ใช่" ทางออกของกติกา v2?',
+          choices:['ชน stop','ชนเป้า (target)','ราคาปิดหลุด SMA'+EX.sma_exit_len,'ETF กลุ่มร่วง >5% ใน 1 วัน'], answer:2,
+          why:'"หลุด SMA'+EX.sma_exit_len+'" ถูกทดสอบแล้วทำ expectancy (ค่าคาดหวังต่อไม้) แย่ลง → ตัดออก (มติ ค1) · อย่าเอากฎเก่ามาใช้เอง',
+          ref:'มติ ค1 2026-06-11 · setups/_PROCESS.md' },
+        { q:'ราคาชน stop แล้วเด้งกลับขึ้นทันที · ครั้งหน้าควรทำยังไง?',
+          choices:['รอดูก่อนค่อยออก เผื่อเด้ง','ออกตามกฎทุกครั้ง แล้วจดบทเรียนใน journal · stop ศักดิ์สิทธิ์','ขยับ stop ให้ต่ำลงอีกหน่อย','ซื้อเพิ่มเพื่อถัวเฉลี่ย'], answer:1,
+          why:'Stop honor rule: ชน = จบไม้ ไม่มีต่อรอง · การละเมิด = −1 คะแนนวินัย ติดกัน 3 ครั้งพักทั้งระบบ · ระบบอยู่ได้เพราะแพ้เล็กเสมอ',
+          ref:'soul-swing.md §Stop honor rule' }
+      ]
+    };
+
+    document.getElementById('foot').innerHTML='เลขกติกาทุกตัวดึงจาก <span class="eq">_kit/canon.js</span> (mirror ของ <span class="eq">src/backtest/rules.py::CANONICAL_V2</span> · มีตัวตรวจอัตโนมัติ) · ตัวอย่างราคาทั้งหน้า (เข้า $100 · ATR $2 ฯลฯ) เป็นเลขกลมสมมุติ (hypothetical) ไม่ใช่ราคาตลาดจริง · self-contained / offline · MyInvest Visual Library';
+
+    renderHero(); renderBand(); renderTarget(); renderTimestop(); renderExits();
+    window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    document.getElementById('caseBtns').addEventListener('click',function(e){
+      var b=e.target.closest('button[data-ci]'); if(!b)return;
+      state.ci=+b.dataset.ci; renderBand();
+    });
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

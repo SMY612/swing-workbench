@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>ทีม MyInvest — ใครทำอะไร แล้วงานไหลยังไง | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  /* ---- team-pipeline page-scoped (ยืม token จาก theme.css ทั้งหมด) ---- */
+  .pill.n { background:var(--bg2); color:var(--ink2); }
+  .grp-label { font-size:.8125rem; font-weight:700; color:var(--ink2); margin:1.15rem 0 .5rem; }
+  .roster-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:.5rem; }
+  .mapnode { display:flex; flex-direction:column; gap:.4rem; align-items:flex-start; text-align:left;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:.75rem .875rem; cursor:pointer;
+    min-height:44px; width:100%; font-family:var(--font); color:var(--ink); box-shadow:var(--shadow); }
+  .mapnode:hover { background:var(--bg3); }
+  .mapnode[aria-pressed="true"] { border-color:var(--ink); box-shadow:0 0 0 2px var(--ink); }
+  .mapnode .nm { font-weight:700; font-size:.9375rem; line-height:1.3; }
+  .mapnode .nm small { display:block; color:var(--ink3); font-weight:400; font-size:.74em; }
+  /* pipeline (สไตล์ flow-row · node แบบไม่คลิก) */
+  .flow-row { display:flex; align-items:stretch; gap:.4rem; overflow-x:auto; padding-bottom:.6rem; margin-top:.85rem; }
+  .cell { display:flex; align-items:center; gap:.4rem; flex:0 0 auto; }
+  .fnode { display:flex; flex-direction:column; gap:.35rem; align-items:flex-start;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:.7rem .875rem;
+    min-width:118px; max-width:172px; box-shadow:var(--shadow); }
+  .fnode .nm { font-weight:700; font-size:.9rem; line-height:1.3; }
+  .fnode .d { font-size:.75rem; color:var(--ink2); line-height:1.35; }
+  .fnode.start { background:var(--bg2); border-style:dashed; box-shadow:none; }
+  .fnode.tool { border-style:dashed; }
+  .edge { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--ink3); font-size:.68rem; max-width:104px; text-align:center; line-height:1.25; flex:0 0 auto; }
+  .edge b { font-size:1.15rem; color:var(--blue); line-height:1; }
+  /* ตาราง (blindness matrix + ตารางรวมทีม) */
+  .ttbl { width:100%; border-collapse:collapse; font-size:.875rem; }
+  .ttbl th, .ttbl td { padding:.55rem .6rem; text-align:left; border-bottom:1px solid var(--line2); vertical-align:top; }
+  .ttbl th { color:var(--ink2); font-weight:600; background:var(--bg2); }
+  .ttbl th.c, .ttbl td.c { text-align:center; white-space:nowrap; }
+  .ttbl tr.sec td { background:var(--bg2); font-weight:700; font-size:.8rem; }
+  .ttbl .eq { font-size:.74rem; }
+  .linklist { list-style:none; }
+  .linklist li { padding:.5rem 0; border-bottom:1px solid var(--line2); font-size:.95rem; }
+  .linklist li:last-child { border-bottom:none; }
+  @media (max-width:760px){
+    .flow-row { flex-direction:column; align-items:stretch; overflow:visible; }
+    .cell { flex-direction:column; align-items:stretch; }
+    .fnode { max-width:none; width:100%; }
+    .edge { max-width:none; flex-direction:row; gap:.4rem; padding:.2rem 0; justify-content:center; }
+    .edge b { transform:rotate(90deg); }
+  }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">ทีม MyInvest — ใครทำอะไร แล้วงานไหลยังไง</h1>
+    <p class="lead">ทีมงาน 13 คน + Kim ผู้จัดคิวงาน (orchestrator) · user คุยกับ Kim คนเดียวพอ
+      แล้วงานจะถูกส่งต่อให้คนที่ใช่เอง · หน้านี้พาไปรู้จักทีละคน ดูว่างานลงทุน 1 รอบไหลผ่านมือใครบ้าง
+      และทำไมคนให้คะแนนถึงต้อง "ตาบอด"</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#roster" class="on">รู้จักทีมทีละคน</a>
+    <a href="#flow">เส้นทางงานลงทุน 1 รอบ</a>
+    <a href="#blindness">ทำไมต้องมี AI ตาบอด</a>
+    <a href="#swing">ฝั่งเทรดสั้นใช้ใครบ้าง</a>
+    <a href="#quiz">แบบทดสอบ</a>
+  </nav>
+
+  <!-- ===== A · ROSTER ===== -->
+  <section id="roster" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">รู้จักทีมทีละคน</h2>
+      <p class="lead">คลิกการ์ดแต่ละคนเพื่อดูหน้าที่ จังหวะที่ควรเรียกใช้ คำสั่งที่เกี่ยว และไฟล์ตัวตน (persona)
+        · ทุกคนเป็นผู้ช่วย AI ที่อ่านกติกาบ้านเดียวกัน แต่ถนัดคนละเรื่องโดยตั้งใจ</p>
+
+      <div class="card" style="margin-top:22px" id="rosterCard">
+        <div class="grp-label" style="margin-top:0">ประตูหน้าบ้าน · คุยคนนี้คนเดียวพอ</div>
+        <div class="roster-grid">
+          <button class="mapnode" data-m="kim" aria-pressed="true">
+            <span class="nm">Kim <small>Orchestrator</small></span>
+            <span class="pill n">ผู้จัดคิวงาน</span>
+          </button>
+        </div>
+
+        <div class="grp-label">ทีมกระบวนการ (Process team) · งานคิด ค้น วางแผน</div>
+        <div class="roster-grid">
+          <button class="mapnode" data-m="indie" aria-pressed="false">
+            <span class="nm">Indie <small>Idea Specialist</small></span>
+            <span class="pill n">จับไอเดีย</span>
+          </button>
+          <button class="mapnode" data-m="rachel" aria-pressed="false">
+            <span class="nm">Rachel <small>General Research</small></span>
+            <span class="pill n">วิจัยทั่วไป</span>
+          </button>
+          <button class="mapnode" data-m="stratton" aria-pressed="false">
+            <span class="nm">Stratton <small>Strategist</small></span>
+            <span class="pill n">วางแผน</span>
+          </button>
+        </div>
+
+        <div class="grp-label">ทีมลงทุน (Investment team) · งานพอร์ตทั้งระบบ</div>
+        <div class="roster-grid">
+          <button class="mapnode" data-m="porter" aria-pressed="false">
+            <span class="nm">Porter <small>Portfolio Manager</small></span>
+            <span class="pill n">ผู้จัดการพอร์ต</span>
+          </button>
+          <button class="mapnode" data-m="reese" aria-pressed="false">
+            <span class="nm">Reese <small>Research Analyst</small></span>
+            <span class="pill n">วิจัยหุ้นรายตัว</span>
+          </button>
+          <button class="mapnode" data-m="quentin" aria-pressed="false">
+            <span class="nm">Quentin <small>Quant</small></span>
+            <span class="pill n">ตัวเลข + backtest</span>
+          </button>
+          <button class="mapnode" data-m="rick" aria-pressed="false">
+            <span class="nm">Rick <small>Risk Manager</small></span>
+            <span class="pill n">ความเสี่ยง</span>
+          </button>
+          <button class="mapnode" data-m="trent" aria-pressed="false">
+            <span class="nm">Trent <small>Trader</small></span>
+            <span class="pill n">ตั๋วเทรด</span>
+          </button>
+          <button class="mapnode" data-m="booker" aria-pressed="false">
+            <span class="nm">Booker <small>Fund Accounting</small></span>
+            <span class="pill n">บัญชี + ภาษี</span>
+          </button>
+          <button class="mapnode" data-m="nick" aria-pressed="false">
+            <span class="nm">Nick <small>AI Fund Manager</small></span>
+            <span class="pill n">AI Tier 1</span>
+          </button>
+          <button class="mapnode" data-m="holden" aria-pressed="false">
+            <span class="nm">Holden <small>AI Fund Manager</small></span>
+            <span class="pill n">AI Tier 2</span>
+          </button>
+          <button class="mapnode" data-m="minnie" aria-pressed="false">
+            <span class="nm">Minnie <small>Question Shaper</small></span>
+            <span class="pill n">ตั้งคำถาม</span>
+          </button>
+          <button class="mapnode" data-m="vera" aria-pressed="false">
+            <span class="nm">Vera <small>Quality Gate</small></span>
+            <span class="pill n">ตรวจคุณภาพ</span>
+          </button>
+        </div>
+
+        <div class="step" style="margin-top:1.3rem">
+          <div class="n" id="memGlyph" style="background:var(--blue);color:#fff">K</div>
+          <div class="b" id="memDetail">
+            <h4>Kim <small style="color:var(--ink3);font-weight:400">(Orchestrator)</small> <span class="badge">ประตูหน้าบ้าน</span></h4>
+            <p>รับโจทย์จาก user แตกงานเป็นชิ้น แล้วส่งต่อให้สมาชิกที่ใช่ จากนั้นสรุปผลกลับมาเป็นภาษาคน</p>
+            <p class="tag">เรียกใช้เมื่อไหร่: ทุกครั้ง · user คุยกับ Kim คนเดียวพอ ไม่ต้องจำเองว่าใครถนัดอะไร</p>
+            <p style="margin-top:.4rem">คำสั่งที่เกี่ยว: <span class="eq">/swing · /checkpoint · /recall</span></p>
+            <p class="tag">ไฟล์ persona: <span class="eq">CLAUDE.md</span> (รากโปรเจกต์ · Kim ไม่ได้อยู่ใน team/ เพราะเป็นชั้นบนสุด)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="selfcheck" style="margin-top:1rem">
+        <details>
+          <summary>ดูตารางรวมทั้งทีม (เห็นครบทีเดียว)</summary>
+          <div class="scroll" style="margin-top:.75rem">
+            <table class="ttbl" id="memberTable">
+              <thead><tr><th>สมาชิก</th><th>ทำอะไร</th><th>เรียกใช้เมื่อไหร่</th><th>ไฟล์</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="note">นับจากไฟล์จริงใน <span class="eq">team/</span>: 13 คน + Kim (ตัวตน Kim อยู่ใน <span class="eq">CLAUDE.md</span>)
+            · ชั้นเรียกใช้งาน (dispatch) อยู่ที่ <span class="eq">.claude/agents/&lt;name&gt;.md</span> ส่วนตัวตนเต็มอยู่ใน <span class="eq">team/&lt;name&gt;.md</span></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B · FLOW ===== -->
+  <section id="flow" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เส้นทางงานลงทุน 1 รอบ</h2>
+      <p class="lead">จากไอเดียดิบจนถึงลงบัญชี งานฝั่ง Passive ไหลผ่านมือทีละคน · แต่ละคนส่งต่อ "ของ" ให้คนถัดไปเสมอ
+        ไม่มีใครตัดสินคนเดียวจบ</p>
+
+      <div class="card" style="margin-top:22px">
+        <h3>เส้นทางหลัก: ไอเดีย → ตัดสิน → ลงบัญชี</h3>
+        <div class="flow-row">
+          <div class="cell">
+            <div class="fnode start"><span class="nm">ไอเดียดิบ</span><span class="d">จาก user · จุดเริ่ม</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>จับใส่โครง</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Indie</span><span class="d">ทำบัตรไอเดีย (idea card)</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>คุ้มค่าเจาะต่อ</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Reese</span><span class="d">เขียนบทวิเคราะห์ (thesis)</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>thesis พร้อมตรวจ</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Quentin</span><span class="d">ตรวจตัวเลขให้ตรงจริง</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>เลขผ่าน</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Rick</span><span class="d">ตรวจเสี่ยง · บังคับเมื่อไม้เกิน 5% ของพอร์ต</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>ผ่านด่านเสี่ยง</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Porter</span><span class="d">ตัดสิน: ซื้อ ขาย หรือถือ</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>เคาะแล้ว</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Trent</span><span class="d">เตรียมตั๋วเทรด · ไม่กดซื้อเอง</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>user กดซื้อที่โบรก ◇</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Booker</span><span class="d">ลงบัญชี ต้นทุน กำไรขาดทุน</span></div>
+          </div>
+        </div>
+        <div class="note">ลำดับนี้มาจากผังงานมาตรฐานใน <span class="eq">CLAUDE.md</span> (Typical investment workflow)
+          · ไม่ใช่ทุกงานต้องครบทุกขั้น: Kim เป็นคนเลือกว่างานไหนใช้ใครบ้าง
+          · กติกาสำคัญ: ไม้ที่ขนาดเกิน 5% ของพอร์ตต้องมีลายเซ็น Rick ก่อนเสมอ (จาก <span class="eq">team/porter.md</span>)</div>
+      </div>
+
+      <div class="card" style="margin-top:22px">
+        <h3>กล่องเสริม: เส้นทางย่อยตอนสร้าง thesis (<span class="eq">/ingest-thesis</span>)</h3>
+        <p class="muted" style="margin-top:.4rem">ก่อน thesis จะถึงมือคนให้คะแนน มันต้องผ่านสายพานคุณภาพ 5 ขั้นนี้ก่อน</p>
+        <div class="flow-row">
+          <div class="cell">
+            <div class="fnode"><span class="nm">Minnie</span><span class="d">ตั้งคำถามเฉพาะบริษัท เจาะสมมุติฐานชี้ขาด</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>คำถาม 3-5 ข้อ</span>
+          </div>
+          <div class="cell">
+            <div class="fnode tool"><span class="nm">NotebookLM</span><span class="d">เครื่องอ่านเอกสาร SEC (เครื่องมือ ไม่ใช่สมาชิก)</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>คำตอบ + หลักฐาน</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Reese</span><span class="d">สังเคราะห์เป็น thesis</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>ร่างพร้อมตรวจ</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Vera</span><span class="d">ตรวจทุกตัวเลขว่ามีที่มา (fact check)</span></div>
+            <span class="edge" aria-hidden="true"><b>→</b>ผ่านด่านคุณภาพ</span>
+          </div>
+          <div class="cell">
+            <div class="fnode"><span class="nm">Nick</span><span class="d">ให้คะแนนความเชื่อมั่น (conviction)</span></div>
+          </div>
+        </div>
+        <div class="note"><b>จุดสังเกต:</b> Vera ยืนหน้า Nick เสมอ · ตรวจคุณภาพก่อน แล้วค่อยตัดสิน
+          ไม่ใช่ตัดสินก่อนแล้วค่อยหาเหตุผล</div>
+      </div>
+
+      <div class="note">เส้นทางบนคือฝั่ง Passive (ถือยาว ใช้ thesis) · ฝั่งเทรดสั้นใช้กรวยคนละชุด
+        ดูได้ที่ <a href="./process-map.html">แผนที่กระบวนการเทรด</a></div>
+    </div>
+  </section>
+
+  <!-- ===== C · BLINDNESS ===== -->
+  <section id="blindness" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทำไมต้องมี AI ตาบอด</h2>
+      <p class="lead">จุดออกแบบที่ฉลาดสุดของทีมนี้: คนให้คะแนน thesis ห้ามรู้ว่าเราถืออะไรอยู่
+        เพื่อให้คะแนนสะท้อนหลักฐาน ไม่ใช่สะท้อนใจเรา</p>
+
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3>Nick · Tier 1 <span class="pill y">ตาบอดเต็มขั้น</span></h3>
+          <p class="muted" style="margin-top:8px">Nick ไม่รู้เลยว่า user ถือหุ้นอะไร ทุนเท่าไหร่ ชอบตัวไหน
+            · เห็นแค่หลักฐาน: งบ ตัวเลข ความเสี่ยง แล้วให้คะแนนความเชื่อมั่น (conviction) ตามกฎใน <span class="eq">soul.md</span> ล้วน ๆ</p>
+          <p class="muted" style="margin-top:8px"><b>เหตุผล:</b> ถ้า AI รู้ว่าเราถืออะไร คะแนนจะเผลอเอียงเข้าข้างของที่ถืออยู่
+            เรียกว่าอคติยึดของเดิม (endowment bias) · เลยออกแบบให้ตาบอดตั้งแต่ต้น แก้ที่โครงสร้าง ไม่ใช่แก้ที่ความตั้งใจ</p>
+        </div>
+        <div class="card col">
+          <h3>Holden · Tier 2 <span class="pill y">ตาบอดครึ่งเดียว</span></h3>
+          <p class="muted" style="margin-top:8px">เหมือน Nick ทุกอย่าง แต่เปิดตาเพิ่มหนึ่งชั้น: เห็นรายงานการถือหุ้น 13F
+            ของนักลงทุนดัง (ข้อมูลสาธารณะที่กองทุนใหญ่ต้องยื่นต่อ ก.ล.ต. สหรัฐ หรือ SEC) · ยังไม่เห็นพอร์ต user เหมือนเดิม</p>
+          <p class="muted" style="margin-top:8px"><b>เอาไว้ทำอะไร:</b> รัน Nick กับ Holden บน thesis เดียวกันแล้วเทียบคะแนน
+            · ถ้าคะแนนต่างกัน แปลว่าข้อมูล guru ดึงคะแนนให้เอียง · นี่คือการวัดอคติคล้อยตามข้อมูลนำ (anchor bias)
+            ด้วยการทดลองจริง ไม่ใช่แค่ทฤษฎี</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.1rem">
+        <h3>ใครเห็นอะไรบ้าง (จาก <span class="eq">soul.md</span> §Blindness Tier Framework)</h3>
+        <div class="scroll" style="margin-top:.75rem">
+          <table class="ttbl">
+            <thead><tr><th>ประเภทข้อมูล</th><th class="c">Nick (Tier 1)</th><th class="c">Holden (Tier 2)</th></tr></thead>
+            <tbody>
+              <tr><td>ข้อมูลพื้นฐานของบริษัท ตัวเลขเชิงปริมาณ และข้อมูลความเสี่ยง</td><td class="c">✓</td><td class="c">✓</td></tr>
+              <tr><td>การถือหุ้นของนักลงทุนดังจากแบบรายงาน 13F (สาธารณะ · เก็บไว้ที่ <span class="eq">data/gurus/</span>)</td><td class="c">✗</td><td class="c">✓</td></tr>
+              <tr><td>พอร์ตของ user: ถืออะไร น้ำหนักเท่าไหร่ มั่นใจตัวไหน</td><td class="c">✗</td><td class="c">✗</td></tr>
+              <tr><td>ความชอบและความผูกพันทางใจของ user</td><td class="c">✗</td><td class="c">✗</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="note"><b>เปรียบง่าย ๆ:</b> เหมือนขอความเห็นหมอสองคนโดยไม่บอกว่าเราซื้อยาอะไรมาแล้ว
+        · หมอคนแรก (Nick) ดูแค่ผลตรวจ · หมอคนที่สอง (Holden) ดูผลตรวจ และรู้เพิ่มว่าหมอดัง ๆ จ่ายยาอะไรให้เคสแบบเดียวกัน
+        · ถ้าสองคนเห็นตรงกันก็มั่นใจขึ้น ถ้าเห็นต่างเราได้รู้ทันทีว่า "ชื่อเสียง" มีอิทธิพลแค่ไหน</div>
+
+      <div class="note"><b>กฎเหล็กตอนส่งงาน:</b> ข้อมูลสรุป (brief) ที่ส่งให้ Nick หรือ Holden
+        ต้องถูกตัดเรื่องพอร์ต user ออกก่อนเสมอ · ถ้ามีประโยคแบบ "user ถือ X อยู่" หลุดเข้าไป ต้องลบทิ้งก่อนเริ่มอ่าน
+        · กฎนี้ต่อรองไม่ได้ (<span class="eq">soul.md</span> Compliance rule)</div>
+    </div>
+  </section>
+
+  <!-- ===== D · SWING SCOPE ===== -->
+  <section id="swing" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ฝั่งเทรดสั้นใช้ใครบ้าง</h2>
+      <p class="lead">พอร์ตมี 2 ฝั่งคู่ขนาน: Passive (ถือเป็นปี ตัดสินด้วย thesis) กับ Active (สวิง 1-3 สัปดาห์
+        ตัดสินด้วยกติกา breakout) · ทีมที่ใช้จึงไม่เหมือนกันโดยตั้งใจ</p>
+
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="up">อยู่ในสโคป Active</h3>
+          <ul class="linklist" style="margin-top:.5rem">
+            <li><b>Kim</b> · ประตูเดียวของฝั่งนี้คือ <span class="eq">/swing</span> (อ่านสถานะแล้วบอกขั้นถัดไป)</li>
+            <li><b>Quentin</b> · ฝั่งตัวเลข: คัดกรอง + ทดสอบย้อนหลัง (backtest) · เครื่องตรวจ <span class="eq">src/indicators.py</span> และ <span class="eq">src/backtest/live.py</span></li>
+            <li><b>Trent</b> · ตั๋วเทรดฝั่งนี้: <span class="eq">/swing-ticket</span> · user ยังเป็นคนกดซื้อเองที่โบรกเหมือนเดิม</li>
+            <li><b>Rick + Booker</b> (ทีมขยาย) · Rick เข้ามาเมื่อไม้เกิน 5% ของพอร์ต Active · Booker ลงบัญชีสมุด <span class="eq">books/swing-portfolio.csv</span></li>
+          </ul>
+        </div>
+        <div class="card col">
+          <h3 class="down">ไม่อยู่ในสโคปนี้ และทำไม</h3>
+          <ul class="linklist" style="margin-top:.5rem">
+            <li><b>Nick / Holden / Vera</b> · ออกจากสโคปโดยกติกา (<span class="eq">soul-swing.md</span>): ฝั่งนี้ถามว่า "ท่านี้มีแต้มต่อทางสถิติไหม"
+              ไม่ใช่ "ธุรกิจนี้โตทบต้นไหม" จึงไม่มี thesis ให้ตรวจหรือให้คะแนน</li>
+            <li><b>Porter</b> · ยังไม่เข้ามาจนกว่าจะถึง Phase 2 · ตอนนี้เป็นช่วงซ้อมมือบนกระดาษ (paper trade)</li>
+            <li><b>เพดานกลุ่มแบบ cluster</b> ของฝั่ง Passive ก็ไม่ใช้ที่นี่ · ฝั่งนี้คุมด้วยเพดานกลุ่มอุตสาหกรรม (sector) 30% แทน</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note">ไปต่อ: <a href="./process-map.html">แผนที่กระบวนการเทรด</a> (กรวยคัดหุ้น + วงจรถือ-ออก-ทบทวนของฝั่ง Active)
+        · <a href="./passive-vs-active.html">Passive vs Active</a> (สองสมุด สองปรัชญา · เทียบสองฝั่งแบบเต็มบท)</div>
+    </div>
+  </section>
+
+  <!-- ===== E · QUIZ ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ · ทีมและเส้นทางงาน</h2>
+      <p class="lead">6 ข้อ ตอบแล้วเฉลยทันที · ผ่านที่ 80%</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot">
+    ข้อมูลบทบาทและเส้นทางงานสรุปจาก <span class="eq">CLAUDE.md</span> (ตารางทีม · Routing Guide · ingest pipeline)
+    · ตัวตนเต็มของสมาชิกอยู่ใน <span class="eq">team/&lt;name&gt;.md</span> ทั้ง 13 ไฟล์ (นับจริง 2026-06-12)
+    · กรอบความตาบอดจาก <span class="eq">soul.md</span> §Blindness Tier Framework · ขอบเขตฝั่ง swing จาก <span class="eq">soul-swing.md</span>
+    · หน้านี้อ่าน/อ้างอิงเท่านั้น ไม่ได้แก้ไฟล์ต้นทาง · self-contained / offline · MyInvest Visual Library
+  </div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var UI = window.UI, QUIZ = window.QUIZ;
+
+    /* ---- single source ของแผงรายละเอียด + ตารางรวม (สรุปจาก CLAUDE.md + team/<name>.md) ---- */
+    var MEMBERS = [
+      { key:'kim', name:'Kim', en:'Orchestrator', grp:'ประตูหน้าบ้าน',
+        does:'รับโจทย์จาก user แตกงานเป็นชิ้น แล้วส่งต่อให้สมาชิกที่ใช่ จากนั้นสรุปผลกลับมาเป็นภาษาคน',
+        when:'ทุกครั้ง · user คุยกับ Kim คนเดียวพอ ไม่ต้องจำเองว่าใครถนัดอะไร',
+        cmd:'/swing · /checkpoint · /recall',
+        file:'CLAUDE.md', fileNote:' (รากโปรเจกต์ · Kim ไม่ได้อยู่ใน team/ เพราะเป็นชั้นบนสุด)',
+        note:'อยากเห็นวิธีคิดตอนจ่ายงาน: ขึ้นต้นข้อความว่า "Kim, ..." แล้ว Kim จะโชว์ตัวเลือกการจ่ายงานก่อนลงมือ' },
+      { key:'indie', name:'Indie', en:'Idea Specialist', grp:'ทีมกระบวนการ',
+        does:'จับความคิดดิบ ๆ ที่ยังฟุ้งให้กลายเป็นบัตรไอเดีย (idea card) ที่มีโครงชัด พร้อมส่งต่อ',
+        when:'มีไอเดียแวบขึ้นมา หรืออยากเทความคิดทั้งหมดออกจากหัว (brain dump)',
+        cmd:'/idea-triage · โฟลเดอร์ ideas/',
+        file:'team/indie.md' },
+      { key:'rachel', name:'Rachel', en:'General Research Specialist', grp:'ทีมกระบวนการ',
+        does:'ค้นคว้าหัวข้อทั่วไปที่ไม่ใช่การลงทุน แล้วสรุปเป็นรายงานที่อ้างที่มาได้',
+        when:'อยากรู้ลึกเรื่องอะไรก็ตามที่ไม่เกี่ยวกับหุ้นหรือพอร์ต · ถ้าเป็นหุ้นรายตัวให้ส่ง Reese แทน',
+        cmd:'/research-idea · โฟลเดอร์ research/',
+        file:'team/rachel.md' },
+      { key:'stratton', name:'Stratton', en:'Strategist', grp:'ทีมกระบวนการ',
+        does:'แปลงบัตรไอเดียกับผลวิจัยให้เป็นแผนปฏิบัติ (action plan) ที่ลงมือได้จริงเป็นขั้น ๆ',
+        when:'ข้อมูลครบแล้วแต่ยังไม่รู้จะเริ่มตรงไหน หรืออยากได้แผนก่อนลงแรง',
+        cmd:'ไม่มีคำสั่งเฉพาะ · เรียกผ่าน Kim (พิมพ์ชื่อ Stratton นำหน้าข้อความได้) · โฟลเดอร์ strategy/',
+        file:'team/stratton.md' },
+      { key:'porter', name:'Porter', en:'Portfolio Manager', grp:'ทีมลงทุน',
+        does:'เจ้าของการจัดสรรพอร์ต (allocation) ฝั่ง Passive · เป็นคนเคาะว่าซื้อ ขาย หรือถือ',
+        when:'ถามว่า "ควรซื้อ/ขาย X ไหม" หรือถึงรอบทบทวนพอร์ตประจำสัปดาห์',
+        cmd:'/portfolio-review · โฟลเดอร์ portfolio/',
+        file:'team/porter.md',
+        note:'กติกาสำคัญ: ไม้ที่ขนาดเกิน 5% ของพอร์ตต้องมีลายเซ็น Rick ก่อนเสมอ' },
+      { key:'reese', name:'Reese', en:'Research Analyst', grp:'ทีมลงทุน',
+        does:'เขียนบทวิเคราะห์การลงทุน (thesis) รายหุ้น/กองทุน: ฉากดี กลาง แย่ (bull/base/bear) พร้อมเงื่อนไขขายตัด (kill condition)',
+        when:'"เจาะหุ้นตัวนี้ให้หน่อย" หรือก่อนเข้าไม้ใหม่ฝั่ง Passive (กฎบ้าน: ไม่มี thesis = ไม่ซื้อ)',
+        cmd:'/upgrade-to-thesis · /mini-financials-forecast · โฟลเดอร์ theses/',
+        file:'team/reese.md' },
+      { key:'quentin', name:'Quentin', en:'Quant', grp:'ทีมลงทุน',
+        does:'มือตัวเลขของทีม: คัดกรองหุ้น (screen) ทดสอบกติกาย้อนหลัง (backtest) และตรวจความถูกต้องของข้อมูล',
+        when:'อยากได้หลักฐานเชิงตัวเลขมายืนยันหรือหักล้าง ก่อนจะเชื่ออะไรสักอย่าง',
+        cmd:'/swing-curate · /swing-screen (งานคัดกรองฝั่ง swing) · โฟลเดอร์ quant/',
+        file:'team/quentin.md' },
+      { key:'rick', name:'Rick', en:'Risk Manager', grp:'ทีมลงทุน',
+        does:'ด่านความเสี่ยง: ตรวจก่อนเข้าไม้ (pre-trade check) ว่าพอร์ตกระจุกเกินไหม สถานการณ์เลวร้ายเจ็บแค่ไหน',
+        when:'ก่อนไม้ใหญ่เสมอ · ไม้ที่ขนาดเกิน 5% ของพอร์ตข้ามด่านนี้ไม่ได้',
+        cmd:'/risk-check · โฟลเดอร์ risk/',
+        file:'team/rick.md' },
+      { key:'trent', name:'Trent', en:'Trader', grp:'ทีมลงทุน',
+        does:'เตรียมตั๋วเทรด (trade ticket): เลือกชนิดคำสั่ง ราคา และจังหวะ แล้ววิเคราะห์คุณภาพการซื้อขายหลังจบ',
+        when:'Porter เคาะแล้วและอยากซื้อให้เนียนที่สุด หรือถึงรอบเก็บภาษีขาดทุน (tax-loss harvest)',
+        cmd:'/prepare-ticket · /swing-ticket · /slippage-report · โฟลเดอร์ trades/',
+        file:'team/trent.md',
+        note:'เส้นแบ่งสำคัญ: Trent เตรียมตั๋วเท่านั้น · คนกดปุ่มซื้อที่โบรก (broker) คือ user เสมอ' },
+      { key:'booker', name:'Booker', en:'Fund Accounting', grp:'ทีมลงทุน',
+        does:'นักบัญชีกองทุน: ลงบัญชีต้นทุน (cost basis) กำไรขาดทุน (P&amp;L) กระทบยอด (reconcile) และภาษี',
+        when:'หลังเทรดทุกไม้ หรือถึงรอบกระทบยอดกับรายงานโบรก/สรุปภาษี',
+        cmd:'/book-trade · /reconcile-statement · สมุดบัญชีใน books/',
+        file:'team/booker.md' },
+      { key:'nick', name:'Nick', en:'AI Fund Manager · Tier 1', grp:'ทีมลงทุน',
+        does:'ผู้จัดการกองทุน AI แบบตาบอดเต็มขั้น (Tier 1): ให้คะแนนความเชื่อมั่น (conviction) จากหลักฐานล้วน ๆ ตามกฎ soul.md',
+        when:'อยากได้คำตัดสินที่ไม่เข้าข้างใครบน thesis หรือถึงรอบทบทวนเช้าวันจันทร์',
+        cmd:'/nick-monday · /nick-weekly · /nick-rebalance',
+        file:'team/nick.md',
+        note:'กฎเหล็ก: งานที่ส่งให้ Nick ต้องตัดข้อมูลพอร์ต user ออกก่อน · เหตุผลอยู่ในหัวข้อ "ทำไมต้องมี AI ตาบอด"' },
+      { key:'holden', name:'Holden', en:'AI Fund Manager · Tier 2', grp:'ทีมลงทุน',
+        does:'คู่ขนานของ Nick (Tier 2): เห็นรายงานการถือหุ้น 13F ของนักลงทุนดังเพิ่มหนึ่งชั้น แต่ยังไม่เห็นพอร์ต user เหมือนเดิม',
+        when:'รันคู่กับ Nick บน thesis เดียวกัน เพื่อวัดว่าข้อมูล guru ดึงคะแนนให้เอียงแค่ไหน',
+        cmd:'เรียกผ่าน Kim คู่กับ Nick · ข้อมูล 13F อยู่ที่ data/gurus/',
+        file:'team/holden.md' },
+      { key:'minnie', name:'Minnie', en:'Thesis Question Shaper', grp:'ทีมลงทุน',
+        does:'นักตั้งคำถาม: อ่านสิ่งที่รู้แล้วเกี่ยวกับบริษัท หาสมมุติฐานชี้ขาดของ thesis แล้วออกแบบคำถามเฉพาะตัว 3-5 ข้อ',
+        when:'ขั้นแรกของการสร้าง thesis ก่อนให้เครื่องอ่านเอกสาร (ดูกล่องเสริมในหัวข้อเส้นทางงาน)',
+        cmd:'อยู่ในขั้นตอนของ /ingest-thesis',
+        file:'team/minnie.md' },
+      { key:'vera', name:'Vera', en:'Research Quality Gate', grp:'ทีมลงทุน',
+        does:'ด่านคุณภาพงานวิจัย: ไล่ตรวจทุกตัวเลขใน thesis ว่ามีที่มาอ้างได้ ก่อนปล่อยไปให้ Nick ให้คะแนน',
+        when:'หลัง Reese เขียน thesis เสร็จทุกครั้ง · ตรวจคุณภาพก่อนตัดสินเสมอ',
+        cmd:'/thesis-scorecard-check',
+        file:'team/vera.md' }
+    ];
+
+    function byKey(k){ for(var i=0;i<MEMBERS.length;i++){ if(MEMBERS[i].key===k) return MEMBERS[i]; } return null; }
+
+    function detailHTML(m){
+      var html = '<h4>'+m.name+' <small style="color:var(--ink3);font-weight:400">('+m.en+')</small> '
+        + '<span class="badge">'+m.grp+'</span></h4>'
+        + '<p>'+m.does+'</p>'
+        + '<p class="tag">เรียกใช้เมื่อไหร่: '+m.when+'</p>'
+        + '<p style="margin-top:.4rem">คำสั่งที่เกี่ยว: <span class="eq">'+m.cmd+'</span></p>'
+        + '<p class="tag">ไฟล์ persona: <span class="eq">'+m.file+'</span>'+(m.fileNote||'')+'</p>';
+      if(m.note){ html += '<p class="tag" style="margin-top:.3rem">'+m.note+'</p>'; }
+      return html;
+    }
+
+    function selectMember(k){
+      var m = byKey(k); if(!m) return;
+      document.getElementById('memGlyph').textContent = m.name.charAt(0);
+      document.getElementById('memDetail').innerHTML = detailHTML(m);
+      var btns = document.querySelectorAll('button[data-m]');
+      for(var i=0;i<btns.length;i++){ btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-m')===k ? 'true' : 'false'); }
+    }
+
+    function renderKpis(){
+      var teamCount = 0;
+      for(var i=0;i<MEMBERS.length;i++){ if(MEMBERS[i].key!=='kim') teamCount++; }
+      var items = [
+        [teamCount+'+1', 'สมาชิก · นับจริงจาก team/ + Kim'],
+        ['1', 'ประตูเดียว · คุยกับ Kim พอ'],
+        ['2', 'Tier ความตาบอด · Nick กับ Holden'],
+        ['◇', 'กดซื้อเอง · user กดที่โบรกเสมอ']
+      ];
+      document.getElementById('heroKpis').innerHTML = items.map(function(k){
+        return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';
+      }).join('');
+    }
+
+    function renderTable(){
+      var tb = document.querySelector('#memberTable tbody'); if(!tb) return;
+      function row(m){
+        return '<tr><td><b>'+m.name+'</b> <small style="color:var(--ink3)">'+m.en+'</small></td>'
+          + '<td>'+m.does+'</td><td>'+m.when+'</td><td><span class="eq">'+m.file+'</span></td></tr>';
+      }
+      var html = '', lastGrp = '';
+      for(var i=0;i<MEMBERS.length;i++){
+        var m = MEMBERS[i];
+        if(m.grp!==lastGrp){ html += '<tr class="sec"><td colspan="4">▼ '+m.grp+'</td></tr>'; lastGrp = m.grp; }
+        html += row(m);
+      }
+      tb.innerHTML = html;
+    }
+
+    document.getElementById('rosterCard').addEventListener('click', function(e){
+      var b = e.target.closest('button[data-m]');
+      if(b) selectMember(b.getAttribute('data-m'));
+    });
+
+    /* ---- แบบทดสอบ ---- */
+    var QUIZ_BANK = {
+      id: 'team-pipeline', pass: 0.8,
+      questions: [
+        { q: "อยากได้บทวิเคราะห์เจาะหุ้นตัวใหม่ ส่งงานให้ใคร?",
+          choices: ["Rachel","Reese","Stratton","Booker"], answer: 1,
+          why: "Reese = นักวิเคราะห์การลงทุนรายตัว (10-K, thesis, bull/base/bear) · Rachel รับเฉพาะวิจัยทั่วไปที่ไม่ใช่การลงทุน — คู่นี้สลับกันบ่อยสุด",
+          ref: "CLAUDE.md §Routing Guide" },
+        { q: "Blindness Rule ของ Nick หมายความว่าอะไร?",
+          choices: ["Nick ไม่ใช้ข้อมูลราคา","Nick ไม่รู้ว่า user ถือหุ้นอะไร/ต้นทุนเท่าไหร่ — เพื่อให้คะแนน conviction ไม่เอียงเข้าข้างของที่ถืออยู่","Nick ตอบได้เฉพาะวันจันทร์","Nick เห็นเฉพาะหุ้นใน watchlist"], answer: 1,
+          why: "ถ้า AI รู้ว่าเราถืออะไร มันจะเผลอให้คะแนนเข้าข้าง (อคติยึดของเดิม) — เลยปิดตาเรื่องพอร์ตทั้งหมด",
+          ref: "soul.md §Blindness Tier Framework" },
+        { q: "Holden ต่างจาก Nick ยังไง?",
+          choices: ["Holden เห็นพอร์ตของ user ได้","Holden คือ Nick เวอร์ชันเร็วกว่า","Holden เห็นข้อมูล 13F ของนักลงทุนดัง (สาธารณะ) เพิ่ม แต่ยังไม่เห็นพอร์ต user — รันคู่กันเพื่อวัดอคติจากข้อมูล guru","Holden ดูแลฝั่ง swing"], answer: 2,
+          why: "Tier 1 vs Tier 2: ต่างกันแค่ชั้นข้อมูล guru — เทียบคะแนนสองคนบน thesis เดียวกัน = การทดลองวัด anchor bias ของจริง",
+          ref: "soul.md §Blindness Tier · team/holden.md" },
+        { q: "ไม้ Passive ขนาดเกิน 5% ของพอร์ต ต้องผ่านใครก่อนเสมอ?",
+          choices: ["Nick","Rick (pre-trade risk check)","Booker","ไม่ต้องผ่านใคร"], answer: 1,
+          why: "Rick คือด่านความเสี่ยงบังคับของไม้ใหญ่ — ตรวจความกระจุก/สถานการณ์เลวร้ายก่อน Porter เคาะ",
+          ref: "CLAUDE.md ตาราง team (Rick)" },
+        { q: "เรียงลำดับ ingest pipeline ให้ถูก",
+          choices: ["Reese → Minnie → Nick → Vera","Minnie → NotebookLM → Reese → Vera → Nick","Vera → Reese → NotebookLM → Nick","NotebookLM → Nick → Reese → Vera"], answer: 1,
+          why: "ตั้งคำถามก่อนอ่าน (Minnie) → เครื่องอ่านเอกสาร → คนสังเคราะห์ (Reese) → ตรวจ fact (Vera) → ค่อยให้คะแนน (Nick) — ตรวจคุณภาพก่อนตัดสินเสมอ",
+          ref: "CLAUDE.md §Ingest pipeline" },
+        { q: "ใครเป็นคน 'กดปุ่มซื้อ' จริง ๆ?",
+          choices: ["Trent","Kim","Porter","user เองที่โบรกเสมอ — ระบบเตรียมตั๋วให้แต่ไม่ส่งคำสั่งซื้อขายเอง"], answer: 3,
+          why: "Trent เตรียมตั๋ว (ราคา/ชนิดคำสั่ง/เงื่อนไข) แต่มือที่กดคือ user — เส้นแบ่งความรับผิดชอบที่ตั้งใจออกแบบ",
+          ref: "team/trent.md · process-map (ขั้น Trade ◇)" }
+      ]
+    };
+
+    renderKpis(); renderTable(); selectMember('kim');
+    QUIZ.mount('#quizHost', QUIZ_BANK);
+    UI.reveal(); UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+</body>
+</html>

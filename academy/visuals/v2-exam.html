@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>สอบรวมก่อนลงสนาม — กติกา canonical_v2 | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">สอบรวมก่อนลงสนาม</h1>
+    <p class="lead">ข้อสอบรวมทุกบทของคอร์สกติกา canonical_v2 — สภาพตลาด · กติกาเข้า · stop/target ·
+      ขนาดไม้ · ผลสอบ backtest · เกราะกันพัง · ทำซ้ำได้ไม่จำกัด คละลำดับข้อและตัวเลือกทุกรอบ</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#howto" class="on">วิธีใช้</a>
+    <a href="#exam">ลงสอบ</a>
+    <a href="#after">ผ่านแล้วไงต่อ</a>
+  </nav>
+
+  <!-- ===== A · HOW TO ===== -->
+  <section id="howto" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">วิธีใช้ข้อสอบนี้</h2>
+      <p class="lead">ทำหลังเรียนครบทุกบทใน<a href="./index.html">หน้ารวมคอร์ส</a> — ข้อที่ตอบผิดจะมีเฉลยพร้อม "ที่มาของกฎ" ให้กลับไปทบทวนถูกบท</p>
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="accent">กติกาห้องสอบ</h3>
+          <p class="muted" style="margin-top:8px">• ตอบได้ข้อละครั้ง เฉลยขึ้นทันที<br>
+            • เกณฑ์ผ่าน 80% ขึ้นไป<br>
+            • กด "ทำใหม่" ได้ไม่จำกัด — ข้อและตัวเลือกสลับใหม่ทุกรอบ<br>
+            • คะแนนดีสุดถูกจำไว้ในเครื่อง (localStorage)</p>
+        </div>
+        <div class="card col">
+          <h3 class="accent">ระวังตัวเลือกหลอก</h3>
+          <p class="muted" style="margin-top:8px">ตัวเลือกผิดหลายข้อคือ "เลขเวอร์ชันเก่า (v1)" ที่เคยอยู่ในเอกสารจริง เช่น
+            วอลุ่ม 150% · เกณฑ์ ≥5/6 · เป้า swing high · ออกเมื่อหลุด SMA50 —
+            ถ้าเลือกพวกนี้แปลว่ายังจำของเก่าอยู่ ซึ่งคือสิ่งที่ข้อสอบนี้ออกแบบมาจับ</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B · EXAM ===== -->
+  <section id="exam" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ลงสอบ</h2>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำข้อสอบ — เนื้อหาบทเรียนทั้งหมดอ่านได้จากหน้ารวมคอร์ส</noscript>
+    </div>
+  </section>
+
+  <!-- ===== C · AFTER ===== -->
+  <section id="after" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ผ่านแล้วไงต่อ</h2>
+      <p class="lead">ผ่าน 80% = พร้อมอ่านผลของระบบรู้เรื่องทั้งหมดแล้ว — เริ่มกิจวัตรเทรดกระดาษได้เลย</p>
+      <div class="card" style="margin-top:22px">
+        <p class="muted">เปิด session แล้วพิมพ์ <span class="eq">/swing</span> คำสั่งเดียว — ระบบอ่านสถานะแล้วบอกขั้นถัดไปเอง ·
+          อยากได้ตาราง "อยากได้ X รัน Y" ดู <span class="eq">setups/_CHEATSHEET.md</span> ·
+          ข้อไหนตอบผิดบ่อย กลับไปทบทวนบทนั้นใน<a href="./index.html">หน้ารวมคอร์ส</a> แล้วค่อยมาสอบใหม่</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var B=window.CANON.breakout, SR=window.CANON.stop, EX=window.CANON.exit,
+        SZ=window.CANON.sizing, RG=window.CANON.regime, X=window.CANON_X;
+    var volPct=B.vol_spike_ratio*100, widthPct=B.base_width_max*100, touchPct=100-B.touch_tol*100;
+
+    /* ตัวอย่างเลขกลมชุดข้อสอบ (สมมุติ): เข้า $50 · ATR $1 — คนละชุดกับในบทเรียน กันจำคำตอบ */
+    var entry=50, atr=1;
+    var bandLo=SR.min_atr_mult*atr, bandHi=SR.max_atr_mult*atr;
+    var stopOk=48, risk=entry-stopOk, target=entry+B.rr_gate*risk;
+    var fallback=entry-B.k_atr*atr;
+    var riskBudget=SZ.start_equity*SZ.risk_pct/100;          // ~$30.69
+    var sharesByRisk=riskBudget/risk;                        // ~15.3 หุ้น
+    var capDollar=SZ.start_equity*SZ.max_weight_pct/100;     // ~$306.9
+    var sharesByCap=capDollar/entry;                         // ~6.14 หุ้น
+    var f=function(n,dp){return window.ENGINE?window.ENGINE.fmt(n,dp):Number(n).toFixed(dp==null?2:dp);};
+
+    var QUIZ_BANK={
+      id:'v2-exam', pass:0.8,
+      questions:[
+        { q:'ก่อนมองหุ้นรายตัว ด่านแรกของทุกวันคืออะไร?',
+          choices:['เช็กข่าวเช้า','SPY ต้องปิดเหนือ SMA'+RG.spy_sma_len+' (สภาพตลาดเขียว) ไม่งั้นห้ามเปิดไม้ใหม่ทั้งระบบ','ดูราคาน้ำมัน','เช็กว่าพอร์ตบวกหรือลบ'], answer:1,
+          why:'regime คือไฟจราจรหัวถนน — ตลาดรวมเป็นขาลง ความน่าจะเป็นของ breakout สำเร็จต่ำลงทั้งกระดาน · ไม้เก่ายังถือ/ออกตามแผนเดิมได้',
+          ref:'CANON.regime · soul-swing.md' },
+        { q:'ฐานราคา (base) ของ breakout ต้องกว้างไม่เกินเท่าไหร่?',
+          choices:['< 5%','< '+widthPct+'% ของราคากลางฐาน (ข้อบังคับ)','< 12%','เท่าไหร่ก็ได้ถ้าวอลุ่มมา'], answer:1,
+          why:'ฐานแน่นคือหลักฐานว่าแรงขายหมด — ผลสอบชี้ว่าตัดข้อนี้แล้วขาดทุนหนักขึ้น (ฐานหลวม = ทะลุหลอก)',
+          ref:'rules.py base_width_max' },
+        { q:'นิยาม "แตะแนวต้าน" ที่ถูกต้องของ v2?',
+          choices:['High ≥ 99.5% · ห่าง ≥ 5 วัน (นิยามเก่า)','ปิดเหนือแนวต้าน 2 ครั้ง','High ≥ '+touchPct+'% ของแนวต้าน · ≥ '+B.touch_min+' ครั้ง · ห่าง ≥ '+B.touch_min_gap_days+' วันทำการ','แตะเมื่อไหร่ก็นับ'], answer:2,
+          why:'v2 ผ่อนนิยามจากฉบับ v1 (99.5% · 5 วัน) เพราะแคบจนแทบไม่มีไม้ให้เทรด (0.7 ไม้/ปี)',
+          ref:'rules.py touch_tol/touch_min_gap_days' },
+        { q:'วอลุ่มวันทะลุต้องอย่างน้อยกี่ % ของเฉลี่ย '+B.vol_avg_len+' วัน?',
+          choices:['100%','110%',volPct+'%','150% (เลขเก่า v1)'], answer:2,
+          why:'150% คือเกณฑ์เก่าที่เข้มเกิน — forensics ของ P0 พบว่าไม้ดี ๆ จำนวนมากโดนปัดตกที่เส้นนั้น จึงลดเป็น '+volPct+'%',
+          ref:'rules.py vol_spike_ratio=1.25' },
+        { q:'วันทะลุ ราคา High ขึ้นไป $101.5 แต่ปิด $99.80 (แนวต้าน $100) — นับเป็น breakout ไหม?',
+          choices:['นับ เพราะ high ทะลุแล้ว','ไม่นับ — ต้อง "ปิด" เหนือแนวต้าน','นับครึ่งหนึ่ง รอวันพรุ่งนี้ยืนยัน','นับ ถ้าวอลุ่มเกินเกณฑ์'], answer:1,
+          why:'แท่งแทงไส้ขึ้นแล้วถอยปิดใต้แนวต้าน = ทะลุหลอกแบบคลาสสิก — กติกาจึงตัดสินที่ราคาปิดเท่านั้น',
+          ref:'rules.py: close above resistance (mandatory)' },
+        { q:'เกณฑ์ผ่านรวมของกติกา v2 คือ?',
+          choices:['ผ่าน ≥ 5 จาก 6 ข้อ (เกณฑ์เก่า)','บังคับครบ 4 ข้อ + เสริมอย่างน้อย '+B.optional_min_pass+' จาก 2','ครบทุกข้อรวม 6 ข้อ','ธง U·A·R·D·V ครบ 5'], answer:1,
+          why:'"≥5/6" คือฉบับหลวมที่เลิกใช้ — ของจริง: บังคับ 4 (ฐาน/แตะ/วอลุ่ม/ปิดเหนือ) ครบทุกข้อ + เสริม (งบไกล · กลุ่มหนุน) ≥ 1',
+          ref:'soul-swing.md §Setup gate' },
+        { q:'5 ธง U·A·R·D·V มีหน้าที่อะไรในระบบปัจจุบัน?',
+          choices:['เป็นประตูเข้าไม้','เป็นคะแนนบริบทไว้จัดอันดับตัวเฝ้า (Stage 2→3) — ประตูจริงคือกติกา breakout v2','เป็นเงื่อนไขออก','เลิกใช้ไปแล้วทั้งชุด'], answer:1,
+          why:'ธงยังทำงานอยู่ในขั้นคัดตัวเฝ้า แต่ไม่ตัดสินการเข้า — ตัวตัดสินคือเครื่องตรวจ src/backtest/live.py',
+          ref:'setups/_SCREENING.md · process-map บทที่ 7' },
+        { q:'เข้า $'+entry+' · ATR $'+atr+' · แนวรับโครงสร้างอยู่ $'+stopOk+' — stop จริงอยู่ไหน?',
+          choices:['$'+stopOk+' (ระยะ $'+f(risk,0)+' อยู่ในกรอบ ['+f(bandLo,1)+', '+f(bandHi,0)+'])','$'+f(fallback,1)+' (fallback)','$47 กันเหนียว','ไม่เทรด'], answer:0,
+          why:'structure-first: ระยะถึงแนวรับ $'+f(risk,0)+' อยู่ในกรอบ ['+SR.min_atr_mult+', '+SR.max_atr_mult+']×ATR = [$'+f(bandLo,1)+', $'+f(bandHi,0)+'] → ใช้แนวรับโครงสร้างได้เลย',
+          ref:'soul-swing.md §Stop (band rule)' },
+        { q:'เข้า $'+entry+' · ATR $'+atr+' · แนวรับโครงสร้างอยู่ $49.40 (ระยะ $0.60) — ทำยังไง?',
+          choices:['ใช้ $49.40 ตามโครงสร้าง','ถอยไปใช้ fallback = entry − '+B.k_atr+'×ATR = $'+f(fallback,1),'ไม่เทรด','ใช้ค่าเฉลี่ยของสองตัว'], answer:1,
+          why:'ระยะ $0.60 แคบกว่าขั้นต่ำ '+SR.min_atr_mult+'×ATR = $'+f(bandLo,1)+' → stop ชิดเกิน โดนกระตุกหลุดง่าย กติกาให้ถอยไปใช้ fallback',
+          ref:'rules.py StopRules min_atr_mult' },
+        { q:'เข้า $'+entry+' · ATR $'+atr+' · แนวรับโครงสร้างอยู่ $46 (ระยะ $4) — ทำยังไง?',
+          choices:['ใช้ $46','ถอยมาใช้ $'+f(fallback,1),'ไม่เทรดไม้นี้ — ระยะกว้างกว่า '+SR.max_atr_mult+'×ATR = setup หลวมเกิน','ลดขนาดไม้ลงครึ่งแล้วเข้า'], answer:2,
+          why:'เกินขอบบนของกรอบ → คำตอบเดียวคือไม่เทรด ไปหาตัวอื่น — ไม่มีการฝืนบีบ stop ให้แคบลงเพื่อให้เข้าได้',
+          ref:'rules.py StopRules max_atr_mult → no trade' },
+        { q:'เข้า $'+entry+' · stop $'+stopOk+' — เป้าขาย (target) อยู่ตรงไหน?',
+          choices:['$52','$'+f(target,0)+' (= '+entry+' + '+B.rr_gate+'×'+f(risk,0)+')','$60 (swing high เดิม)','แล้วแต่หน้างาน'], answer:1,
+          why:'target = entry + '+B.rr_gate+' × (entry − stop) ตายตัวทุกไม้ → R:R = '+B.rr_gate+' เสมอ · เป้า swing high คือสูตรเก่าที่เลิกใช้',
+          ref:'soul-swing.md §Target (r2)' },
+        { q:'ถือมา 25 วัน กำไร +0.3R — ทำยังไง?',
+          choices:['ถือต่อ รอถึงเป้า','ออก — เข้าเงื่อนไข time-stop (เกิน '+EX.time_stop_days+' วัน และกำไร < +'+EX.time_stop_min_r+'R)','ขยับ stop ขึ้นแล้วถือต่อ','เพิ่มไม้'], answer:1,
+          why:'ครบทั้งสองเงื่อนไขของ time-stop: เวลาเกิน '+EX.time_stop_days+' วัน และกำไรไม่ถึง +'+EX.time_stop_min_r+'R — ไม้ที่ไม่ไปไหนกินทุนและโอกาสของไม้ถัดไป',
+          ref:'rules.py ExitRules' },
+        { q:'ข้อไหน "ไม่ใช่" เงื่อนไขออกของ v2?',
+          choices:['ชน stop / ชนเป้า','time-stop','ราคาปิดหลุด SMA50','ETF กลุ่มร่วง >5% ใน 1 วัน (ทบทวนใน 24 ชม.)'], answer:2,
+          why:'"หลุด SMA50" ถูกทดสอบแล้ว expectancy แย่ลง → ตัดออกตามมติ ค1 — ทางออกจริงมี 5: stop / target / time-stop / thesis แตก / sector ร่วง',
+          ref:'มติ ค1 (2026-06-11)' },
+        { q:'พอร์ต $'+f(SZ.start_equity,0)+' เข้า $'+entry+' stop $'+stopOk+' — ตามเสี่ยง '+SZ.risk_pct+'% ได้ ~'+f(sharesByRisk,1)+' หุ้น แต่ซื้อจริงได้ ~'+f(sharesByCap,2)+' หุ้น เพราะอะไร?',
+          choices:['โบรกจำกัดจำนวนหุ้น','ชนเพดานขนาดไม้ '+SZ.max_weight_pct+'% ของพอร์ต — เอาตัวเล็กกว่าระหว่าง "ตามเสี่ยง" กับ "เพดาน" เสมอ','คิดเลขผิด','ต้องปัดเป็นหุ้นเต็มเท่านั้น'], answer:1,
+          why:f(sharesByRisk,1)+' หุ้น × $'+entry+' ≈ $'+f(sharesByRisk*entry,0)+' = '+f(sharesByRisk*entry/SZ.start_equity*100,0)+'% ของพอร์ต เกินเพดาน '+SZ.max_weight_pct+'% → ถูกบีบเหลือ $'+f(capDollar,0)+' ≈ '+f(sharesByCap,2)+' หุ้น (เศษหุ้นอนุญาต)',
+          ref:'CANON.sizing · บท Position Sizing' },
+        { q:'ทำไมข้อสอบ OOS ของ backtest ถึงรันได้ครั้งเดียว?',
+          choices:['ประหยัดไฟ','รันซ้ำหลายรอบแล้วเลือกผลที่ถูกใจ = หลอกตัวเอง (data snooping) — หลักฐานใหม่จากนี้คือไม้กระดาษจริงเท่านั้น','ข้อมูลโดนลบหลังรัน','รันซ้ำได้ถ้าขออนุญาต'], answer:1,
+          why:'ความศักดิ์สิทธิ์ของข้อสอบอยู่ที่ความใหม่ — เห็นเฉลยแล้วสอบใหม่ไม่เรียกว่าสอบ · กติกา P0 จึงประกาศเกณฑ์ก่อนรันและรันครั้งเดียวจบ',
+          ref:'บทอ่านผลสอบ backtest' },
+        { q:'ทำไม Trend Pullback ถึงถูกพัก (PARKED)?',
+          choices:['คนไม่นิยม','ผลสอบขาดทุนเฉลี่ย '+X.pullback_insample_r+'R/ไม้ และติดลบ 25/27 ช่องทดสอบความทน','ใช้เวลาถือนานไป','รอเขียนโค้ดเพิ่ม'], answer:1,
+          why:'สถานะท่าตัดสินด้วยผลวัด ไม่ใช่ความเชื่อ — ห้ามเทรดทั้งกระดาษและเงินจริงจนกว่าจะออกแบบใหม่และสอบผ่าน',
+          ref:'soul-swing.md §Setup Patterns' },
+        { q:'พอร์ตย่อลง −5% จากจุดสูงสุด — กติกาให้ทำอะไร?',
+          choices:['ไม่ต้องทำอะไร','หยุดเข้าไม้ใหม่ 3 วัน + ทบทวน 5 ไม้ล่าสุดหารูปแบบความผิดพลาด','ขายทุกไม้','เพิ่มขนาดไม้เอาคืน'], answer:1,
+          why:'ขั้นแรกของบันได drawdown: เบรกเล็กบังคับหยุด-คิดตั้งแต่เนิ่น ๆ และพักต่อจนกู้คืน 50% ของส่วนที่หาย',
+          ref:'soul-swing.md §Drawdown Protocol' },
+        { q:'จะปลดล็อกเงินจริง (Phase 2) ต้องทำอะไร?',
+          choices:['เทรดกระดาษครบ 1 เดือน','กำไรรวมเป็นบวกก็พอ','ผ่านหมุดหมายครบทั้ง '+X.milestones.length+' ข้อ (จำนวนไม้ · regime · expectancy · วินัย · journal) แล้วเริ่มด้วย 5% จากเล่ม Passive','ขออนุมัติจาก Kim'], answer:2,
+          why:'เงื่อนไขแบบ AND ครบทุกข้อ — และเป็นของ user คนเดียว ระบบ/AI ทำแทนไม่ได้ เพราะมันวัดวินัยของคนเทรด',
+          ref:'soul-swing.md §Phase Unlock' }
+      ]
+    };
+
+    document.getElementById('heroKpis').innerHTML=[
+      [String(QUIZ_BANK.questions.length),'ข้อ','คละทุกบท'],
+      ['80%','เกณฑ์ผ่าน','ทำซ้ำได้ไม่จำกัด'],
+      ['ทุกข้อ','มีเฉลย + ที่มาของกฎ','ผิดตรงไหน กลับไปทบทวนถูกบท'],
+      ['v1','ตัวเลือกหลอก','เลขเก่าที่เลิกใช้แล้ว']
+    ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+' · '+k[2]+'</span></div>';}).join('');
+
+    document.getElementById('foot').innerHTML='เลขกติกาทุกตัวในข้อสอบประกอบจาก <span class="eq">_kit/canon.js</span> (mirror ของ <span class="eq">src/backtest/rules.py::CANONICAL_V2</span>) · ตัวอย่างราคา $'+entry+'/$'+stopOk+' เป็นเลขกลมสมมุติ (hypothetical) · ผลสอบ backtest = อ้างอิงในอดีต ไม่ใช่คำสัญญา · self-contained / offline · MyInvest Visual Library';
+
+    window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

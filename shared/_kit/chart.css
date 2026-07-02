@@ -1,0 +1,84 @@
+/* shared/_kit/chart.css — สไตล์ chart internals สำหรับ SWChart (chart.js)
+   ============================================================================
+   เฉพาะ "ภายในกราฟ" (เส้น / แกน / tooltip / donut / legend) — การ์ด container
+   (.ccard glass · .charts layout · .ctitle) ยังอยู่ที่หน้าเจ้าของ (landing/briefing).
+   ยกจาก site-src/index.html + briefing.html inline (เลิก duplicate) · ใช้ semantic token.
+   ============================================================================ */
+
+/* ---- area / line ---- */
+.cx-host { position: relative; }
+.cx-host svg { width: 100%; height: auto; display: block; touch-action: none; }
+.cx-line { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.cx-grid line { stroke: var(--hair, var(--border)); stroke-width: 1; }
+.cx-axl { fill: var(--text-faint); font-size: 9px; font-family: var(--font); }
+.cx-dot { fill: var(--accent); }
+.cx-cross { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 3 3; }
+.cx-hot { fill: var(--accent); stroke: var(--surface); stroke-width: 1.5; }
+.cx-tip { position: absolute; top: 0; transform: translateX(-50%); pointer-events: none;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 2px 8px; font-size: .72rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; font-variant-numeric: tabular-nums; box-shadow: var(--shadow); }
+.cx-note { font-size: .7rem; color: var(--text-faint); margin: 9px 0 0; font-variant-numeric: tabular-nums; }
+.cx-empty { font-size: .8125rem; color: var(--text-faint); margin: 1.5rem 0; text-align: center; }
+.cx-base { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 3 3; }   /* เส้นฐาน/ศูนย์ (drawdown=0 · R=0) */
+
+/* ---- histogram (การกระจาย เช่น R-multiple) ---- */
+.hist-host { position: relative; }   /* anchor ของ .cx-tip (ซ้อน 1 ชั้น กันกฎ glass .ccard>* ทับ tip) */
+.hist-host svg { width: 100%; height: auto; display: block; touch-action: none; }
+.hist-bar { transition: opacity .12s ease; }
+.hist-bar:hover { opacity: .8; }
+.cx-grid-base { stroke: var(--hair, var(--border)); stroke-width: 1; }
+
+/* mini spark (briefing) — ก็ interactive (crosshair บาง) ตาม quality contract */
+.spark { width: 100%; height: 54px; margin-top: .5rem; display: block; }
+.cx-mini { position: relative; }
+
+/* ---- donut ---- */
+.donut-host { position: relative; }  /* anchor ของ .sector-tip (ซ้อนกันกฎ glass .ccard>* ทับ) */
+.seg { fill: none; stroke-width: 16; }
+.donut-wrap { position: relative; width: 132px; height: 132px; margin: 4px auto 8px;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .22)); }
+.donut-mid { position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; pointer-events: none; }
+.donut-row { display: flex; align-items: center; gap: .8rem; margin-top: .3rem; }
+.legmini { font-size: .74rem; line-height: 1.7; }
+.legmini b { font-weight: 700; }
+
+/* ---- legend (area multi-line + donut full) ---- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: .75rem; color: var(--text-muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+.legend b { color: var(--text); font-weight: 600; }
+.legend .lg-item { color: var(--text-muted); text-decoration: none; }
+.legend a.lg-item { cursor: pointer; }
+.legend a.lg-item:hover, .legend a.lg-item:hover b { color: var(--accent-ink); }
+.lg-pct { color: var(--text-faint); }
+.sector-miss { width: 100%; font-size: .7rem; color: var(--text-faint); margin: 10px 0 0; }
+
+/* donut hover tooltip */
+.sector-tip { position: absolute; transform: translate(-50%, -100%); pointer-events: none; z-index: 5;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px;
+  padding: 6px 10px; font-size: .72rem; color: var(--text); box-shadow: var(--shadow-lg);
+  max-width: 210px; line-height: 1.45; }
+.sector-tip b { color: var(--text); font-weight: 600; }
+.sector-tip .st-list { display: block; margin-top: 3px; color: var(--text-muted); font-size: .68rem; word-spacing: 2px; }
+
+/* ---- horizontal ranked bars (แทน donut · #8 · จัดอันดับมาก→น้อย) ----
+   layout 2 บรรทัด: [ชื่อ ........ ค่า%] / [แท่งเต็มกว้าง] → ทนทานทั้งการ์ดแคบ
+   (index side zone ~134px) + กว้าง (briefing span2 ~348px) · แท่ง = สัดส่วนชัดเสมอ */
+.hb-host { position: relative; margin-top: .2rem; width: 100%; }
+.hb-head { font-size: .76rem; color: var(--text-faint); margin-bottom: .85rem; }
+.hb-head b { font-size: 1.3rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.hb-list { display: flex; flex-direction: column; gap: .55rem; }
+.hb-row { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "lab val" "bar bar";
+  gap: 3px 10px; align-items: baseline; color: inherit; text-decoration: none; }
+.hb-lab { grid-area: lab; font-size: .78rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb-val { grid-area: val; font-size: .74rem; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.hb-pct { color: var(--text-faint); }
+.hb-track { grid-area: bar; height: 7px; background: var(--surface-2); overflow: hidden; }
+.hb-track i { display: block; height: 100%; }
+a.hb-row { cursor: pointer; }
+a.hb-row:hover .hb-lab { color: var(--accent-ink); text-decoration: underline; }
+/* compact (single-line) — การ์ดกว้างพอ (เช่น briefing): ชื่อ | แท่ง | ค่า บรรทัดเดียว → ลดความสูง */
+.hb-compact .hb-list { gap: .42rem; }
+.hb-compact .hb-row { grid-template-columns: minmax(56px, 34%) 1fr auto; grid-template-areas: "lab bar val"; gap: 0 .55rem; align-items: center; }
+.hb-compact .hb-track { height: 6px; }

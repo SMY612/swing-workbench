@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" data-shell-root=".." data-skin="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เครื่องฝึกย้อนเวลา (Bar Replay) — Workbench</title>
+<!-- ตั้งธีมก่อน first paint (กัน FOUC) — key ร่วมทั้งเว็บ = sw_theme -->
+<script src="../shared/_kit/theme-boot.js?v=1782967287"></script>
+<style>
+/* critical fallback — กันจอขาว/ฟอนต์เพี้ยนระหว่างโหลด (รับรู้ธีมจาก data-theme ที่ theme-boot ตั้ง) */
+html, body { margin: 0; }
+html { background: #000; }
+html[data-theme="light"] { background: #fff; }
+body {
+  color: #f2f2f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text",
+               "Segoe UI", "Leelawadee UI", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
+  font-size: 13px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+html[data-theme="light"] body { color: #1c1d22; }
+.boot-note {
+  max-width: 540px; margin: 18vh auto; padding: 24px 28px; text-align: center;
+  background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 12px;
+  font-size: 15px; line-height: 1.7;
+}
+</style>
+<style>
+@import url("../shared/_kit/tokens.css?v=1782967287");
+/* Bar Replay — ใช้ชุดสีร่วม shared/_kit/tokens.css (สลับมืด/สว่างตาม data-theme)
+
+   ⚠️ สัญญากับ kit/replay.js (อ่าน CSS var ตอนโหลด + ตอนสลับธีม — ห้ามเปลี่ยนชื่อ):
+   --bg --panel --border --text --muted --green --red --amber --blue
+   map กับ tokens: --muted=--text-muted · --green=--up · --red=--down
+   (--bg/--panel/--border/--text/--amber/--blue + --font/--mono มาจาก tokens ตรง ๆ) */
+:root {
+  /* ---- contract vars ที่ replay.js ใช้ แต่ tokens ใช้ชื่อต่าง → alias ---- */
+  --muted: var(--text-muted);
+  --green: var(--up);
+  --red: var(--down);
+
+  /* ---- CSS-only tokens (ค่ามืด = default · light override อยู่บล็อกถัดไป) ---- */
+  --panel-2: #2c2c2e;
+  --faint: #707078;
+  --green-soft: rgba(48, 209, 88, 0.14);
+  --red-soft: rgba(255, 69, 58, 0.14);
+  --amber-soft: rgba(255, 214, 10, 0.12);
+  --blue-soft: rgba(10, 132, 255, 0.14);
+  --gray-soft: rgba(120, 120, 128, 0.16);
+  --fill: rgba(120, 120, 128, 0.18);
+  --fill2: rgba(120, 120, 128, 0.30);
+  --hairline: rgba(255, 255, 255, 0.10);
+  --hairline2: rgba(255, 255, 255, 0.06);
+  --frost: rgba(8, 8, 10, 0.72);
+  --radius: 12px;
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --press: scale(0.97);
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* light: token ที่ค่ามืดใช้บนพื้นสว่างไม่ได้ (hairline=ขาวโปร่ง · frost=ดำโปร่ง) */
+:root[data-theme="light"] {
+  --panel-2: #eef0f4;
+  --faint: #86868b;
+  --hairline: rgba(0, 0, 0, 0.10);
+  --hairline2: rgba(0, 0, 0, 0.055);
+  --frost: rgba(255, 255, 255, 0.80);
+  --shadow-1: 0 1px 3px rgba(28, 42, 74, 0.10);
+}
+
+/* ---------- base ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  font-family: var(--font);
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: var(--mono); font-size: 0.92em;
+  background: var(--fill); padding: 1px 6px; border-radius: 5px;
+}
+p { margin: 8px 0; }
+ul { padding-left: 20px; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+::selection { background: var(--blue-soft); }
+kbd {
+  display: inline-block; min-width: 18px; text-align: center;
+  background: var(--fill); border: 1px solid var(--hairline);
+  border-radius: 5px; padding: 0 5px; font-size: 11px; color: var(--muted);
+  font-family: var(--font);
+}
+
+/* thin subtle scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 128, 0.32);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgba(120, 120, 128, 0.5); background-clip: padding-box; }
+* { scrollbar-width: thin; scrollbar-color: rgba(120, 120, 128, 0.4) transparent; }
+
+/* ---------- แบนเนอร์แนวคิด (frosted — ติดบนเสมอ) ---------- */
+.banner {
+  position: sticky; top: 0; z-index: 50;
+  padding: 10px 16px;
+  background: var(--frost);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border-bottom: 1px solid var(--hairline);
+  font-size: 12px; color: var(--muted); line-height: 1.5;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .banner { background: var(--panel); }
+}
+/* มือถือ/แท็บเล็ต (≤1024px): เปลือกร่วมมี top-bar sticky ของตัวเองแล้ว → ปล่อยแบนเนอร์เลื่อนตามเนื้อหา
+   ค่า 1024 = ตาม breakpoint เปลือก (shell.css) กัน sticky ซ้อนช่วง 721-1024 */
+@media (max-width: 1024px) {
+  .banner { position: static; }
+}
+.banner b { color: var(--text); font-size: 13px; font-weight: 600; }
+.banner .accent { color: var(--amber); }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 16px; }
+
+h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 10px 0 4px; }
+h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 18px 0 8px; }
+h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 18px 0 8px; }
+.sub { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+
+/* ---------- ปุ่ม → capsule (ทุกปุ่มสูง ≥ 32px, ปุ่มหลัก ≥ 38px) ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 38px; padding: 7px 18px;
+  background: var(--gray-soft); color: var(--text);
+  border: 1px solid transparent; border-radius: 999px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  touch-action: manipulation; user-select: none; white-space: nowrap;
+  transition: background 160ms var(--ease), filter 160ms var(--ease),
+              transform 120ms var(--ease), opacity 160ms var(--ease);
+}
+.btn:hover { text-decoration: none; }
+.btn:hover:not(:disabled) { background: var(--fill2); }
+.btn:active:not(:disabled) { transform: var(--press); }
+.btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--blue); color: #ffffff; box-shadow: var(--shadow-1); }
+.btn-primary:hover:not(:disabled) { background: var(--blue); filter: brightness(1.1); }
+.btn-enter {
+  background: var(--green); color: #000000;
+  font-size: 15px; font-weight: 700; min-height: 46px; padding: 10px 24px;
+  box-shadow: var(--shadow-1);
+}
+.btn-enter:hover:not(:disabled) { background: var(--green); filter: brightness(1.08); }
+.btn-danger-ghost { background: var(--red-soft); color: var(--red); }
+.btn-danger-ghost:hover:not(:disabled) { background: rgba(255, 69, 58, 0.24); }
+.btn-sm { min-height: 32px; padding: 4px 14px; font-size: 12px; }
+
+/* ---------- จอเลือกหุ้น (setup) ---------- */
+.screen { display: none; }
+.screen.active { display: block; }
+
+.tgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px; margin: 12px 0 8px;
+}
+.tcard {
+  background: var(--panel); border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 12px 14px; cursor: pointer; text-align: left;
+  font: inherit; color: var(--text); min-height: 64px;
+  transition: background 160ms var(--ease), border-color 160ms var(--ease),
+              transform 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.tcard:hover { background: var(--panel-2); transform: translateY(-1px); }
+.tcard:active { transform: var(--press); }
+.tcard:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.tcard.selected {
+  border-color: var(--blue); background: var(--blue-soft);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+.tcard .tkr { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.tcard .sig { font-size: 12px; color: var(--amber); margin-top: 3px; }
+.tcard .sig.zero { color: var(--muted); }
+
+.note {
+  background: var(--amber-soft); border: 1px solid rgba(255, 214, 10, 0.30);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 12.5px; color: var(--amber); margin: 10px 0;
+}
+
+.startpanel {
+  background: var(--panel); border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 16px 18px; margin: 14px 0;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.startpanel .sel { flex: 1 1 240px; font-size: 13px; }
+.startpanel .sel .none { color: var(--muted); }
+.startpanel .sel .picked { color: var(--blue); font-weight: 600; }
+.howto { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; padding-left: 20px; }
+.howto li { margin: 3px 0; }
+
+/* ---------- ตารางประวัติ ---------- */
+table.hist { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+table.hist th, table.hist td {
+  border-bottom: 1px solid var(--hairline2); padding: 7px 10px; text-align: right;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+table.hist th { color: var(--faint); font-weight: 600; font-size: 11px; }
+table.hist th:first-child, table.hist td:first-child,
+table.hist th:nth-child(2), table.hist td:nth-child(2) { text-align: left; }
+table.hist tr:last-child td { border-bottom: none; }
+.hist-empty { color: var(--muted); font-size: 12.5px; padding: 8px 2px; }
+
+/* ---------- จอเล่น (play) ---------- */
+.play-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
+@media (max-width: 980px) { .play-grid { grid-template-columns: 1fr; } }
+
+.hud {
+  display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+  background: var(--panel); border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 10px 16px; margin-bottom: 10px; font-size: 13px;
+}
+.hud .tk { font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.hud .dt { color: var(--text); font-variant-numeric: tabular-nums; }
+.hud .bars { color: var(--muted); font-variant-numeric: tabular-nums; }
+.hud .spacer { flex: 1; }
+.hud .controls { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.poschip {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 30px; border: 1px solid transparent; border-radius: 999px;
+  padding: 4px 14px; font-size: 12px; margin-bottom: 10px;
+  background: var(--gray-soft); color: var(--muted);
+}
+.poschip.open { background: var(--blue-soft); color: var(--text); }
+.poschip .r-pos { color: var(--green); font-weight: 600; }
+.poschip .r-neg { color: var(--red); font-weight: 600; }
+
+.chartbox {
+  position: relative; background: var(--bg);
+  border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1); padding: 6px; overflow: hidden;
+}
+canvas#chart { display: block; width: 100%; height: 460px; }
+@media (max-width: 700px) { canvas#chart { height: 380px; } }
+.legend { font-size: 11px; color: var(--muted); padding: 6px 8px 2px; }
+.legend .g { color: var(--green); } .legend .r { color: var(--red); }
+.legend .b { color: var(--blue); } .legend .a { color: var(--amber); }
+
+/* toast ซ้อนมุมขวาบนของกราฟ (frosted) */
+#toasts {
+  position: absolute; top: 10px; right: 10px; z-index: 10;
+  display: flex; flex-direction: column; gap: 6px; max-width: 78%;
+  pointer-events: none;
+}
+.toast {
+  background: rgba(28, 28, 30, 0.92);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid var(--hairline); border-left-width: 3px;
+  border-radius: 10px; box-shadow: var(--shadow-1);
+  padding: 7px 12px; font-size: 12px; line-height: 1.45;
+  opacity: 0; transform: translateY(-4px);
+  transition: opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.ok { border-left-color: var(--green); }
+.toast.warn { border-left-color: var(--amber); }
+.toast.bad { border-left-color: var(--red); }
+.toast.info { border-left-color: var(--blue); }
+.toast.dim { border-left-color: var(--muted); color: var(--muted); }
+
+.actionrow { display: flex; gap: 12px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.actionrow .hint { font-size: 12px; color: var(--muted); max-width: 480px; }
+
+/* ---------- กระดานคะแนน ---------- */
+.scoreboard {
+  background: var(--panel); border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 16px 18px; font-size: 13px;
+  position: sticky; top: 64px;
+}
+@media (max-width: 980px) { .scoreboard { position: static; } }
+.scoreboard h3 { margin: 0 0 10px; font-size: 13px; color: var(--text); }
+.scoreboard .row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; }
+.scoreboard .row .k { color: var(--muted); }
+.scoreboard .row .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.scoreboard hr { border: 0; border-top: 1px solid var(--hairline2); margin: 9px 0; }
+.scoreboard .bigr {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.r-pos { color: var(--green); } .r-neg { color: var(--red); } .r-zero { color: var(--muted); }
+.discipline {
+  margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 12px;
+  background: var(--gray-soft); border: 1px solid transparent;
+  line-height: 1.5; color: var(--muted);
+}
+.discipline.good { background: var(--green-soft); color: var(--green); }
+.discipline.bad { background: var(--red-soft); color: var(--red); }
+.discipline.warn { background: var(--amber-soft); color: var(--amber); }
+
+/* ---------- จอสรุป (end) ---------- */
+.endcard {
+  background: var(--panel); border: 1px solid var(--hairline2); border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 20px 22px; max-width: 720px; margin: 12px auto;
+}
+.endcard h2 { margin-top: 0; }
+.end-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 11px; margin: 14px 0; }
+.end-stat { background: var(--panel-2); border: 1px solid var(--hairline2); border-radius: 10px; padding: 12px 14px; }
+.end-stat .k { font-size: 11px; color: var(--muted); }
+.end-stat .v { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.vs { display: flex; gap: 12px; margin: 14px 0; flex-wrap: wrap; }
+.vs .side { flex: 1 1 200px; background: var(--panel-2); border: 1px solid var(--hairline2); border-radius: 10px; padding: 14px 16px; }
+.vs .side .k { font-size: 12px; color: var(--muted); }
+.vs .side .v { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.verdictline { font-size: 13.5px; margin: 8px 0 4px; }
+.smallnote { font-size: 12px; color: var(--faint); margin: 6px 0; }
+.endbtns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+a.lesson { color: var(--blue); font-size: 13px; }
+
+footer {
+  border-top: 1px solid var(--hairline2); margin-top: 26px; padding: 14px 16px 28px;
+  font-size: 12px; color: var(--faint); text-align: center; line-height: 1.6;
+}
+
+#bootError {
+  display: none; margin: 30px auto; max-width: 640px;
+  background: var(--red-soft); border: 1px solid rgba(255, 69, 58, 0.35);
+  border-radius: var(--radius); color: var(--text);
+  padding: 16px 20px; font-size: 13.5px;
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   Glass cohesion (Pass 1) — replay เข้าธีม home/briefing/board: ปล่อยฉากพาสเทล +
+   panel กระจกโปร่ง + การ์ดเลือกหุ้นไล่สี bento (เลิก "ดินสอ 2B ซ้ำ 10 แท่ง" · user ข้อ 4).
+   กราฟ .chartbox คงพื้นทึบเพื่อความชัด. token แยกมืด/สว่าง (ตัวอักษรอ่านได้ทั้ง 2 ธีม).
+   วางท้าย <style> = ชนะ rule เดิม.
+   ============================================================================ */
+:root{
+  --radius:16px;
+  --glass-blur:blur(22px) saturate(1.5);
+  --rim:linear-gradient(140deg,rgba(255,255,255,.5),rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 56%,rgba(255,255,255,.16));
+  --sheen:linear-gradient(125deg,rgba(255,255,255,.22),rgba(255,255,255,0) 40%);
+}
+:root[data-theme="dark"]{
+  --g-pk:rgba(191,64,121,.30); --pk-ink:#f7b6d3;
+  --g-y:rgba(157,134,18,.32);  --y-ink:#f0d65f;
+  --g-bl:rgba(44,111,208,.30); --bl-ink:#9cc4ff;
+  --g-tl:rgba(15,125,140,.32); --tl-ink:#6fe0ec;
+  --g-lv:rgba(122,91,208,.32); --lv-ink:#cdbef0;
+  --g-gr:rgba(48,160,80,.30);  --gr-ink:#86e6a0;
+  --g-co:rgba(200,90,70,.30);  --co-ink:#ffb0a4;
+  --g-or:rgba(180,120,40,.32); --or-ink:#f2c97a;
+  --glass-panel:rgba(28,28,30,.52);
+}
+:root[data-theme="light"]{
+  --g-pk:rgba(245,168,206,.32); --pk-ink:#8a2f5e;
+  --g-y:rgba(240,214,96,.34);   --y-ink:#6b5a0e;
+  --g-bl:rgba(150,190,245,.32); --bl-ink:#1c4a86;
+  --g-tl:rgba(110,200,206,.32); --tl-ink:#0c5a66;
+  --g-lv:rgba(190,165,235,.32); --lv-ink:#4a3585;
+  --g-gr:rgba(150,205,150,.32); --gr-ink:#2f6b30;
+  --g-co:rgba(245,152,140,.32); --co-ink:#8a3328;
+  --g-or:rgba(245,190,120,.34); --or-ink:#7a4a14;
+  --glass-panel:rgba(255,255,255,.56);
+}
+body{ background:transparent; }                  /* โชว์ .sw-scene */
+#sw-content{ position:relative; z-index:1; background:transparent; }
+
+.startpanel, .hud, .scoreboard, .endcard, .end-stat, .vs .side {
+  background: var(--glass-panel);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+
+/* การ์ดเลือกหุ้น → กล่องสีไม้ (ไล่ 8 สี bento) + กระจก */
+.tcard{
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border-color: transparent;
+}
+.tgrid .tcard:nth-child(8n+1){ background:var(--g-bl); color:var(--bl-ink); }
+.tgrid .tcard:nth-child(8n+2){ background:var(--g-tl); color:var(--tl-ink); }
+.tgrid .tcard:nth-child(8n+3){ background:var(--g-lv); color:var(--lv-ink); }
+.tgrid .tcard:nth-child(8n+4){ background:var(--g-gr); color:var(--gr-ink); }
+.tgrid .tcard:nth-child(8n+5){ background:var(--g-y);  color:var(--y-ink); }
+.tgrid .tcard:nth-child(8n+6){ background:var(--g-co); color:var(--co-ink); }
+.tgrid .tcard:nth-child(8n+7){ background:var(--g-pk); color:var(--pk-ink); }
+.tgrid .tcard:nth-child(8n){   background:var(--g-or); color:var(--or-ink); }
+.tcard .tkr{ color:inherit; }
+.tcard .sig{ color:inherit; opacity:.82; }
+.tcard.selected{ outline:2px solid var(--blue); outline-offset:-2px; }
+
+/* แบนเนอร์ → การ์ดกระจกลอยมน (เข้ากับหัว board) */
+.banner{
+  margin:12px 14px 6px; top:10px;
+  border:1px solid var(--hairline); border-radius:18px; box-shadow:var(--shadow-1);
+}
+
+/* page-enter motion (academy-style) — fade+slide ตอนเปิด/สลับจอ (CSS ล้วน · เคารพ reduced-motion) */
+@keyframes wbEnter { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.screen.active { animation: wbEnter 0.45s var(--ease) both; }
+</style>
+<!-- เปลือกร่วม (sidebar/bottom-nav/ปุ่มธีม) — ใช้ token จาก tokens.css ที่ @import ในสไตล์ด้านบน -->
+<link rel="stylesheet" href="../shared/_kit/shell.css?v=1782967287b">
+<!-- terminal skin (flat · เลื่อนจาก glass) — สกินกลาง (token/nav) + ชั้น workbench (board+replay) -->
+<link rel="stylesheet" href="../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../shared/_kit/skin-terminal-wb.css?v=1782967287">
+</head>
+<body data-nav="replay">
+
+<noscript>
+  <div class="boot-note">
+    หน้านี้ต้องเปิด JavaScript ก่อนถึงจะใช้เครื่องฝึกได้<br>
+    (ข้อมูลทั้งหมดอยู่ในเครื่อง — ไม่มีการเรียกออกอินเทอร์เน็ต)<br>
+    เปิด JavaScript ในเบราว์เซอร์แล้วรีเฟรชหน้านี้อีกครั้ง
+  </div>
+</noscript>
+
+<!-- แบนเนอร์แนวคิด — เห็นตลอดเวลา -->
+<div class="banner">
+  <b>เครื่องฝึกย้อนเวลา (bar replay)</b> — เดินทีละแท่งโดยไม่เห็นอนาคต แล้ววัดว่าคุณจับสัญญาณ breakout
+  ตามกติกา canonical_v2 ได้แค่ไหน · ข้อมูล: คลังแช่แข็ง 2018→มิ.ย. 2025
+  <span class="accent">(สนามซ้อมของระบบ — ไม่แตะปีข้อสอบ OOS)</span> ·
+  ตัวจำลองอย่างง่ายเพื่อการฝึก ไม่ใช่ผล backtest ทางการ
+</div>
+
+<div class="wrap">
+
+  <div id="bootError">
+    โหลดข้อมูลไม่สำเร็จ — ไม่พบ <code>data/replay.js</code> หรือไฟล์ไม่สมบูรณ์
+    (ให้รัน <code>scripts/workbench_replay_data.py</code> เพื่อสร้างข้อมูลก่อน แล้วเปิดหน้านี้ใหม่)
+  </div>
+
+  <!-- ============ จอที่ 1: เลือกหุ้น ============ -->
+  <section id="screen-setup" class="screen active">
+    <h1>เลือกหุ้นที่จะฝึก</h1>
+    <p class="sub">
+      เครื่องจะพาคุณไปยืนอยู่ ณ จุดหนึ่งในอดีตโดยไม่บอกว่าตรงไหน แล้วให้เดินไปข้างหน้าทีละแท่ง (แท่งเทียนรายวัน)
+      — หน้าที่ของคุณคือกด <b>เข้าไม้</b> เฉพาะแท่งที่คิดว่าเป็นสัญญาณ breakout (ราคาทะลุแนวต้าน) ตามกติกา
+    </p>
+
+    <div id="tickerGrid" class="tgrid"></div>
+
+    <div class="note">
+      ตัวที่สัญญาณ = 0 ก็มีไว้ฝึก "ความอดทน" — ระบบจริงบางตัวเงียบทั้งปี การไม่เข้ามั่ว ๆ คือทักษะ
+    </div>
+
+    <div class="startpanel">
+      <div class="sel" id="selInfo"><span class="none">ยังไม่ได้เลือกหุ้น — แตะการ์ดด้านบนก่อน</span></div>
+      <button class="btn btn-primary" id="btnStartRandom" disabled><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="15" cy="15" r="1.3"/></svg> เริ่มจากจุดสุ่ม</button>
+      <button class="btn" id="btnStartBegin" disabled><svg viewBox="0 0 24 24"><path d="M18 6v12l-9-6z"/><path d="M7 6v12"/></svg> เริ่มจากต้นช่วง</button>
+    </div>
+
+    <ul class="howto">
+      <li>รอบหนึ่งเดินได้สูงสุด 500 แท่ง (ราว 2 ปีการซื้อขาย) หรือจนสุดข้อมูล — ระบบจะโชว์จำนวนแท่งที่เหลือตลอด</li>
+      <li>จุดเริ่มเว้น 260 แท่งแรกเสมอ (ช่วงอุ่นเครื่องของอินดิเคเตอร์ ~1 ปี)</li>
+      <li>คีย์ลัด: <kbd>→</kbd> หรือ <kbd>Space</kbd> = แท่งถัดไป · <kbd>←</kbd> = ย้อนดูแท่ง (ไม่ขยับเวลาจริง) · <kbd>E</kbd> = เข้าไม้ · <kbd>P</kbd> = เล่น/หยุดอัตโนมัติ</li>
+      <li>ถือได้ทีละไม้เหมือนระบบจริง — ระหว่างถือ ปุ่มเข้าไม้จะล็อก</li>
+    </ul>
+
+    <h3>ประวัติการฝึก (เก็บในเครื่องนี้ 20 รอบล่าสุด)</h3>
+    <div id="historyWrap"><div class="hist-empty">ยังไม่มีประวัติ — จบรอบแรกแล้วจะโผล่ที่นี่</div></div>
+    <p><button class="btn btn-sm btn-danger-ghost" id="btnClearHistory" style="display:none">ล้างประวัติ</button></p>
+  </section>
+
+  <!-- ============ จอที่ 2: เล่น ============ -->
+  <section id="screen-play" class="screen">
+    <div class="hud">
+      <span class="tk" id="hudTicker">—</span>
+      <span class="dt" id="hudDate">—</span>
+      <span class="bars" id="hudBars">—</span>
+      <span class="spacer"></span>
+      <div class="controls">
+        <button class="btn" id="btnRewind" title="ย้อนดูแท่งก่อนหน้า (←) — ดูได้เฉพาะตอนไม่ถือไม้ ไม่ขยับเวลาจริง">◂ ย้อนดู</button>
+        <button class="btn" id="btnNext">ถัดไป ▸</button>
+        <button class="btn" id="btnAuto">เล่นอัตโนมัติ ▸▸</button>
+        <button class="btn btn-sm" id="btnEndSession">จบรอบ</button>
+      </div>
+    </div>
+
+    <div class="play-grid">
+      <div>
+        <div class="poschip" id="posChip">ว่าง — ยังไม่มีไม้ในมือ</div>
+        <div class="chartbox">
+          <canvas id="chart"></canvas>
+          <div id="toasts"></div>
+          <div class="legend">
+            <span class="b">▲</span> จุดเข้า · <span class="r">▼</span> จุดออก ·
+            <span class="a">◇</span> สัญญาณที่พลาด · ▢ สัญญาณที่ชนกับไม้ที่ถือ ·
+            เส้นประ: <span class="b">entry</span> / <span class="r">stop</span> / <span class="g">target</span>
+          </div>
+        </div>
+        <div class="actionrow">
+          <button class="btn btn-enter" id="btnEnter">เข้าไม้ (E)</button>
+          <span class="hint">กดเมื่อคิดว่าแท่งปัจจุบันคือสัญญาณ breakout ตามกติกา — เข้าที่ราคาปิดของแท่งนี้</span>
+        </div>
+      </div>
+
+      <aside class="scoreboard" id="scoreboard">
+        <h3>กระดานคะแนนรอบนี้</h3>
+        <div class="row"><span class="k">สัญญาณที่ผ่านมา</span><span class="v" id="scPassed">0</span></div>
+        <div class="row"><span class="k">จับได้</span><span class="v r-pos" id="scCaught">0</span></div>
+        <div class="row"><span class="k">พลาด</span><span class="v r-neg" id="scMissed">0</span></div>
+        <div class="row"><span class="k">เข้านอกกติกา</span><span class="v" id="scFalse" style="color:var(--amber)">0</span></div>
+        <div class="row"><span class="k">ชนกับไม้ที่ถือ</span><span class="v" id="scClash" style="color:var(--muted)">0</span></div>
+        <hr>
+        <div class="row"><span class="k">กำไรสะสมของคุณ (R)</span></div>
+        <div class="bigr" id="scYourR">+0.00R</div>
+        <div class="row" style="margin-top:7px"><span class="k">เทียบระบบ — ถ้าเข้าทุกสัญญาณที่ผ่านมา (ทีละไม้แบบเดียวกัน)</span></div>
+        <div class="bigr" id="scSysR" style="font-size:17px">+0.00R</div>
+        <div class="discipline" id="scDiscipline">—</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ จอที่ 3: สรุปจบรอบ ============ -->
+  <section id="screen-end" class="screen">
+    <div class="endcard">
+      <h2 id="endTitle">จบรอบฝึก</h2>
+      <p class="sub" id="endReason">—</p>
+      <div class="vs">
+        <div class="side"><div class="k">กำไรสะสมของคุณ (R)</div><div class="v" id="endYourR">—</div></div>
+        <div class="side"><div class="k">ระบบ — เข้าทุกสัญญาณ ทีละไม้ (R)</div><div class="v" id="endSysR">—</div></div>
+      </div>
+      <p class="verdictline" id="endVerdict">—</p>
+      <div class="end-stats" id="endStats"></div>
+      <p class="smallnote" id="endSysDetail"></p>
+      <p class="smallnote" id="endSettleNote" style="display:none">
+        * มีไม้ที่ยังค้างอยู่ตอนจบรอบ — ตัวจำลองปิดให้ที่ราคาปิดของแท่งสุดท้าย แล้วรวมเข้าผลรวมแล้ว
+      </p>
+      <div class="discipline" id="endDiscipline">—</div>
+      <div class="endbtns">
+        <button class="btn btn-primary" id="btnReplaySame"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> เล่นใหม่ (สุ่มจุดเริ่มใหม่)</button>
+        <button class="btn" id="btnPickOther"><svg viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="15" rx="1"/><path d="M9 4h6v3H9z"/><path d="M8 12h8M8 16h6"/></svg> เลือกหุ้นอื่น</button>
+        <a class="lesson btn" href="../academy/visuals/setup-patterns.html"><svg viewBox="0 0 24 24"><path d="M12 7v13"/><path d="M3 5h6a3 3 0 0 1 3 2 3 3 0 0 1 3-2h6v13h-6a3 3 0 0 0-3 2 3 3 0 0 0-3-2H3z"/></svg> เปิดบทเรียนกติกา breakout</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer id="footerNote">
+  ข้อมูล: คลังแช่แข็ง P0 · สัญญาณ: detect_signals (canonical_v2) ตัวเดียวกับ backtest ·
+  ตัวจำลอง: กติกาออกอย่างง่าย (stop ก่อน target ในแท่งเดียวกัน, time-stop <span id="ftTimeStop">21</span> วัน)
+  — เพื่อการฝึกเท่านั้น
+</footer>
+
+<script src="data/replay.js?v=1782967287"></script>
+<script src="kit/replay.js?v=1782967287b"></script>
+<!-- เปลือกร่วม: nav registry → shell (ฉีด sidebar/bottom-nav/ปุ่มธีม) ท้าย body -->
+<script src="../shared/_kit/nav.js?v=1782967287"></script>
+<script src="../shared/_kit/shell.js?v=1782967287"></script>
+</body>
+</html>

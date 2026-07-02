@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>ห้องสมุดภาพการเรียนรู้ — MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  .lib-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:1.125rem; margin-top:1.75rem; }
+  .lib-tile { display:flex; flex-direction:column; gap:.45rem; color:var(--ink); }
+  .lib-tile:hover { text-decoration:none; }
+  .lib-tile .motif { width:100%; height:72px; display:block; border-radius:12px; background:var(--bg2); }
+  .lib-tile .cat { font-size:.8125rem; color:var(--ink3); font-weight:600; margin-top:.25rem; }
+  .lib-tile h3 { font-size:1.1875rem; }
+  .lib-tile p { font-size:.9375rem; color:var(--ink2); max-width:none; line-height:1.5; }
+  .lib-chips { display:flex; flex-wrap:wrap; gap:.375rem; }
+  .lib-chips span { font-size:.75rem; color:var(--ink2); background:var(--bg2); border-radius:var(--radius-pill); padding:.1875rem .625rem; }
+  .lib-go { margin-top:auto; color:var(--blue-ink); font-weight:600; font-size:.9375rem; padding-top:.5rem; }
+  .lib-tile.soon { opacity:.62; }
+  .lib-tile.soon .lib-go { color:var(--ink3); }
+  .lib-badge { display:inline-block; font-size:.6875rem; font-weight:700; padding:.125rem .5rem; border-radius:var(--radius-pill); background:var(--accent-soft); color:var(--accent-ink); vertical-align:middle; margin-left:.4rem; }
+  .lib-badge.soon { background:var(--bg2); color:var(--ink3); }
+  .lib-feature { display:flex; gap:1.5rem; align-items:center; margin-top:0; margin-bottom:clamp(2.5rem,6vh,4rem); color:var(--ink);
+    background:linear-gradient(180deg,var(--accent-soft),var(--surface)); border:1px solid var(--line2); }
+  /* ดึงการ์ดแผนที่ให้อยู่กลางระหว่าง hero กับหัวข้อ "บทพร้อมเรียน" (scope เฉพาะหน้ารวม) */
+  #hubHero { padding-bottom:clamp(1.5rem,4vh,3rem); }
+  #ready { padding-top:clamp(1.25rem,3vh,2.5rem); }
+  .lib-feature:hover { text-decoration:none; }
+  .lib-feature .motif { flex:0 0 200px; width:200px; height:120px; border-radius:14px; background:var(--bg2); }
+  /* คอร์สกติกา canonical_v2 — รายการเรียงลำดับ */
+  .course { list-style:none; counter-reset:lesson; margin-top:1.25rem; }
+  .course li { counter-increment:lesson; display:flex; align-items:center; gap:.875rem; padding:.75rem .25rem; border-bottom:1px solid var(--line2); }
+  .course li::before { content:counter(lesson); flex:none; width:34px; height:34px; border-radius:50%; background:var(--blue); color:#fff;
+    font-weight:700; display:inline-flex; align-items:center; justify-content:center; font-size:.9375rem; }
+  .course li.new::before { background:var(--up); }
+  .course a { font-weight:600; font-size:1rem; }
+  .course .tag { margin-left:auto; text-align:right; flex:none; }
+  .lib-feature .feat-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:.45rem; }
+  .lib-feature .cat { font-size:.8125rem; color:var(--ink3); font-weight:600; }
+  .lib-feature h3 { font-size:1.375rem; }
+  .lib-feature p { font-size:.9375rem; color:var(--ink2); max-width:none; line-height:1.5; }
+  @media (max-width:640px){ .lib-feature{ flex-direction:column; align-items:stretch; } .lib-feature .motif{ flex:none; width:100%; } }
+  /* ปุ่มสลับมุมมองบทเรียน: การ์ด ↔ รายการ (แก้การแสดงซ้ำซ้อน list+card บนหน้าเดียว) */
+  .lib-viewhead { display:flex; align-items:center; justify-content:space-between; gap:1rem 1.5rem; flex-wrap:wrap; margin-top:1.25rem; }
+  .lib-viewhead .sec-title { margin:0; }
+  .lib-viewtoggle { display:inline-flex; gap:.25rem; background:var(--bg2); border-radius:var(--radius-pill); padding:.25rem; }
+  .lvt-btn { appearance:none; -webkit-appearance:none; border:0; cursor:pointer; font-family:var(--font); font-size:.875rem; font-weight:600;
+    color:var(--ink2); background:transparent; border-radius:var(--radius-pill); padding:.4rem .95rem; min-height:38px; transition:background .15s ease, color .15s ease; }
+  .lvt-btn:hover { color:var(--ink); }
+  .lvt-btn.on { background:var(--surface); color:var(--blue-ink); box-shadow:var(--shadow); }
+  .libview[hidden] { display:none; }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint reveal" id="hubHero" data-reveal="left"><!-- สไลด์ซ้ายเหมือน index (ในจอตอนโหลด) -->
+    <div class="eyebrow">MyInvest · Academy</div>
+    <h1 class="hero-title">ห้องสมุดภาพการเรียนรู้</h1>
+    <p class="lead">เข้าใจการเทรดด้วย “ภาพที่เล่นได้” ไม่ใช่ตัวอักษรหรือไฟล์ .md อย่างเดียว
+      ทุกบทคำนวณสดจากราคา GOOGL จริง ผ่าน engine กลางตัวเดียว ตัวเลขตรงกันทั้งห้องสมุด</p>
+    <div class="kpis" id="heroKpis">
+      <div class="kpi"><b>9 + สอบรวม</b><span>บทคอร์สกติกา canonical_v2</span></div>
+      <div class="kpi"><b>6</b><span>บทมีแบบทดสอบให้คะแนน</span></div>
+      <div class="kpi"><b>100%</b><span>offline · self-contained</span></div>
+    </div>
+  </header>
+
+  <!-- ===== READY LESSONS ===== -->
+  <section class="section" id="ready">
+    <div class="section-inner"><!-- section#ready: การ์ด = .reveal รายใบ (เติม JS ท้ายไฟล์) → reveal ทีละแถวตาม scroll -->
+
+      <a class="tile lib-feature reveal" href="./process-map.html">
+        <svg class="motif" viewBox="0 0 200 120" aria-hidden="true">
+          <rect x="16" y="24" width="150" height="15" rx="6" fill="var(--blue)"/>
+          <rect x="16" y="47" width="110" height="15" rx="6" fill="var(--blue)" opacity=".6"/>
+          <rect x="16" y="70" width="70" height="15" rx="6" fill="var(--up)"/>
+          <path d="M150 96 a26 26 0 1 1 26 -26" fill="none" stroke="var(--blue)" stroke-width="3" stroke-dasharray="5 4" stroke-linecap="round"/>
+          <path d="M176 74 l3 -11 l-10 3 z" fill="var(--blue)"/>
+        </svg>
+        <div class="feat-body">
+          <div class="cat">เริ่มที่นี่ · ภาพรวมกระบวนการ</div>
+          <h3>แผนที่กระบวนการเทรด <span class="lib-badge">interactive</span></h3>
+          <p>ทั้งวงจร Active ในภาพเดียว: หา → เลือก → เข้า → ถือ → ออก → ทบทวน ↺ — คลิกแต่ละขั้นดูคำสั่ง/ไฟล์/จุดตัดสินใจ และสถานะจริง (✓ มีแล้ว · ○ กำลังมา · ◇ ทำมือ)</p>
+          <div class="lib-chips"><span>คลิกทีละขั้น</span><span>กรวย + วงจร</span><span>เกณฑ์ U·A·R·D·V</span><span>สถานะจริง</span></div>
+          <div class="lib-go">เปิดแผนที่ →</div>
+        </div>
+      </a>
+
+      <div class="lib-viewhead">
+        <h2 class="sec-title">คอร์สกติกา canonical_v2</h2>
+        <div class="lib-viewtoggle" role="group" aria-label="สลับมุมมองบทเรียน">
+          <button type="button" class="lvt-btn" data-libview="cards" aria-pressed="true">การ์ด</button>
+          <button type="button" class="lvt-btn" data-libview="list" aria-pressed="false">รายการ</button>
+        </div>
+      </div>
+      <p class="lead">ชุดบทเรียน + แบบทดสอบที่อธิบายกติกาที่สอบผ่าน backtest (P0, 2026-06-11) ตั้งแต่อ่านกราฟจนถึงบันไดปลดล็อกเงินจริง —
+        เรียนจบแล้วอ่านผล <span class="eq">/swing</span> รู้เรื่องทั้งหมด</p>
+
+      <div id="libList" class="libview" hidden>
+      <ol class="course">
+        <li><a href="./read-the-chart.html">อ่านกราฟให้เป็น</a><span class="tag">ทิศ × ผันผวน · 2×2</span></li>
+        <li><a href="./adx.html">ADX / ATR — วัดแรงและวัดเหวี่ยง</a><span class="tag">ไม้บรรทัดของ stop</span></li>
+        <li><a href="./setup-patterns.html">กติกา Breakout v2 + ทำไม Pullback ถูกพัก</a><span class="tag">มี quiz</span></li>
+        <li class="new"><a href="./stop-target-exit.html">Stop · Target · ออกเมื่อไหร่</a><span class="tag">มี quiz</span></li>
+        <li><a href="./position-sizing.html">ขนาดไม้ (Position Sizing)</a><span class="tag">เสี่ยง 1% · เพดาน 10%</span></li>
+        <li><a href="./rr-expectancy.html">R:R &amp; Expectancy</a><span class="tag">ทำไมตรึง 2.5</span></li>
+        <li><a href="./process-map.html">แผนที่กระบวนการ + เครื่องยนต์</a><span class="tag">มี quiz</span></li>
+        <li class="new"><a href="./backtest-verdict.html">อ่านผลสอบ backtest ให้เป็น</a><span class="tag">มี quiz</span></li>
+        <li class="new"><a href="./risk-milestones.html">เกราะกันพัง: Drawdown + บันไดปลดล็อกเงินจริง</a><span class="tag">มี quiz</span></li>
+        <li class="new"><a href="./v2-exam.html">สอบรวมก่อนลงสนาม (paper)</a><span class="tag">15+ ข้อ</span></li>
+      </ol>
+      <p class="tag" style="margin-top:.75rem">วงเขียว = บทใหม่ของคอร์ส · ติ๊กความคืบหน้าใน <span class="eq">academy/PROGRESS.md</span> (นับว่าจบบทเมื่อ quiz ผ่าน ≥ 80%)</p>
+      </div>
+
+      <div id="libCards" class="libview">
+      <div class="lib-grid">
+
+        <a class="tile lib-tile reveal" href="./read-the-chart.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <polyline points="10,58 45,46 80,50 120,30 160,38 200,16 232,24" fill="none" stroke="var(--up)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="10,62 40,40 70,64 100,42 130,64 160,42 190,64 232,50" fill="none" stroke="var(--down)" stroke-width="2" opacity=".5" stroke-linecap="round"/>
+          </svg>
+          <div class="cat">พื้นฐาน · อ่านกราฟ</div>
+          <h3>อ่านกราฟให้เป็น <span class="lib-badge">interactive</span></h3>
+          <p>โมเดล 2 แกน: ทิศทาง (เทรนด์/ออกข้าง) × ความผันผวน (เรียบ/กระตุก) → แผนที่ 2×2 ว่า “เทรดหรือหลบ” บนราคา GOOGL จริง</p>
+          <div class="lib-chips"><span>สลับเทรนด์จริง</span><span>slider noise</span><span>2×2 เทรด/หลบ</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./adx.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <polyline points="10,20 70,28 120,40 175,30 232,18" fill="none" stroke="var(--up)" stroke-width="3" stroke-linecap="round"/>
+            <polyline points="10,52 70,46 120,34 175,40 232,52" fill="none" stroke="var(--down)" stroke-width="3" stroke-linecap="round"/>
+            <polyline points="10,60 70,52 120,40 175,46 232,40" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-dasharray="5" stroke-linecap="round"/>
+            <circle cx="120" cy="37" r="5" fill="none" stroke="var(--cross)" stroke-width="2"/>
+          </svg>
+          <div class="cat">เครื่องมือ · indicator</div>
+          <h3>ADX / +DI / −DI <span class="lib-badge">interactive</span></h3>
+          <p>วัด “เทรนด์แรงแค่ไหน” ด้วยเลขเส้นเดียว + ดู “ใครคุม” ด้วย DI cross เดินสูตร 5 ขั้นจากราคาจริงทีละแท่ง</p>
+          <div class="lib-chips"><span>stepper 5 ขั้น</span><span>กราฟ↔ตาราง</span><span>what-if slider</span><span>5 ธงบริบท U·A·R·D·V</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./position-sizing.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <rect x="10" y="14" width="200" height="13" rx="6" fill="var(--blue)"/>
+            <rect x="10" y="33" width="120" height="13" rx="6" fill="var(--cross)"/>
+            <rect x="10" y="52" width="120" height="13" rx="6" fill="var(--up)" stroke="var(--ink)" stroke-width="1.5"/>
+          </svg>
+          <div class="cat">กฎพอร์ต · ขนาดไม้</div>
+          <h3>Position Sizing <span class="lib-badge">interactive</span></h3>
+          <p>ซื้อกี่หุ้นดี? เริ่มจาก “ยอมเสียกี่บาท” ไม่ใช่ “มีเงินเท่าไหร่” — เสี่ยง 1% ÷ stop เทียบเพดาน 10% และเศษหุ้น</p>
+          <div class="lib-chips"><span>สูตร 3 ชั้น</span><span>slider พอร์ต/stop</span><span>ตัวบีบ risk vs cap</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./rr-expectancy.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <rect x="150" y="8" width="80" height="26" fill="var(--ok-bg)"/>
+            <rect x="150" y="34" width="80" height="30" fill="var(--bad-bg)"/>
+            <line x1="60" y1="34" x2="232" y2="34" stroke="var(--blue)" stroke-width="2.5"/>
+            <line x1="60" y1="8"  x2="232" y2="8"  stroke="var(--up)" stroke-width="2.5"/>
+            <line x1="60" y1="64" x2="232" y2="64" stroke="var(--down)" stroke-width="2.5"/>
+            <text x="12" y="12" fill="var(--up)" font-size="11">+2R</text>
+            <text x="12" y="68" fill="var(--down)" font-size="11">−1R</text>
+          </svg>
+          <div class="cat">กฎพอร์ต · คุ้มเสี่ยง</div>
+          <h3>R:R &amp; Expectancy <span class="lib-badge">interactive</span></h3>
+          <p>คุ้มเสี่ยงไหม (R:R) + ระยะยาวได้เปรียบไหม (ค่าคาดหวัง) ทำไม R:R ≥ 2 ถึงให้ “ผิดบ่อยได้” โดยไม่ขาดทุน</p>
+          <div class="lib-chips"><span>บันไดราคา</span><span>อัตราชนะคุ้มทุน</span><span>เครื่องคิดเลข edge</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./setup-patterns.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <polyline points="10,30 50,22 92,18 132,40 162,46 200,32 232,22" fill="none" stroke="var(--blue)" stroke-width="2" opacity=".45" stroke-linecap="round"/>
+            <line x1="10" y1="22" x2="232" y2="22" stroke="var(--up)" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="40" x2="232" y2="40" stroke="var(--blue)" stroke-width="1.5"/>
+            <line x1="10" y1="56" x2="232" y2="56" stroke="var(--down)" stroke-width="1.5" stroke-dasharray="4"/>
+            <circle cx="162" cy="46" r="4.5" fill="none" stroke="var(--up)" stroke-width="2"/>
+          </svg>
+          <div class="cat">setup · กติกาเข้าไม้</div>
+          <h3>กติกา Breakout v2 <span class="lib-badge">interactive · quiz</span></h3>
+          <p>กติกาที่สอบผ่าน backtest: 4 ข้อบังคับ + เสริม ≥1/2 — เข้าตรงไหน ทำไม Trend Pullback ถูกพัก (PARKED) พร้อมตัวอย่างเลขกลม ๆ</p>
+          <div class="lib-chips"><span>4 บังคับ + ≥1/2 เสริม</span><span>entry·stop·เป้า r2</span><span>PARKED pullback</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./stop-target-exit.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <line x1="10" y1="16" x2="232" y2="16" stroke="var(--up)" stroke-width="2.5"/>
+            <line x1="10" y1="38" x2="232" y2="38" stroke="var(--blue)" stroke-width="2.5"/>
+            <line x1="10" y1="60" x2="232" y2="60" stroke="var(--down)" stroke-width="2.5"/>
+            <rect x="150" y="16" width="60" height="22" fill="var(--ok-bg)"/>
+            <rect x="150" y="38" width="60" height="22" fill="var(--bad-bg)"/>
+          </svg>
+          <div class="cat">exit · จุดตัด</div>
+          <h3>Stop · Target · ออกเมื่อไหร่ <span class="lib-badge">interactive · quiz</span></h3>
+          <p>stop แบบ structure-first ในกรอบ [1.5, 3]×ATR · เป้า r2 = entry + 2.5×ความเสี่ยง · time-stop 21 วัน และทางออกครบ 5 ทาง</p>
+          <div class="lib-chips"><span>กรอบ stop 3 กรณี</span><span>เป้า r2</span><span>time-stop</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./backtest-verdict.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <rect x="14" y="40" width="22" height="22" rx="3" fill="var(--blue)" opacity=".55"/>
+            <rect x="44" y="28" width="22" height="34" rx="3" fill="var(--blue)" opacity=".75"/>
+            <rect x="74" y="34" width="22" height="28" rx="3" fill="var(--blue)" opacity=".55"/>
+            <rect x="104" y="14" width="22" height="48" rx="3" fill="var(--up)"/>
+            <line x1="146" y1="10" x2="146" y2="64" stroke="var(--line)" stroke-width="2" stroke-dasharray="4"/>
+            <rect x="160" y="22" width="22" height="40" rx="3" fill="var(--up)" opacity=".85"/>
+            <text x="196" y="44" fill="var(--ink3)" font-size="11">OOS</text>
+          </svg>
+          <div class="cat">หลักฐาน · backtest</div>
+          <h3>อ่านผลสอบ backtest ให้เป็น <span class="lib-badge">quiz</span></h3>
+          <p>in-sample vs ข้อสอบจริง (OOS) · ทำไม OOS รันครั้งเดียวห้ามรันซ้ำ · ผล P0 ของ breakout + คำเตือน “edge บาง กำไรมาเป็นพัก ๆ”</p>
+          <div class="lib-chips"><span>+0.228R in-sample</span><span>+0.702R OOS</span><span>คำเตือน 3 ข้อ</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./risk-milestones.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <polyline points="14,18 60,26 100,22 140,40 180,34 226,46" fill="none" stroke="var(--down)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="14" y1="34" x2="226" y2="34" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="14" y1="52" x2="226" y2="52" stroke="var(--down)" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="190" y="30" fill="var(--warn)" font-size="10">−5%</text>
+            <text x="186" y="66" fill="var(--down)" font-size="10">−20%</text>
+          </svg>
+          <div class="cat">ความเสี่ยง · วินัย</div>
+          <h3>เกราะกันพัง + บันไดปลดล็อก <span class="lib-badge">quiz</span></h3>
+          <p>บันได drawdown (−5% → แช่แข็งที่ −20%) ที่หยุดเราอัตโนมัติ และ 5 หมุดหมาย (milestone) ก่อนแตะเงินจริง Phase 2</p>
+          <div class="lib-chips"><span>บันได 4 ขั้น</span><span>กฎกู้คืน 50%</span><span>5 milestones</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+
+        <a class="tile lib-tile reveal" href="./v2-exam.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <rect x="16" y="12" width="150" height="10" rx="5" fill="var(--line)"/>
+            <rect x="16" y="30" width="120" height="10" rx="5" fill="var(--line)"/>
+            <rect x="16" y="48" width="135" height="10" rx="5" fill="var(--line)"/>
+            <circle cx="200" cy="36" r="22" fill="none" stroke="var(--up)" stroke-width="3"/>
+            <path d="M190 36 l7 7 l13 -14" fill="none" stroke="var(--up)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="cat">สอบรวม · capstone</div>
+          <h3>สอบรวมก่อนลงสนาม <span class="lib-badge">quiz</span></h3>
+          <p>ข้อสอบรวมทุกบท 15+ ข้อ คละลำดับทุกรอบ — ผ่าน 80% แล้วค่อยเริ่มกิจวัตร paper trade ด้วยความเข้าใจเต็มร้อย</p>
+          <div class="lib-chips"><span>คละข้อทุกรอบ</span><span>เฉลย + ที่มาของกฎ</span><span>เกณฑ์ผ่าน 80%</span></div>
+          <div class="lib-go">เริ่มสอบ →</div>
+        </a>
+
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMING SOON ===== -->
+  <section class="section section--alt">
+    <div class="section-inner reveal" data-reveal="fade"><!-- บทเสริม: fade in ล้วน -->
+      <h2 class="sec-title">บทเสริมนอกคอร์ส — เข้าใจทั้งระบบ</h2>
+      <p class="lead">สองบทสุดท้ายของแผน 8 หัวข้อเดิม — ปรัชญาสองสมุด และทีมที่อยู่เบื้องหลังทุกการตัดสินใจ</p>
+      <div class="lib-grid">
+        <a class="tile lib-tile" href="./passive-vs-active.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <polyline points="14,52 70,44 130,38 190,26 228,18" fill="none" stroke="var(--up)" stroke-width="3" stroke-linecap="round"/>
+            <polyline points="14,40 38,30 60,46 84,28 108,44 132,30 156,46 180,32 204,46 228,36" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="cat">พอร์ต · ปรัชญา</div>
+          <h3>Passive vs Active <span class="lib-badge">interactive · quiz</span></h3>
+          <p>สองสมุด สองเกม: thesis ระยะปี vs setup ระยะสัปดาห์ — เทียบ 8 มิติ ทำไมถือ ticker เดียวกันได้ และจุดพังคลาสสิกเมื่อเอาตรรกะผิดเกมมาใช้</p>
+          <div class="lib-chips"><span>เทียบ 8 มิติ</span><span>ทีมคนละชุด</span><span>จุดพังคลาสสิก</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+        <a class="tile lib-tile" href="./team-pipeline.html">
+          <svg class="motif" viewBox="0 0 240 72" aria-hidden="true">
+            <circle cx="30" cy="36" r="13" fill="var(--blue)"/>
+            <circle cx="78" cy="22" r="9" fill="var(--blue)" opacity=".55"/>
+            <circle cx="78" cy="50" r="9" fill="var(--blue)" opacity=".55"/>
+            <circle cx="126" cy="36" r="9" fill="var(--up)" opacity=".8"/>
+            <circle cx="174" cy="22" r="9" fill="var(--cross)" opacity=".6"/>
+            <circle cx="174" cy="50" r="9" fill="var(--warn)" opacity=".6"/>
+            <line x1="43" y1="36" x2="69" y2="24" stroke="var(--line)" stroke-width="2"/>
+            <line x1="43" y1="36" x2="69" y2="48" stroke="var(--line)" stroke-width="2"/>
+            <line x1="87" y1="24" x2="117" y2="34" stroke="var(--line)" stroke-width="2"/>
+            <line x1="87" y1="48" x2="117" y2="38" stroke="var(--line)" stroke-width="2"/>
+            <line x1="135" y1="36" x2="165" y2="24" stroke="var(--line)" stroke-width="2"/>
+            <line x1="135" y1="36" x2="165" y2="48" stroke="var(--line)" stroke-width="2"/>
+          </svg>
+          <div class="cat">ทีม · pipeline</div>
+          <h3>ทีม MyInvest <span class="lib-badge">interactive · quiz</span></h3>
+          <p>Kim + สมาชิก 13 คน: ใครทำอะไร งานไหลยังไงจากไอเดียถึงลงบัญชี และทำไมต้องมี AI "ตาบอด" (Blindness Tier) สองระดับ</p>
+          <div class="lib-chips"><span>บัตร 14 ใบคลิกได้</span><span>เส้นทางงาน 8 ขั้น</span><span>Tier 1 vs Tier 2</span><span>quiz</span></div>
+          <div class="lib-go">เปิดบท →</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    ทุกบทใช้ kit กลางตัวเดียว (<span class="eq">_kit/engine.js · canon.js · charts.js · ui.js · quiz.js · theme.css</span>) — ราคาคำนวณสดจาก GOOGL จริง (yfinance) และเลขกติกา v2 จาก <span class="eq">canon.js</span> (mirror ของ <span class="eq">src/backtest/rules.py</span> มีตัวตรวจอัตโนมัติ) · self-contained / offline · มาตรฐานหน้า: <span class="eq">academy/_VISUAL-GUIDE.md</span> · MyInvest Visual Library
+  </div>
+
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script>
+  /* การ์ดบทเรียนใน #ready มี .reveal ใน HTML แล้ว (เดิมเติมด้วย JS ท้าย body → เห็นแวบ→ซ่อน
+     ก่อน fade เข้า เพราะเติม class หลัง paint; ย้ายมา static แล้ว .js-gate กัน blank ตอน JS ปิด)
+     → เผยทีละใบตาม scroll · hero=สไลด์ซ้าย · บทเสริม=fade · UI.reveal() รอบเดียวให้สังเกตทุกชิ้น */
+  (function(){
+    if(window.UI && window.UI.reveal) window.UI.reveal();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var KEY='sw_lib_view', btns=document.querySelectorAll('.lvt-btn');
+    var cards=document.getElementById('libCards'), list=document.getElementById('libList');
+    if(!btns.length||!cards||!list) return;
+    function set(v){
+      if(v!=='list') v='cards';
+      cards.hidden=(v!=='cards'); list.hidden=(v!=='list');
+      for(var i=0;i<btns.length;i++){ var on=btns[i].getAttribute('data-libview')===v; btns[i].classList.toggle('on',on); btns[i].setAttribute('aria-pressed',on?'true':'false'); }
+      try{ localStorage.setItem(KEY,v); }catch(e){}
+    }
+    for(var i=0;i<btns.length;i++) btns[i].addEventListener('click',(function(b){return function(){ set(b.getAttribute('data-libview')); };})(btns[i]));
+    var saved='cards'; try{ saved=localStorage.getItem(KEY)||'cards'; }catch(e){}
+    set(saved);
+  })();
+  </script>
+</body>
+</html>

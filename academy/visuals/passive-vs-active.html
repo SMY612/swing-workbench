@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>Passive vs Active — สองสมุด สองปรัชญา | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  /* การ์ดคู่เทียบสองสมุด */
+  .duo { display:grid; grid-template-columns:1fr 1fr; gap:1.125rem; margin-top:1.125rem; }
+  @media (max-width:720px){ .duo { grid-template-columns:1fr; } }
+  .bookcard { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem 1.375rem; }
+  .bookcard .bhead { display:flex; align-items:center; gap:.5rem; font-weight:700; font-size:.78125rem; letter-spacing:.03em; }
+  .bookcard .bdot { flex:none; width:10px; height:10px; border-radius:50%; }
+  .bookcard.p .bhead { color:var(--blue-ink); } .bookcard.p .bdot { background:var(--blue); }
+  .bookcard.a .bhead { color:var(--flat); } .bookcard.a .bdot { background:var(--flat); }
+  .bookcard h4 { font-size:1.125rem; line-height:1.4; margin:.5rem 0 .375rem; }
+  .bookcard p { font-size:.9375rem; color:var(--ink2); max-width:none; }
+  .bookcard .cite { display:block; margin-top:.75rem; padding-top:.625rem; border-top:1px solid var(--line2);
+    font-size:.75rem; color:var(--ink3); font-family:var(--mono); }
+  /* แถบเลือกมิติ */
+  .dimbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem; }
+  .dimbar button { display:inline-flex; align-items:center; min-height:44px; padding:.5rem 1rem;
+    border-radius:var(--radius-pill); border:1px solid var(--line); background:var(--surface); color:var(--ink2);
+    font-family:var(--font); font-size:.875rem; font-weight:600; cursor:pointer; }
+  .dimbar button:hover { background:var(--bg2); }
+  .dimbar button.on { background:var(--ink); border-color:var(--ink); color:#fff; }
+  .dimq { font-weight:600; font-size:1.0625rem; margin-top:1.125rem; }
+  .dimq span { color:var(--ink3); font-weight:400; font-size:.875rem; }
+  /* ตารางรวม */
+  table.cmp { width:100%; border-collapse:collapse; font-size:.875rem; min-width:680px; }
+  table.cmp th, table.cmp td { padding:.625rem .75rem; text-align:left; border-bottom:1px solid var(--line2); vertical-align:top; line-height:1.55; }
+  table.cmp th { background:var(--bg2); font-weight:600; }
+  table.cmp td:first-child { font-weight:600; white-space:nowrap; }
+  /* รายชื่อทีม */
+  .roster { list-style:none; margin-top:.625rem; }
+  .roster li { padding:.375rem 0; font-size:.9375rem; color:var(--ink2); border-bottom:1px solid var(--line2); }
+  .roster li:last-child { border-bottom:none; }
+  .roster b { color:var(--ink); }
+  /* กล่อง "กติกาที่กันไว้" ในหัวข้อจุดพัง */
+  .guard { margin-top:.875rem; background:var(--ok-bg); border-radius:12px; padding:.6875rem .9375rem;
+    font-size:.875rem; line-height:1.65; color:var(--ok-ink); }
+  .trap { margin-top:.625rem; background:var(--bg2); border-radius:12px; padding:.6875rem .9375rem;
+    font-size:.9375rem; line-height:1.65; color:var(--ink2); }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">Passive vs Active</h1>
+    <p class="lead"><b>สองสมุด สองปรัชญา</b> · พอร์ตของเราแยกเป็นสมุดบัญชี (book) สองเล่มที่เล่นคนละเกม:
+      เล่มลงทุนยาว (Passive) ฟังเสียง<b>ธุรกิจ</b>เป็นรายไตรมาสถึงรายปี กับเล่มเทรดสั้น (Active)
+      ฟังเสียง<b>ราคา</b>เป็นรายวันถึงรายสัปดาห์ · หน้านี้สอนเส้นแบ่งที่ห้ามข้าม
+      เพราะข้ามเมื่อไหร่ วินัยพังทั้งสองเล่ม</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#why" class="on">ทำไมต้องสองสมุด</a>
+    <a href="#compare">เทียบมิติต่อมิติ</a>
+    <a href="#team">ทีมคนละชุด</a>
+    <a href="#mistakes">จุดพังคลาสสิก</a>
+    <a href="#quiz">แบบทดสอบ</a>
+  </nav>
+
+  <!-- ===== A · WHY TWO BOOKS ===== -->
+  <section id="why" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทำไมต้องสองสมุด · พอร์ตเดียว สองเกม</h2>
+      <p class="lead">เกมยาวกับเกมสั้นต่างกันถึงระดับ "หลักฐานที่ใช้ตัดสินใจ" ไม่ใช่แค่ระยะเวลา ·
+        บ้านนี้จึงแยกเป็นสองเล่มที่มีธรรมนูญของตัวเอง: <span class="eq">soul.md</span> ปกครองเกมยาว
+        และ <span class="eq">soul-swing.md</span> ปกครองเกมสั้น</p>
+
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="accent">เกมยาว · Passive</h3>
+          <p class="muted" style="margin-top:8px">ซื้อ "ธุรกิจ" แล้วถือหลายเดือนถึงหลายปี ให้การทบต้น (compound) ทำงาน ·
+            ตัดสินใจจากบทวิเคราะห์ธุรกิจ (thesis) และขายเมื่อเหตุผลเชิงธุรกิจพัง ไม่ใช่เมื่อกราฟเป็นสีแดง</p>
+          <div class="note">ธรรมนูญ: <span class="eq">soul.md</span> · สมุด: <span class="eq">books/paper-portfolio.csv</span></div>
+        </div>
+        <div class="card col">
+          <h3 class="flat">เกมสั้น · Active (swing)</h3>
+          <p class="muted" style="margin-top:8px">ถือสั้น ๆ 1-3 สัปดาห์ตามรูปแบบราคา (setup) ที่ผ่านการทดสอบย้อนหลัง (backtest)
+            ว่าได้เปรียบทางสถิติ · ทุกไม้รู้จุดออกตั้งแต่ยังไม่เข้า: จุดตัดขาดทุน (stop) เป้าขาย (target) และเส้นตายเวลา (time-stop)</p>
+          <div class="note">ธรรมนูญ: <span class="eq">soul-swing.md</span> · สมุด: <span class="eq">books/swing-portfolio.csv</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="chartwrap"><svg id="laneChart" viewBox="0 0 700 230" width="100%" aria-label="เส้นเวลาเทียบเกมยาวกับเกมสั้น"></svg></div>
+        <div class="legend" id="laneLegend"></div>
+        <div class="note">ภาพนี้เป็นแผนภาพแนวคิด (ไม่ใช่ราคาจริง): เกมยาวคือเส้นเดียวยาวต่อเนื่อง
+          จังหวะสำคัญคืองบรายไตรมาส · เกมสั้นคือรอบเล็ก ๆ หลายรอบ แต่ละรอบมีจุดเข้า จุดออก
+          และเส้นตายของตัวเอง · สองเกมนี้วิ่งบนแกนเวลาเดียวกันได้โดยไม่ชนกัน ตราบใดที่กติกาไม่ปนกัน</div>
+      </div>
+
+      <h3 style="margin-top:1.75rem">กฎทอง 2 ข้อของการอยู่ร่วมกัน</h3>
+      <div class="step" style="margin-top:.875rem">
+        <div class="n">1</div>
+        <div class="b"><h4>อำนาจเท่ากัน คนละขอบเขต</h4>
+          <p>สองเล่มไม่มีใครใหญ่กว่าใคร · <span class="eq">soul-swing.md</span> ระบุไว้เองว่ามีศักดิ์เท่ากับ
+            <span class="eq">soul.md</span> ภายในขอบเขตของเล่ม Active · ก่อนตัดสินใจอะไรก็ตาม
+            ให้ถามก่อนว่า "ไม้นี้อยู่สมุดไหน" แล้วใช้กติกาของสมุดนั้นเล่มเดียวจนจบ</p></div>
+      </div>
+      <div class="step" style="margin-top:.625rem">
+        <div class="n">2</div>
+        <div class="b"><h4>ticker เดียวกัน อยู่สองสมุดพร้อมกันได้</h4>
+          <p>ตัวอย่างจริง: GOOGL อยู่ในสมุด Passive อยู่แล้ววันนี้ (บันทึกใน <span class="eq">books/paper-portfolio.csv</span>
+            ด้วยคะแนนความเชื่อมั่น 3/5) · <i>สมมุติว่า</i>วันหนึ่ง GOOGL เกิดการทะลุกรอบ (breakout)
+            ที่ผ่านกติกา v2 ก็เปิดไม้ swing เพิ่มในสมุด Active ได้อีกไม้ โดยไม่ต้องแตะของเดิมเลย ·
+            เงื่อนไขเดียวคือ ตรรกะตัดสินใจ ขนาดไม้ และทางออก ต้องแยกกันเด็ดขาด
+            ห้ามให้เล่มหนึ่งไปกู้หรือค้ำอีกเล่ม</p></div>
+      </div>
+      <div class="note"><b>ทำไมห้ามปน?</b> เพราะสองเกมวัดผลคนละแบบ: เกมยาววัดว่า "ธุรกิจยังดีไหม"
+        เกมสั้นวัดว่า "ทำตามแผนไหม" · พอเอากติกาข้ามเกม ตัววัดทุกตัวจะเสียความหมายทันที
+        ดูตัวอย่างพังจริงในหัวข้อ <a href="#mistakes">จุดพังคลาสสิก</a></div>
+    </div>
+  </section>
+
+  <!-- ===== B · COMPARE (CENTERPIECE) ===== -->
+  <section id="compare" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เทียบมิติต่อมิติ · คำถามเดียวกัน คำตอบคนละโลก</h2>
+      <p class="lead">กดเลือกทีละมิติเพื่อดูการ์ดคู่ หรือสลับเป็นตารางรวมเพื่อเห็นทั้ง 8 มิติพร้อมกัน ·
+        เลขกติกาฝั่ง Active ทุกตัวดึงสดจากกล่องกติกากลาง (canon) ตัวเดียวกับที่เครื่องตรวจใช้
+        ส่วนฝั่ง Passive ยกตัวอย่าง 1-2 ค่า พร้อมชี้ว่าตารางเต็มอยู่ใน <span class="eq">soul.md</span></p>
+      <div id="cmpCtl">
+        <div class="stepper" style="margin-top:18px" id="viewBtns">
+          <button data-view="cards" class="on">ดูทีละมิติ (การ์ดคู่)</button>
+          <button data-view="table">ดูตารางรวม</button>
+        </div>
+        <div id="cmpBody"></div>
+      </div>
+      <div class="note">ถ้าจำได้ข้อเดียวจากหน้านี้ จำว่า <b>"ก่อนตัดสินใจ ถามก่อนว่าไม้นี้อยู่สมุดไหน"</b> ·
+        เจาะลึกฝั่ง Active ต่อได้ที่บท <a href="./position-sizing.html">Position Sizing</a> ·
+        <a href="./setup-patterns.html">กติกา Breakout v2</a> · <a href="./stop-target-exit.html">Stop · Target · ออกเมื่อไหร่</a></div>
+    </div>
+  </section>
+
+  <!-- ===== C · TEAM ===== -->
+  <section id="team" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทีมคนละชุด</h2>
+      <p class="lead">กติกาไม่ได้แยกแค่ตัวเลข แต่แยก "คนทำงาน" ด้วย ·
+        ชั้นวิเคราะห์ธุรกิจทั้งชั้นของเกมยาว ถูกตัดออกจากเกมสั้นโดยตั้งใจ
+        เพราะเกมสั้นไม่มีขั้นให้คะแนนความเชื่อมั่นเลย</p>
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="accent">Passive เท่านั้น</h3>
+          <ul class="roster">
+            <li><b>Reese</b> · นักวิเคราะห์ เขียน thesis รายตัว</li>
+            <li><b>Vera</b> · ด่านตรวจคุณภาพงานวิจัยก่อนให้คะแนน</li>
+            <li><b>Nick</b> · ผู้จัดการกองทุน AI (Tier 1) มองไม่เห็นข้อมูลเราเลย</li>
+            <li><b>Holden</b> · ผู้จัดการกองทุน AI (Tier 2) เห็นข้อมูล 13F สาธารณะเพิ่ม</li>
+            <li><b>Porter</b> · เจ้าของการตัดสินใจฝั่งพอร์ตยาว</li>
+          </ul>
+          <div class="note"><span class="pill r">ถูกตัดออกจาก Active โดยกติกา</span><br>
+            Nick / Holden / Vera รวมถึงเพดานกลุ่มธีม (cluster caps) เป็นของฝั่ง Passive เท่านั้น</div>
+        </div>
+        <div class="card col">
+          <h3 class="flat">Active ใช้งานจริงรายวัน</h3>
+          <ul class="roster">
+            <li><b>Kim</b> · ประตูเดียว <span class="eq">/swing</span> อ่านสถานะแล้วบอกขั้นถัดไป</li>
+            <li><b>Quentin</b> · สแกนหุ้นเข้าเกณฑ์ + ทำ backtest</li>
+            <li><b>Trent</b> · เตรียมตั๋วเทรด (ticket) ก่อนลงมือ</li>
+          </ul>
+          <div class="note">Porter จะกลับเข้ามาร่วมฝั่ง Active ตอน Phase 2 (เริ่มแบ่งเงินจริง)</div>
+        </div>
+        <div class="card col">
+          <h3>โครงสร้างร่วมสองสมุด</h3>
+          <ul class="roster">
+            <li><b>Rick</b> · ตรวจความเสี่ยงก่อนเข้าไม้ ทั้งสองเล่ม</li>
+            <li><b>Booker</b> · ลงบัญชีทุกรายการ ทั้งสองสมุด</li>
+          </ul>
+          <div class="note">คนเดียวกันทำงานให้ทั้งสองเล่มได้ แต่ต้องสวมกติกาคนละชุดตามสมุดที่กำลังแตะ</div>
+        </div>
+      </div>
+      <div class="note"><b>Blindness Rule ฉบับย่อ:</b> Nick กับ Holden ให้คะแนนความเชื่อมั่น (conviction)
+        โดยมองไม่เห็นพอร์ตและความชอบของเรา เพื่อให้คะแนนไม่เอนเอียงตามใจเจ้าของพอร์ต ·
+        เรื่องเต็มของทีมและสายพานงานอยู่บท "ทีม MyInvest" (<a href="./team-pipeline.html">team-pipeline.html</a>
+        · บทถัดไปของห้องสมุด ถ้าลิงก์ยังเปิดไม่ได้แปลว่าบทนั้นยังไม่ถูกสร้าง)</div>
+    </div>
+  </section>
+
+  <!-- ===== D · CLASSIC MISTAKES ===== -->
+  <section id="mistakes" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">จุดพังคลาสสิกเมื่อปนสองเกม</h2>
+      <p class="lead">ทั้งสามตัวอย่างเป็นเหตุการณ์<b>สมมุติ เลขกลมล้วน ๆ</b> (ไม่ใช่ market state จริง)
+        แต่รูปแบบความคิดคือของจริงที่เกิดกับนักลงทุนทุกรุ่น · แต่ละข้อปิดท้ายด้วยกติกาบ้านที่ออกแบบมากันเรื่องนี้โดยเฉพาะ</p>
+      <div id="mistakeList" style="margin-top:22px"></div>
+    </div>
+  </section>
+
+  <!-- ===== E · QUIZ ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ · เส้นแบ่งสองสมุด</h2>
+      <p class="lead">6 ข้อ ตอบแล้วเฉลยทันที ผ่านที่ 80% ·
+        ข้อไหนมีเลขกติกาฝั่ง Active ตัวเลขถูกประกอบสดจากกล่องกติกากลาง (canon)</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var E=window.ENGINE, CH=window.CHARTS, C=CH.C;
+    var CN=window.CANON, X=window.CANON_X;
+    var S=CN.sizing, B=CN.breakout, SR=CN.stop, EX=CN.exit, ER=CN.earnings, RG=CN.regime;
+    var FLAT='#b25e00';
+    function money(n){ return '$'+Number(n).toLocaleString('en-US'); }
+    var state={dim:0, view:'cards'};
+
+    /* ---------- hero KPIs ---------- */
+    function renderHero(){
+      document.getElementById('heroKpis').innerHTML=[
+        ['2','สมุดแยกกัน','คนละเกม คนละกติกา'],
+        ['เท่ากัน','อำนาจสองเล่ม','ในขอบเขตของตัวเอง'],
+        ['ซ้ำได้','ticker เดียวกันสองสมุด','ตรรกะแยกเด็ดขาด'],
+        ['คนละภาษา','ทางออก','thesis พัง vs ราคา/เวลา']
+      ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+' · '+k[2]+'</span></div>';}).join('');
+    }
+
+    /* ---------- timeline แนวคิด (แผนภาพ ไม่ใช่ราคาจริง) ---------- */
+    function renderLanes(){
+      var x0=60, mpx=50, xEnd=x0+12*mpx;
+      var svg='';
+      // แกนเวลา
+      svg+='<line x1="'+x0+'" y1="190" x2="'+xEnd+'" y2="190" stroke="'+C.grid+'" stroke-width="1.5"/>';
+      [0,3,6,9,12].forEach(function(m){
+        var x=x0+m*mpx;
+        svg+='<line x1="'+x+'" y1="187" x2="'+x+'" y2="193" stroke="'+C.grid+'" stroke-width="1.5"/>'+
+          '<text x="'+x+'" y="208" text-anchor="middle" class="vlbl">เดือนที่ '+m+'</text>';
+      });
+      svg+='<text x="'+xEnd+'" y="224" text-anchor="end" class="vlbl">เวลา →</text>';
+      // เลนเกมยาว (Passive)
+      svg+='<text x="'+x0+'" y="46" class="vlbl" fill="'+C.adx+'" style="font-weight:700">Passive · ฟังธุรกิจ</text>';
+      svg+='<rect x="'+x0+'" y="62" width="'+(xEnd-x0)+'" height="18" rx="9" style="fill:var(--accent-soft)" stroke="'+C.adx+'" stroke-width="1.5"/>';
+      svg+='<polygon points="'+xEnd+',58 '+(xEnd+18)+',71 '+xEnd+',84" fill="'+C.adx+'"/>';
+      [3,6,9,12].forEach(function(m,i){
+        var x=x0+m*mpx;
+        svg+='<circle cx="'+x+'" cy="71" r="5" fill="'+C.adx+'"/>'+
+          '<text x="'+x+'" y="54" text-anchor="middle" class="vlbl">งบ Q'+(i+1)+'</text>';
+      });
+      svg+='<text x="'+xEnd+'" y="100" text-anchor="end" class="vlbl">ไม้เดียว ถือต่อเป็นปี ขายเมื่อธุรกิจพัง</text>';
+      // เลนเกมสั้น (Active)
+      svg+='<text x="'+x0+'" y="128" class="vlbl" fill="'+FLAT+'" style="font-weight:700">Active · ฟังราคา</text>';
+      var wpx=mpx/4.33;  // ~1 สัปดาห์
+      [[0.3,1.5],[1.6,3],[3.2,2],[5.0,2.5],[7.2,1.5],[9.4,3]].forEach(function(t){
+        var x=x0+t[0]*mpx, w=t[1]*wpx;
+        svg+='<rect x="'+x.toFixed(1)+'" y="142" width="'+w.toFixed(1)+'" height="18" rx="6" style="fill:var(--warn-bg)" stroke="'+FLAT+'" stroke-width="1.5"/>';
+      });
+      svg+='<text x="'+xEnd+'" y="174" text-anchor="end" class="vlbl">หลายไม้ ไม้ละ 1-3 สัปดาห์ จบเป็นรอบ ๆ</text>';
+      document.getElementById('laneChart').innerHTML=svg;
+      document.getElementById('laneLegend').innerHTML=
+        '<span><i style="background:'+C.adx+'"></i>เกมยาว: เส้นเดียวข้ามปี จังหวะคืองบรายไตรมาส</span>'+
+        '<span><i style="background:'+FLAT+'"></i>เกมสั้น: หลายรอบ ทุกรอบมีเส้นตาย '+EX.time_stop_days+' วัน</span>';
+    }
+
+    /* ---------- 8 มิติเปรียบเทียบ ---------- */
+    var DIMS=[
+      { label:'กรอบเวลา', q:'ถือนานแค่ไหน?',
+        p:{ h:'คิดเป็นปี ไม่ใช่วัน',
+            body:'ถือหลายเดือนถึงหลายปี ปล่อยให้ธุรกิจทบต้นทำงาน · จังหวะทบทวนคือรายสัปดาห์ (ราคา/ข่าว) และรายไตรมาส (งบ) · "การไม่ทำอะไรเลย" บ่อยครั้งคือการกระทำที่ถูกต้อง',
+            cite:'soul.md §Core Principles · §Review Cadence', s:'หลายเดือนถึงหลายปี · ทบทวนรายสัปดาห์ + รายไตรมาส' },
+        a:{ h:'1-3 สัปดาห์ต่อไม้',
+            body:'ทุกไม้มีเส้นตายในตัว: ถือเกิน '+EX.time_stop_days+' วันแล้วกำไรยังไม่ถึง +'+E.fmt(EX.time_stop_min_r,1)+'R ต้องออกตามเวลา (time-stop) · ทบทวนรายวัน (เช็กราคา) และรายสัปดาห์ (กวาดสมุดบันทึกเทรด)',
+            cite:'soul-swing.md §Portfolio Rules · canon.js exit', s:'1-3 สัปดาห์ · เส้นตาย time-stop '+EX.time_stop_days+' วัน' } },
+      { label:'ตัวขับการตัดสินใจ', q:'ตัดสินใจจากหลักฐานอะไร?',
+        p:{ h:'thesis + conviction',
+            body:'ซื้อเพราะเข้าใจธุรกิจ: thesis ต้องตอบครบ 5 คำถาม ตั้งแต่คูเมืองแข่งขัน (moat) จนถึงเงื่อนไขขายตัด (kill condition) · จากนั้น Nick ให้คะแนนความเชื่อมั่น (conviction) 1-5 แบบมองไม่เห็นพอร์ตเรา',
+            cite:'soul.md §What Makes a Valid Thesis · §Conviction Score', s:'thesis 5 คำถาม + conviction 1-5' },
+        a:{ h:'setup + edge ทางสถิติ',
+            body:'เข้าเพราะรูปแบบราคา (setup) ที่สอบผ่าน backtest เท่านั้น · ตอนนี้มีท่าเดียวคือ breakout (สถานะ '+X.pattern_status.breakout+') ส่วน trend pullback = '+X.pattern_status.trend_pullback+' ห้ามเทรด · ความเชื่อไม่มีน้ำหนัก ผลวัดเท่านั้นที่มี',
+            cite:'soul-swing.md §Setup Patterns · canon.js (CANON_X)', s:'setup ที่สอบผ่าน (breakout '+X.pattern_status.breakout+' · pullback '+X.pattern_status.trend_pullback+')' } },
+      { label:'จุดเข้า', q:'อะไรปลดล็อกการกดซื้อ?',
+        p:{ h:'วิจัยธุรกิจให้จบก่อน',
+            body:'อ่านรายงานประจำปี (10-K) ผ่านสายพานย่อยข้อมูล: Minnie ตั้งคำถาม → NotebookLM ตอบ → Reese สังเคราะห์ → Vera ตรวจ → Nick ให้คะแนน · เงื่อนไขขั้นต่ำก่อนซื้อ: thesis เขียนเสร็จ + kill condition นิยามแล้ว + ผ่านแบบเช็กพฤติกรรม (behavioral checklist)',
+            cite:'soul.md §Portfolio Rules (Min requirement to buy)', s:'10-K + สายพาน ingest + checklist 3 เงื่อนไขขั้นต่ำ' },
+        a:{ h:'เครื่องตรวจกติกา breakout v2',
+            body:'ข้อบังคับ 4 ข้อครบ + ข้อเสริมอย่างน้อย '+B.optional_min_pass+' จาก 2 · ตรวจด้วยเครื่อง (<span class="eq">src/backtest/live.py</span>) ผ่านคำสั่ง <span class="eq">/swing-checklist</span> · มีด่านหน้าสุด: SPY ต้องปิดเหนือ SMA'+RG.spy_sma_len+' และห้ามมีงบประกาศภายใน '+ER.min_days+' วัน',
+            cite:'soul-swing.md §Setup gate · canon.js breakout/regime/earnings', s:'เครื่องตรวจ v2: บังคับ 4 + เสริม ≥'+B.optional_min_pass+'/2 + ด่าน SPY/งบ' } },
+      { label:'ทางออก', q:'อะไรสั่งให้ขาย?',
+        p:{ h:'kill condition: เหตุผลธุรกิจพัง',
+            body:'ขายเมื่อข้อเท็จจริงพิสูจน์ว่า thesis ผิด (นิยามรายตัว ไม่ใช่สูตรกลาง) · ราคาตกอย่างเดียว "ไม่เคย" เป็นเหตุขาย · มีกติกาเก็บกำไรเสริม เช่น ตัวที่โตเกิน 15% ของพอร์ตเพราะราคาล้วน ให้เล็มกลับเหลือ 12% (ตารางเต็มดู soul.md)',
+            cite:'soul.md §Kill Condition Framework · §Exit Discipline', s:'kill condition เชิงธุรกิจ · ราคาตกอย่างเดียวไม่ใช่เหตุขาย' },
+        a:{ h:'ราคาและเวลาเป็นผู้สั่ง',
+            body:'stop วางในกรอบ ['+SR.min_atr_mult+', '+SR.max_atr_mult+'] เท่าของ ATR (ตัววัดช่วงแกว่งเฉลี่ย) · เป้าขาย = ราคาเข้า + '+B.rr_gate+' เท่าของระยะ stop · ถือเกิน '+EX.time_stop_days+' วันไม่ไปไหนก็ออก · ชน stop ต้องออกทันที ห้ามต่อรอง',
+            cite:'soul-swing.md §Stop · §Target · §Exit Discipline · canon.js', s:'stop · เป้า r'+B.rr_gate+' · time-stop '+EX.time_stop_days+' วัน' } },
+      { label:'ขนาดไม้', q:'ใส่เงินเท่าไหร่ต่อไม้?',
+        p:{ h:'ตาราง sizing ตาม conviction',
+            body:'ขนาดมาจากคะแนนความเชื่อมั่น เช่น 4/5 เริ่ม 6-8% เพดาน 10% · 3/5 เริ่ม 3-5% เพดาน 6% (ตารางเต็ม + เงื่อนไขเพิ่มไม้ดู soul.md) · เพดานหุ้นเดี่ยว 15% ของพอร์ต',
+            cite:'soul.md §Sizing Matrix · §Portfolio Rules', s:'ตาม conviction (เช่น 4/5 → เริ่ม 6-8%) · หุ้นเดี่ยว ≤15%' },
+        a:{ h:'สูตรเดียว ไม่ใช้ความเชื่อมั่น',
+            body:'จำนวนหุ้น = (พอร์ต × '+S.risk_pct+'%) ÷ (ราคาเข้า − stop) · มูลค่าไม้ห้ามเกิน '+S.max_weight_pct+'% ของพอร์ต ถ้าสูตรให้เกินก็ขยาย stop หรือลดความเสี่ยง · เศษหุ้น (fractional) อนุญาต',
+            cite:'soul-swing.md §Position Sizing · canon.js sizing', s:'เสี่ยง '+S.risk_pct+'% ÷ ระยะ stop · ไม้ ≤'+S.max_weight_pct+'%' } },
+      { label:'เพดานกลุ่ม', q:'กันการกระจุกตัวยังไง?',
+        p:{ h:'cluster caps รายธีม ละเอียด',
+            body:'คุมธีมการลงทุน (cluster) ทีละกลุ่ม เช่น AI Infrastructure 22% · Hyperscaler/Cloud 20% (ทั้งหมด 9 กลุ่ม พร้อมกฎนับเต็มน้ำหนักทุกกลุ่มที่สังกัด ดู soul.md) · Rick เป็นผู้เฝ้าเพดาน',
+            cite:'soul.md §Cluster Definitions &amp; Caps', s:'cluster caps 9 กลุ่ม (เช่น AI Infra 22% · Hyperscaler 20%)' },
+        a:{ h:'เพดาน sector เดียว จบ',
+            body:'ไม่ใช้ cluster caps เลย (ถูกตัดออกจากขอบเขต Active โดยกติกา) · ใช้เพดานรายกลุ่มอุตสาหกรรม (sector) ข้อเดียว: ไม่เกิน '+S.max_sector_pct+'% ของพอร์ต swing',
+            cite:'soul-swing.md §What We Ignore (Active) · canon.js sizing', s:'sector ≤'+S.max_sector_pct+'% ข้อเดียว · ไม่มี cluster caps' } },
+      { label:'สมุดบัญชี', q:'จดบันทึกที่ไหน?',
+        p:{ h:'books/paper-portfolio.csv',
+            body:'งานวิเคราะห์อยู่ใน <span class="eq">theses/</span> (บทวิเคราะห์รายตัว) · ตอนนี้เป็นพอร์ตกระดาษ (paper) ทั้งเล่ม: ทุกคำสั่งซื้อขายคือการจดลงสมุด ไม่ใช่เงินจริง',
+            cite:'soul.md §Portfolio Mode', s:'paper-portfolio.csv + theses/' },
+        a:{ h:'books/swing-portfolio.csv',
+            body:'งานประกอบไม้อยู่ใน <span class="eq">setups/</span> (ไฟล์เฝ้าดูรายตัว + สมุดบันทึกเทรด) · Phase 1 เป็นกระดาษเช่นกัน จนกว่าจะผ่านครบ 5 ด่านปลดล็อก (milestones) แล้วจึงแบ่งเงินจริง 5%',
+            cite:'soul-swing.md §Portfolio Mode · §Phase Unlock', s:'swing-portfolio.csv + setups/' } },
+      { label:'เครื่องมือ', q:'ใช้คำสั่งอะไรทำงาน?',
+        p:{ h:'หลายคำสั่ง ตามจังหวะรีวิว',
+            body:'คำสั่งประจำ: <span class="eq">/portfolio-review</span> (สุขภาพพอร์ตรายสัปดาห์) · <span class="eq">/kill-sweep</span> (ไล่เช็ก kill condition ทุกตัว) · <span class="eq">/nick-weekly</span> (รีวิวคะแนน) · <span class="eq">/ingest-thesis</span> (ย่อยเอกสารเข้า thesis)',
+            cite:'CLAUDE.md §Routing Guide', s:'/portfolio-review · /kill-sweep · /nick-weekly ฯลฯ' },
+        a:{ h:'ประตูเดียว: /swing',
+            body:'เปิดทุกครั้งด้วย <span class="eq">/swing</span> (อ่านสถานะแล้วบอกขั้นถัดไปให้เอง) แล้วแตกไปคำสั่งลูก: <span class="eq">/swing-curate</span> · <span class="eq">/swing-screen</span> · <span class="eq">/swing-checklist</span> · <span class="eq">/swing-sizer</span> · <span class="eq">/swing-ticket</span> · <span class="eq">/swing-journal</span>',
+            cite:'CLAUDE.md §Active Portfolio · setups/_CHEATSHEET.md', s:'/swing ประตูเดียว → คำสั่งลูก 6 ตัว' } }
+    ];
+
+    function bookCard(side,d){
+      var head = side==='p' ? 'PASSIVE · เกมยาว · soul.md' : 'ACTIVE · เกมสั้น · soul-swing.md + canon';
+      var o = side==='p' ? d.p : d.a;
+      return '<div class="bookcard '+side+'"><div class="bhead"><span class="bdot"></span>'+head+'</div>'+
+        '<h4>'+o.h+'</h4><p>'+o.body+'</p><span class="cite">ที่มา: '+o.cite+'</span></div>';
+    }
+    function renderCompare(){
+      var html='';
+      if(state.view==='cards'){
+        var d=DIMS[state.dim];
+        html+='<div class="dimbar">'+DIMS.map(function(x,i){
+          return '<button data-dim="'+i+'" class="'+(i===state.dim?'on':'')+'" aria-pressed="'+(i===state.dim)+'">'+x.label+'</button>';
+        }).join('')+'</div>';
+        html+='<div class="dimq">'+d.q+' <span>(มิติ '+(state.dim+1)+'/'+DIMS.length+')</span></div>';
+        html+='<div class="duo">'+bookCard('p',d)+bookCard('a',d)+'</div>';
+      } else {
+        html+='<div class="scroll"><table class="cmp"><thead><tr><th>มิติ</th>'+
+          '<th style="color:var(--blue-ink)">Passive · เกมยาว (soul.md)</th>'+
+          '<th style="color:var(--flat)">Active · เกมสั้น (soul-swing.md + canon)</th></tr></thead><tbody>'+
+          DIMS.map(function(x){ return '<tr><td>'+x.label+'</td><td>'+x.p.s+'</td><td>'+x.a.s+'</td></tr>'; }).join('')+
+          '</tbody></table></div>';
+      }
+      document.getElementById('cmpBody').innerHTML=html;
+      document.querySelectorAll('#viewBtns button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-view')===state.view); });
+    }
+
+    /* ---------- จุดพังคลาสสิก (ตัวอย่างสมมุติ เลขกลม) ---------- */
+    function renderMistakes(){
+      var port=10000;
+      var capUsd=port*S.max_weight_pct/100, riskUsd=port*S.risk_pct/100;
+      var items=[
+        { t:'① ไม้ swing ขาดทุน แล้วหลอกตัวเองว่า "ถือยาวเป็น Passive ก็ได้"',
+          sc:'เข้าไม้ swing หุ้น A ที่ $100 วาง stop ไว้ $96 · ราคาไหลลงมา $96.50 ใจเริ่มกระซิบว่า "งบบริษัทก็สวยนี่ เปลี่ยนเป็นถือยาวไปเลยแล้วกัน"',
+          why:'นี่คือการละเมิด stop ในร่างแปลง: ไม้นี้เกิดจากกติกาเกมสั้น (เข้าเพราะ breakout) พอกำลังจะแพ้กลับขอย้ายไปตัดสินด้วยภาษาเกมยาว · การเข้าสมุด Passive มีทางเดียวคือเริ่มจาก thesis + kill condition + แบบเช็กพฤติกรรม ตั้งแต่ต้น ไม่ใช่เริ่มจากไม้ขาดทุนที่ค้างอยู่',
+          g:'<b>กติกาที่กันไว้:</b> soul-swing.md §Stop honor rule · ชน stop = จบไม้ทันที ละเมิดโดนหักคะแนนวินัย (แกน D) และผิดซ้ำ 3 ครั้งติดระบบสั่งพักทั้งเล่ม · ฝั่ง soul.md §Portfolio Rules ก็ปิดประตู: จะซื้อเข้าเล่มยาวต้องมี thesis เขียนเสร็จก่อนเสมอ' },
+        { t:'② เอา conviction ของ thesis มาปั๊มขนาดไม้ swing',
+          sc:'พอร์ต swing '+money(port)+' · Nick ให้หุ้น B ฝั่ง Passive 5/5 เลยอยากใส่ไม้ swing '+money(1500)+' "เพราะมั่นใจมาก" ทั้งที่เพดานมูลค่าไม้คือ '+S.max_weight_pct+'% = '+money(capUsd)+' เท่านั้น',
+          why:'conviction เป็นภาษาของเกมยาว ไม่มีบทบาทใด ๆ ในสูตรขนาดไม้ฝั่ง Active · ขนาดไม้มาจากความเสี่ยง '+S.risk_pct+'% ของพอร์ต ('+money(riskUsd)+') ÷ ระยะ stop แล้วตัดเพดานที่ '+S.max_weight_pct+'% ของพอร์ต จบแค่นั้น คะแนน 5/5 ไม่ได้แปลว่า breakout ไม้นี้จะชนะบ่อยขึ้นเลย',
+          g:'<b>กติกาที่กันไว้:</b> soul-swing.md §Position Sizing (เพดานแข็ง '+S.max_weight_pct+'%) + §What We Ignore (Active): คะแนน conviction ถูกตัดออกจากเกมสั้น แทนที่ด้วย setup ผ่าน/ไม่ผ่าน' },
+        { t:'③ ขายหุ้นเกมยาวเพราะตกใจแท่งแดงรายวัน',
+          sc:'หุ้น C ในสมุด Passive ราคา $200 อยู่ ๆ ร่วง 5% เหลือ $190 ในวันเดียวโดยไม่มีข่าวธุรกิจ · มือสั่นอยากกดขายทันที ทั้งที่ thesis ไม่มีอะไรเปลี่ยน',
+          why:'นี่คือการใช้สายตาเกมสั้น (แท่งรายวัน) ตัดสินเกมยาว · ฝั่ง Passive ราคาตกอย่างเดียวไม่ใช่เหตุขาย คำถามที่ถูกคือ "kill condition เชิงธุรกิจโดนแตะหรือยัง" ถ้า thesis ยังดี ราคาตกคือสัญญาณรบกวน (noise) หรือบางครั้งคือโอกาสซื้อเพิ่มด้วยซ้ำ',
+          g:'<b>กติกาที่กันไว้:</b> soul.md §Kill Condition Framework ("Price decline alone is never a kill condition") + §Core Principles: ไม่ตอบสนองต่อการขยับของราคารายวัน' }
+      ];
+      document.getElementById('mistakeList').innerHTML=items.map(function(m){
+        return '<div class="card"><span class="pill y">สมมุติ · เลขกลม ไม่ใช่ market state จริง</span>'+
+          '<h3 style="margin-top:.625rem">'+m.t+'</h3>'+
+          '<div class="trap">'+m.sc+'</div>'+
+          '<p class="muted" style="margin-top:.75rem">'+m.why+'</p>'+
+          '<div class="guard">'+m.g+'</div></div>';
+      }).join('');
+    }
+
+    /* ---------- quiz bank ---------- */
+    var QUIZ_BANK={
+      id:'passive-vs-active', pass:0.8,
+      questions:[
+        { q:'ถือ GOOGL ใน Passive อยู่แล้ว เจอ breakout ที่ผ่านกติกา v2 พอดี · เปิดไม้ swing GOOGL อีกได้ไหม?',
+          choices:['ไม่ได้ ห้ามซ้ำ ticker','ได้ · คนละสมุด ตัดสินใจ/ขนาด/ทางออกแยกกันเด็ดขาด','ได้ แต่ต้องลดขนาดฝั่ง Passive','ได้ถ้า Nick อนุมัติ'],
+          answer:1,
+          why:'กติกาบ้านอนุญาต same ticker, different books · เงื่อนไขเดียวคือห้ามเอาตรรกะของสมุดหนึ่งไปตัดสินอีกสมุด',
+          ref:'CLAUDE.md §Active Portfolio · soul-swing.md' },
+        { q:'ตัวขับการตัดสินใจของสองสมุดต่างกันยังไง?',
+          choices:['Passive ใช้ข่าว · Active ใช้กราฟ','Passive = thesis + คะแนนความเชื่อมั่น (conviction) · Active = setup ที่พิสูจน์ทางสถิติ','เหมือนกัน ต่างแค่ระยะเวลา','Passive = Kim ตัดสิน · Active = user ตัดสิน'],
+          answer:1,
+          why:'Passive ซื้อเพราะเข้าใจธุรกิจและมี thesis · Active เข้าเพราะ pattern ที่ backtest พิสูจน์แล้ว · คนละหลักฐาน คนละภาษา',
+          ref:'soul.md vs soul-swing.md' },
+        { q:'ไม้ swing ติดลบใกล้ stop แล้วคิดว่า "งั้นถือยาวเป็นการลงทุนแทน" · ผิดตรงไหน?',
+          choices:['ไม่ผิด ยืดหยุ่นดี','ผิด: เปลี่ยนเกมกลางทางคือการละเมิด stop · ไม้ swing ต้องออกตามกติกา ถ้าอยากถือยาวต้องเริ่มจาก thesis ฝั่ง Passive ใหม่ตั้งแต่ต้น','ผิดเพราะต้องขอ Rick ก่อน','ถูก ถ้าหุ้นพื้นฐานดี'],
+          answer:1,
+          why:'Stop honor rule: ชน stop = จบไม้ · การย้ายเกมกลางทางคือวิธีคลาสสิกที่เทรดเดอร์หลอกตัวเองให้ขาดทุนลึก',
+          ref:'soul-swing.md §Stop honor rule' },
+        { q:'Nick / Holden / Vera ทำงานให้สมุดไหน?',
+          choices:['ทั้งสองสมุด','Active เท่านั้น','Passive เท่านั้น · ฝั่ง Active ถูกตัดออกโดยกติกา (ใช้ Kim + Quentin + Trent)','แล้วแต่ Kim มอบหมาย'],
+          answer:2,
+          why:'soul-swing กำหนดชัด: Nick/Holden/Vera + cluster caps = Passive-only · Active ใช้ sector cap '+S.max_sector_pct+'% แทนและไม่มีขั้น conviction scoring',
+          ref:'CLAUDE.md §Active (KIM_UNLOCK line)' },
+        { q:'เพดานความเสี่ยงฝั่ง Active ต่อไม้คือ?',
+          choices:['เสี่ยง 5% ต่อไม้','เสี่ยง '+S.risk_pct+'% ของพอร์ตต่อไม้ + มูลค่าไม้ไม่เกิน '+S.max_weight_pct+'% ของพอร์ต','ไม่จำกัด ถ้า setup ดี','ตาม conviction score'],
+          answer:1,
+          why:'สูตรขนาดไม้: เสี่ยง '+S.risk_pct+'% ÷ ระยะ stop แล้วตัดเพดานที่ '+S.max_weight_pct+'% ของพอร์ต · conviction ไม่มีบทบาทฝั่งนี้',
+          ref:'CANON.sizing · soul-swing.md' },
+        { q:'ทางออกของ Passive กับ Active ต่างกันยังไง?',
+          choices:['เหมือนกัน: ขายเมื่อกำไรพอ','Passive ออกเมื่อ kill condition (เหตุผลเชิงธุรกิจพัง) · Active ออกตามราคา/เวลา (stop · target · time-stop)','Passive ห้ามขายตลอดชีพ','Active ออกเมื่อ thesis แตกเท่านั้น'],
+          answer:1,
+          why:'คนละภาษา: เกมยาวฟังธุรกิจ เกมสั้นฟังราคา · เอาภาษาผิดเกมไปใช้ = ขายของดีเร็วเกิน หรือถือของพังนานเกิน',
+          ref:'soul.md §Kill conditions · soul-swing.md §Exit Discipline' }
+      ]
+    };
+
+    document.getElementById('foot').innerHTML='เลขกติกาฝั่ง Active ดึงจาก <span class="eq">_kit/canon.js</span> (mirror ของ <span class="eq">src/backtest/rules.py::CANONICAL_V2</span> · มีตัวตรวจอัตโนมัติ) · หลักการและตัวเลขฝั่ง Passive อ้างจาก <span class="eq">soul.md</span> (ฉบับเต็มคือผู้ถือกฎ) · ปรัชญาฝั่ง Active อ้างจาก <span class="eq">soul-swing.md</span> · สองเล่มอำนาจเท่ากันคนละขอบเขต · ตัวอย่างราคาในหน้านี้เป็นเลขกลมสมมุติทั้งหมด · self-contained / offline · MyInvest Visual Library';
+
+    renderHero(); renderLanes(); renderCompare(); renderMistakes();
+    window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    document.getElementById('cmpCtl').addEventListener('click',function(e){
+      var b=e.target.closest('button'); if(!b)return;
+      if(b.hasAttribute('data-view')){ state.view=b.getAttribute('data-view'); renderCompare(); }
+      else if(b.hasAttribute('data-dim')){ state.dim=+b.getAttribute('data-dim'); renderCompare(); }
+    });
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+</body>
+</html>

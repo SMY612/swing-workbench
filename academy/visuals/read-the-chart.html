@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>อ่านกราฟให้เป็น — 2 แกน: ทิศทาง × ความผันผวน | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">อ่านกราฟให้เป็น</h1>
+    <p class="lead">ก่อนดูอินดิเคเตอร์ใด ๆ ให้ถาม 2 คำถามที่ “คนละแกน” กัน:
+      ราคาไป<b>ทางไหน</b> (ทิศทาง) และ <b>แรง/ผันผวนแค่ไหน</b> (volatility) — รวมกันเป็นแผนที่ว่า “เทรดหรือหลบ”</p>
+    <div class="hero-card row" style="align-items:center">
+      <div class="col" style="flex:1.1"><svg id="heroMatrix" viewBox="0 0 460 300" width="100%" aria-label="แผนที่ 2×2 ของ GOOGL"></svg></div>
+      <div class="col" id="heroSide"></div>
+    </div>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#axes" class="on">2 แกน</a>
+    <a href="#direction">ทิศทาง</a>
+    <a href="#noise">noise</a>
+    <a href="#matrix">ตาราง 2×2</a>
+    <a href="#gate">5 ธง</a>
+    <a href="#quiz">เช็ก</a>
+  </nav>
+
+  <!-- ===== A · TWO AXES ===== -->
+  <section id="axes" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">หัวใจ: 2 แกนคนละเรื่อง</h2>
+      <p class="lead">ความงงส่วนใหญ่เกิดจากเอา “ทิศ” กับ “ความผันผวน” มาปนกัน — มันวัดคนละอย่าง ใช้คนละเครื่องมือ</p>
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="accent">① ทิศทาง — ไปทางไหน?</h3>
+          <p class="muted" style="margin-top:8px">ดูที่<b>โครงสร้างยอด (High) และก้น (Low)</b> ก่อน:</p>
+          <p class="muted">• ยอดสูงขึ้น + ก้นสูงขึ้น = <b class="up">ขาขึ้น</b><br>
+            • ยอดต่ำลง + ก้นต่ำลง = <b class="down">ขาลง</b><br>
+            • ยอด-ก้นไม่ไปทางเดียว = <b class="flat">ออกข้าง</b></p>
+          <div class="note">ยืนยันความแรงของทิศด้วย <b>ADX</b> (+DI/−DI บอกฝั่ง) — รายละเอียดใน <a href="./adx.html">บท ADX</a></div>
+        </div>
+        <div class="card col">
+          <h3 class="accent">② ความผันผวน — แรงแค่ไหน?</h3>
+          <p class="muted" style="margin-top:8px">ขนาดการแกว่งต่อวัน ใหญ่/เล็ก และ เรียบ/กระตุก:</p>
+          <p class="muted">• วัดขนาดด้วย <b>ATR</b> (ค่าเฉลี่ยช่วงแกว่งจริง)<br>
+            • ใช้เป็นไม้บรรทัดของ <b>stop</b> (กรอบ 1.5–3×ATR ตามกติกา v2) และคุมขนาดไม้<br>
+            • “กระตุก” (choppy) = เด้งไปมาถี่ → สัญญาณหลอกเยอะ</p>
+          <div class="note">ATR ทำงานยังไง + ใช้ตั้ง stop/ขนาดไม้ ดูใน <a href="./adx.html">บท ADX</a> และ <a href="./position-sizing.html">บท Position Sizing</a></div>
+        </div>
+      </div>
+      <div class="note"><b>กฎเหล็ก:</b> 2 แกนนี้อิสระต่อกัน — หุ้นอาจ “ผันผวนสูงแต่ไร้ทิศ” (แกว่งแรงในกรอบ) หรือ “ไต่ขึ้นเรียบ ๆ ผันผวนต่ำ” ได้ทั้งคู่</div>
+    </div>
+  </section>
+
+  <!-- ===== B · DIRECTION (real data) ===== -->
+  <section id="direction" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แกนที่ 1 — ทิศทาง จากราคา GOOGL จริง</h2>
+      <p class="lead">เลือกช่วงเวลา แล้วดูโครงสร้างยอด/ก้นจริง — เส้นทึบ = ก้นไล่กัน, เส้นประ = ยอดไล่กัน</p>
+      <div class="card" style="margin-top:22px">
+        <div class="stepper" id="dirBtns">
+          <button data-dir="up" class="on">ขาขึ้น</button>
+          <button data-dir="down">ขาลง</button>
+          <button data-dir="side">ออกข้าง</button>
+        </div>
+        <div class="chartwrap"><svg id="dirChart" viewBox="0 0 700 320" width="100%" aria-label="แท่งเทียน GOOGL ตามช่วงที่เลือก"></svg></div>
+        <div class="note" id="dirReadout"></div>
+      </div>
+      <div class="note">โครงสร้าง High/Low มา<b>ก่อน</b> indicator เสมอ — เส้นค่าเฉลี่ย/แนวรับต้านเป็นแค่ตัวยืนยัน ไม่ใช่ตัวนิยามเทรนด์</div>
+    </div>
+  </section>
+
+  <!-- ===== C · NOISE ===== -->
+  <section id="noise" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แกนที่ 2 — เรียบ vs กระตุก (noise)</h2>
+      <p class="lead">เทรนด์เดียวกัน แต่ “กระตุก” มากขึ้น ทำให้เส้นค่าเฉลี่ย (MA) เกิดสัญญาณตัดหลอก (whipsaw) ถี่ขึ้น</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col">
+          <span class="pill y">ภาพประกอบ (สมมุติ) — ไม่ใช่ราคา GOOGL จริง</span>
+          <div class="slider-row" style="margin-top:14px"><label>noise</label><input type="range" id="noiseR"><span class="val" id="noiseV"></span></div>
+          <div class="note">เทรนด์จริง (เส้นประเทา) ชันเท่าเดิมตลอด — เลื่อน slider เพิ่มเฉพาะ “ความกระตุก” รอบเทรนด์</div>
+          <div id="noiseStat" style="margin-top:12px"></div>
+        </div>
+        <div class="col" style="flex:1.2">
+          <svg id="noiseChart" viewBox="0 0 460 260" width="100%" aria-label="เทรนด์ + noise + เส้นค่าเฉลี่ย"></svg>
+          <div class="legend" style="justify-content:center;margin-top:6px">
+            <span><i style="background:var(--ink)"></i>เส้นสีดำ = ราคาจริง (มี noise กระตุก)</span>
+            <span><i style="background:var(--blue)"></i>เส้นสีฟ้า = เส้นค่าเฉลี่ย (MA 5 วัน)</span>
+          </div>
+        </div>
+      </div>
+      <div class="note"><b>sideway ≠ noise ต่ำ เสมอไป</b> — หุ้นเด้งแรงในกรอบ = ออกข้าง แต่ noise สูงมาก → สัญญาณหลอกเพียบ ควรหลบ</div>
+    </div>
+  </section>
+
+  <!-- ===== D · 2x2 MATRIX (capstone) ===== -->
+  <section id="matrix" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">รวม 2 แกน → ตาราง 2×2: เทรดหรือหลบ</h2>
+      <p class="lead">เอา “ความแรงเทรนด์ (ADX)” เป็นแกนตั้ง และ “ความผันผวน (ATR%)” เป็นแกนนอน — แต่ละช่องบอกว่าควรทำอะไร</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" style="flex:1.2"><svg id="bigMatrix" viewBox="0 0 560 380" width="100%" aria-label="ตาราง 2×2 regime"></svg></div>
+        <div class="col">
+          <div class="stepper" id="ptBtns" style="flex-wrap:wrap"></div>
+          <div id="matrixReadout" style="margin-top:12px"></div>
+        </div>
+      </div>
+      <div class="note" id="matrixNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== E · GATE U·A·R·D·V ===== -->
+  <section id="gate" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">5 ธงบริบท U·A·R·D·V — อ้างอิงละเอียด</h2>
+      <p class="lead">เมื่อรู้ว่าอยู่ช่อง “เทรดได้” แล้ว ธง 5 ตัวนี้ (จาก <span class="eq">setups/_SCREENING.md</span>) ใช้<b>ให้คะแนนบริบท/จัดอันดับตัวเฝ้า</b> (Stage 2→3)
+        — <b>ไม่ใช่ประตูเข้าไม้</b>: การเข้าจริงต้องผ่านกติกา breakout canonical_v2 ที่เครื่องตรวจ <span class="eq">src/backtest/live.py</span> <span id="gateScore" class="pill"></span></p>
+      <div id="gateList" style="margin-top:20px"></div>
+      <div class="note" id="gateNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== F · QUIZ ===== -->
+  <section id="quiz" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เช็กความเข้าใจ</h2>
+      <div class="selfcheck" id="quizBox"></div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script>
+  (function(){
+    const E=window.ENGINE, CH=window.CHARTS, C=CH.C;
+    const f=(n,dp)=>E.fmt(n,dp), pc=(n,dp)=>f(n,dp==null?2:dp)+'%';
+    const ALL=E.adx14(E.GOOGL);
+    const dm=d=>{const p=d.split('-');return (+p[2])+'/'+(+p[1]);};
+    const SIDE='#b25e00';
+
+    const WINS={
+      up:  {label:'ขาขึ้น',  start:'2026-04-06', end:'2026-05-08', color:C.up},
+      down:{label:'ขาลง',    start:'2026-05-26', end:'2026-06-05', color:C.down},
+      side:{label:'ออกข้าง', start:'2026-05-11', end:'2026-05-22', color:SIDE}
+    };
+    const win=k=>E.sliceWindow(ALL,WINS[k].start,WINS[k].end);
+    const state={dir:'up', noise:0.4, sel:'up'};
+
+    /* ---------- structure via halves (robust direction label) ---------- */
+    function extreme(rows,lo,hi){let mh=-1,mhp=-1e9,ml=-1,mlp=1e9;
+      for(let i=lo;i<hi;i++){if(rows[i].h>mhp){mhp=rows[i].h;mh=i;}if(rows[i].l<mlp){mlp=rows[i].l;ml=i;}}
+      return {hi:{i:mh,p:mhp},lo:{i:ml,p:mlp}};}
+    function structure(rows){const m=Math.floor(rows.length/2);
+      const a=extreme(rows,0,m), b=extreme(rows,m,rows.length);
+      const dir=(b.hi.p>a.hi.p&&b.lo.p>a.lo.p)?'up':(b.hi.p<a.hi.p&&b.lo.p<a.lo.p)?'down':'side';
+      return {dir,aHi:a.hi,aLo:a.lo,bHi:b.hi,bLo:b.lo};}
+
+    /* ---------- B · direction candle window ---------- */
+    function renderDirection(){
+      const k=state.dir, rows=win(k), st=structure(rows);
+      const lows=rows.map(r=>r.l), highs=rows.map(r=>r.h);
+      const yMin=Math.min.apply(null,lows), yMax=Math.max.apply(null,highs);
+      const pad=(yMax-yMin)*0.08;
+      const sc=CH.makeScale({x:46,y:18,w:620,h:250,yMin:yMin-pad,yMax:yMax+pad,n:rows.length});
+      const cw=Math.min(20,sc.step*0.55);
+      let svg=CH.axis({scale:sc,yTicks:[{v:yMin,label:f(yMin,0)},{v:(yMin+yMax)/2,label:f((yMin+yMax)/2,0)},{v:yMax,label:f(yMax,0)}],
+        xLabels:[0,Math.floor(rows.length/2),rows.length-1].map(i=>({i,label:dm(rows[i].date)}))});
+      rows.forEach((b,i)=>svg+=CH.candle(b,{cx:sc.sx(i),sy:sc.sy,w:cw}));
+      svg+=`<line x1="${sc.sx(st.aLo.i)}" y1="${sc.sy(st.aLo.p)}" x2="${sc.sx(st.bLo.i)}" y2="${sc.sy(st.bLo.p)}" stroke="${C.down}" stroke-width="2"/>`;
+      svg+=`<line x1="${sc.sx(st.aHi.i)}" y1="${sc.sy(st.aHi.p)}" x2="${sc.sx(st.bHi.i)}" y2="${sc.sy(st.bHi.p)}" stroke="${C.up}" stroke-width="2" stroke-dasharray="5"/>`;
+      const mark=(pt,col,lab)=>{svg+=`<circle cx="${sc.sx(pt.i)}" cy="${sc.sy(pt.p)}" r="5" style="fill:var(--bg)" stroke="${col}" stroke-width="2.5"/>`+
+        `<text x="${sc.sx(pt.i)}" y="${(sc.sy(pt.p)+(lab.up?-9:16)).toFixed(1)}" text-anchor="middle" class="vlbl" fill="${col}" style="font-weight:700">${lab.t}</text>`;};
+      const hiTag=st.bHi.p>st.aHi.p?'HH':'LH', loTag=st.bLo.p>st.aLo.p?'HL':'LL';
+      mark(st.aHi,C.up,{t:'ยอด',up:true}); mark(st.bHi,C.up,{t:hiTag,up:true});
+      mark(st.aLo,C.down,{t:'ก้น',up:false}); mark(st.bLo,C.down,{t:loTag,up:false});
+      document.getElementById('dirChart').innerHTML=svg;
+      document.querySelectorAll('#dirBtns button').forEach(b=>b.classList.toggle('on',b.dataset.dir===k));
+      const verdict={up:'ขาขึ้น (Uptrend)',down:'ขาลง (Downtrend)',side:'ออกข้าง (Sideway)'}[st.dir];
+      const expl={
+        up:`ยอดสูงขึ้น (<b class="up">Higher High, HH</b>): ${f(st.aHi.p)} → ${f(st.bHi.p)} · ก้นสูงขึ้น (<b class="up">Higher Low, HL</b>): ${f(st.aLo.p)} → ${f(st.bLo.p)} → ทั้งยอดและก้นไล่ขึ้น = ขาขึ้น`,
+        down:`ยอดต่ำลง (<b class="down">Lower High, LH</b>): ${f(st.aHi.p)} → ${f(st.bHi.p)} · ก้นต่ำลง (<b class="down">Lower Low, LL</b>): ${f(st.aLo.p)} → ${f(st.bLo.p)} → ทั้งยอดและก้นไล่ลง = ขาลง`,
+        side:`ยอด ${f(st.aHi.p)} → ${f(st.bHi.p)} (${hiTag}) · ก้น ${f(st.aLo.p)} → ${f(st.bLo.p)} (${loTag}) → ยอดกับก้นไม่ไปทางเดียวกัน = ไม่มีทิศชัด (ออกข้าง)`
+      }[st.dir];
+      document.getElementById('dirReadout').innerHTML=`<b>${WINS[k].label}</b> (${dm(WINS[k].start)}–${dm(WINS[k].end)}) = <b class="accent">${verdict}</b><br>${expl}`;
+    }
+
+    /* ---------- C · noise (illustrative, seeded) ---------- */
+    function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+    const N=60, rng=mulberry32(20260607);
+    const NOISE_BASE=Array.from({length:N},()=>rng()*2-1);
+    const TREND=Array.from({length:N},(_,i)=>100+i*0.55);
+    function renderNoise(){
+      const amp=state.noise*9;
+      const price=TREND.map((t,i)=>t+amp*NOISE_BASE[i]);
+      const ma=price.map((_,i)=>{if(i<4)return null;let s=0;for(let j=i-4;j<=i;j++)s+=price[j];return s/5;});
+      let whip=0; for(let i=5;i<N;i++){if(ma[i]==null||ma[i-1]==null)continue;const a=price[i-1]-ma[i-1],b=price[i]-ma[i];if(a*b<0)whip++;}
+      const all=price.concat(TREND), yMin=Math.min.apply(null,all), yMax=Math.max.apply(null,all);
+      const sc=CH.makeScale({x:20,y:14,w:420,h:210,yMin:yMin-2,yMax:yMax+2,n:N});
+      let svg=CH.line(TREND,{scale:sc,color:C.mute,dash:'4',width:1.5});
+      svg+=CH.line(price,{scale:sc,color:C.ink,width:2});
+      svg+=CH.line(ma,{scale:sc,color:C.adx,width:2.5});
+      document.getElementById('noiseChart').innerHTML=svg;
+      document.getElementById('noiseV').textContent=Math.round(state.noise*100)+'%';
+      document.getElementById('noiseStat').innerHTML=
+        `<div class="eq b">สัญญาณตัดหลอก (whipsaw): <b class="${whip>=6?'down':whip>=3?'flat':'up'}">${whip} ครั้ง</b></div>`+
+        `<p class="tag">${whip<=2?'noise ต่ำ → MA เชื่อได้ สัญญาณหลอกน้อย':whip<=5?'noise ปานกลาง → เริ่มมีสัญญาณหลอก':'noise สูง → MA ตัดไปมาถี่ ส่วนใหญ่เป็นสัญญาณหลอก ควรหลบ'}</p>`;
+    }
+
+    /* ---------- D · 2×2 matrix ---------- */
+    const PTS=[
+      {key:'up',  color:C.up},
+      {key:'down',color:C.down},
+      {key:'side',color:SIDE},
+      {key:'fake',color:C.mute, synthetic:true}
+    ];
+    function classifyPt(p){return p.synthetic
+      ? E.regimeClassify([{date:'สมมุติ',c:300,atr:16.5,adx:16,plusDI:18,minusDI:20}])
+      : E.regimeClassify(win(p.key));}
+    function matrix(id,W,H,sel,small){
+      const x=92,y=18,w=W-x-18,h=H-y-(small?30:56),cw=w/2,ch=h/2;
+      const cells=[
+        {cx:0,cy:0,fill:'var(--ok-bg)',t:'เทรดได้'},
+        {cx:1,cy:0,fill:'var(--warn-bg)',t:'เทรนด์กระตุก·ระวัง'},
+        {cx:0,cy:1,fill:'var(--surface-2)',t:'เงียบ'},
+        {cx:1,cy:1,fill:'var(--bad-bg)',t:'หลบ'}
+      ];
+      let s='';
+      cells.forEach(c=>{s+=`<rect x="${x+c.cx*cw}" y="${y+c.cy*ch}" width="${cw}" height="${ch}" style="fill:${c.fill};stroke:var(--bg)" stroke-width="2"/>`;
+        if(!small)s+=`<text x="${x+c.cx*cw+8}" y="${y+c.cy*ch+18}" class="vlbl" style="font-weight:700">${c.t}</text>`;});
+      s+=`<text x="${x-8}" y="${y+ch*0.5}" text-anchor="end" class="vlbl">เทรนด์แรง</text>`;
+      s+=`<text x="${x-8}" y="${y+ch+ch*0.5}" text-anchor="end" class="vlbl">ออกข้าง</text>`;
+      s+=`<text x="${x+cw*0.5}" y="${y+h+18}" text-anchor="middle" class="vlbl">ผันผวนพอเหมาะ</text>`;
+      s+=`<text x="${x+cw+cw*0.5}" y="${y+h+18}" text-anchor="middle" class="vlbl">นิ่ง/แรงเกิน</text>`;
+      function plot(cl){
+        const fx = cl.volInBand ? Math.max(.18,Math.min(.82,(cl.atrPct-1.5)/2.5)) : .55;
+        const colX = cl.volInBand ? x : x+cw;
+        const px = colX + fx*cw;
+        let py;
+        if(cl.trend==='strong'){const fy=Math.max(0,Math.min(1,(cl.adx-25)/25)); py=y+ch-0.12*ch-fy*ch*0.72;}
+        else py=y+ch+ch*0.5;
+        return {px,py};
+      }
+      PTS.forEach(p=>{const cl=classifyPt(p); if(!cl.ok)return; const pt=plot(cl); const on=(p.key===sel);
+        if(p.synthetic){s+=`<circle cx="${pt.px}" cy="${pt.py}" r="${on?9:7}" fill="none" stroke="${p.color}" stroke-width="2.5" stroke-dasharray="3"/>`;}
+        else{s+=`<circle cx="${pt.px}" cy="${pt.py}" r="${on?9:7}" fill="${p.color}" ${on?'style="stroke:var(--ink);stroke-width:2.5"':''}/>`;}
+        if(!small)s+=`<text x="${pt.px}" y="${(pt.py-12).toFixed(1)}" text-anchor="middle" class="vlbl" fill="${p.synthetic?C.mute:p.color}">${p.synthetic?'สมมุติ':WINS[p.key].label}</text>`;});
+      document.getElementById(id).innerHTML=s;
+    }
+    function actionOf(cl,synthetic){
+      if(synthetic) return 'ATR% นอกกรอบ + ADX ต่ำ = ไร้ทิศและแกว่งแรง → <b class="down">หลบ ไม่เทรด</b>';
+      if(cl.verdict==='trade') return 'เทรนด์แรง (ADX≥25) + ผันผวนพอเหมาะ → สภาพ "น่าเฝ้า" — จะเข้าไม้ได้ก็ต่อเมื่อเกิด <b class="up">Breakout ตามกติกา canonical_v2</b> (ท่าเดียวที่สอบผ่าน — Trend Pullback ถูกพัก) ดูบท "กติกา Breakout v2"';
+      return 'ไม่เข้าเกณฑ์ → <b class="down">หลบ</b>';
+    }
+    function renderMatrix(){
+      matrix('bigMatrix',560,380,state.sel,false);
+      document.getElementById('ptBtns').innerHTML=PTS.map(p=>
+        `<button data-pt="${p.key}" class="${p.key===state.sel?'on':''}">${p.synthetic?'สมมุติ':WINS[p.key].label}</button>`).join('');
+      const p=PTS.find(x=>x.key===state.sel), cl=classifyPt(p);
+      document.getElementById('matrixReadout').innerHTML=
+        `<h3>${p.synthetic?'จุดสมมุติ (hypothetical)':WINS[p.key].label}</h3>`+
+        `<p class="muted" style="margin:8px 0 4px">ADX <b class="real">${f(cl.adx)}</b> (${cl.trend==='strong'?'เทรนด์แรง':'อ่อน'}) · ATR% <b class="real">${pc(cl.atrPct)}</b> (${cl.volInBand?'ในกรอบ':'นอกกรอบ'})</p>`+
+        `<p style="margin:6px 0"><span class="pill ${cl.verdict==='trade'?'g':'r'}">${cl.verdict==='trade'?'เทรดได้':'หลบ'}</span></p>`+
+        `<p class="muted">${actionOf(cl,p.synthetic)}</p>`;
+    }
+
+    /* ---------- E · gate U·A·R·D·V ---------- */
+    function badge(ok){return ok?'<span class="badge pass">ผ่าน</span>':'<span class="badge fail">ไม่ผ่าน</span>';}
+    function renderGate(){
+      const last=ALL[ALL.length-1], sma=E.SMA50_AS_OF, G=E.GATES;
+      const rr=E.rr({entry:last.c,stop:last.c-2*last.atr,target:E.SWING_HIGH}).rr, ap=E.atrPct(last);
+      const rows=[
+        ['U','ขาขึ้น (Uptrend)',`ราคา ${f(last.c)} ${last.c>sma?'>':'<'} SMA50 ${f(sma)}`,'เทรดตามเทรนด์ใหญ่ ไม่สวนน้ำ — เข้าเฉพาะเมื่อราคายืนเหนือเส้นค่าเฉลี่ย 50 วัน',last.c>sma],
+        ['A','เทรนด์แรง (ADX)',`ADX ${f(last.adx)} ${last.adx>=G.adxMin?'≥':'<'} ${G.adxMin}`,'มีเทรนด์จริงให้เกาะ ไม่ใช่ออกข้างมั่ว (ช่อง “เทรดได้” ในตาราง 2×2)',last.adx>=G.adxMin],
+        ['R','คุ้มเสี่ยง (R:R · ธง legacy)',`R:R ${f(rr,2)} ${rr>=G.rrMin?'≥':'<'} ${G.rrMin} (สูตรเดโม่)`,'หลักคิด: กำไรที่เป้าต้อง ≥ 2 เท่าของระยะ stop (ดู บท R:R) — ธงนี้คำนวณแบบ heuristic ไว้จัดอันดับ ส่วนไม้จริง R:R ถูกตรึง 2.5 โดยสูตร target r2',rr>=G.rrMin],
+        ['D','ยืนยันเด้ง (DI)',`+DI ${f(last.plusDI)} ${last.plusDI>last.minusDI?'>':'<'} −DI ${f(last.minusDI)}`,'รอให้ฝั่งซื้อ (+DI) กลับมาเหนือฝั่งขาย (−DI) ก่อน = โมเมนตัมหันกลับขึ้นแล้ว',last.plusDI>last.minusDI],
+        ['V','ผันผวนพอเหมาะ (ATR%)',`ATR ${pc(ap)} ${(ap>=G.atrPctMin&&ap<=G.atrPctMax)?'อยู่ใน':'นอก'} ${G.atrPctMin}–${G.atrPctMax}%`,'แกว่งพอให้มีกำไร แต่ไม่แรงจน stop โดนกระตุกง่าย',ap>=G.atrPctMin&&ap<=G.atrPctMax]
+      ];
+      document.getElementById('gateList').innerHTML=rows.map(r=>
+        `<div class="step" style="margin-bottom:10px"><div class="n">${r[0]}</div><div class="b">`+
+        `<h4>${r[1]} ${badge(r[4])}</h4><p style="margin:.35rem 0"><span class="eq">${r[2]}</span></p>`+
+        `<p class="tag">ทำไมต้องมี: ${r[3]}</p></div></div>`).join('');
+      const pass=rows.filter(r=>r[4]).length;
+      const sc=document.getElementById('gateScore'); sc.textContent=pass+'/5 ติด'; sc.className='pill '+(pass>=5?'g':pass>=3?'y':'r');
+      document.getElementById('gateNote').innerHTML=
+        `GOOGL ล่าสุด (${dm(last.date)}) ติดธง <b>${pass}/5</b> — ขาดที่ <b>D</b> (−DI ยังเหนือ +DI = ขาลงพักยังไม่ยืนยันเด้งกลับ) → ในฐานะคะแนนบริบท: อยู่ช่อง “เทรดได้” ของ 2×2 แต่ยังไม่ใช่ตัวเฝ้าใกล้ชิด · <b>เข้าไม้จริงมีทางเดียว = ผ่านกติกา breakout canonical_v2</b> (4 บังคับ + ≥1/2 เสริม — เครื่องตรวจ <span class="eq">src/backtest/live.py</span>) · ตัวเลขธงสดจาก engine (นิยามเดียวกับ <span class="eq">_SCREENING.md</span>)`;
+    }
+
+    /* ---------- HERO ---------- */
+    function renderHero(){
+      matrix('heroMatrix',460,300,null,true);
+      const last=ALL[ALL.length-1];
+      document.getElementById('heroSide').innerHTML=
+        `<p class="muted">จุดสีคือ GOOGL จริง 3 ช่วง (ขึ้น/ลง/ออกข้าง) — <b>อยู่คอลัมน์ “เทรนด์” ทั้งหมด</b> เพราะ GOOGL เป็นหุ้นที่เข้าเกณฑ์ ส่วนช่อง “หลบ” ใช้ตัวอย่าง<b>สมมุติ</b></p>`+
+        `<p class="tag" style="margin-top:8px">“ออกข้าง” ของ GOOGL = ย่อในเทรนด์ (ADX ยังสูง) ไม่ใช่ไร้เทรนด์</p>`;
+      document.getElementById('heroKpis').innerHTML=[
+        [f(last.adx),'ADX','ความแรงเทรนด์'],
+        [pc(E.atrPct(last)),'ATR%','ความผันผวน'],
+        ['ย่อในเทรนด์','ล่าสุด','ขาลงพัก']
+      ].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]} · ${k[2]}</span></div>`).join('');
+    }
+
+    /* ---------- F · quiz ---------- */
+    function renderQuiz(){
+      const qs=[
+        ['“ทิศทาง” กับ “ความผันผวน” ต่างกันยังไง ทำไมต้องแยก?',
+         'ทิศทาง = ราคาไปทางไหน (ขึ้น/ลง/ออกข้าง) ดูจากโครงสร้างยอด-ก้น · ความผันผวน = แกว่งแรง/เรียบแค่ไหน ดูจาก ATR · แยกเพราะหุ้นเป็นได้ทุกคู่ผสม เช่น “ขาขึ้นแต่กระตุกแรง” หรือ “ออกข้างแต่นิ่ง” — ใช้คนละเครื่องมือและตัดสินใจคนละแบบ'],
+        ['ADX สูง (>25) แปลว่าเป็นขาขึ้นใช่ไหม?',
+         'ไม่ใช่ — ADX วัดแค่ “เทรนด์แรงแค่ไหน” ไม่บอกขึ้นหรือลง · ช่วงขาลงของ GOOGL (26 พ.ค.–5 มิ.ย.) ADX ก็ยัง >25 เพราะลงแบบมีแรง · ทิศต้องดูจากโครงสร้าง High/Low หรือ +DI vs −DI'],
+        ['ทำไมช่อง “หลบ” ในตาราง 2×2 ต้องใช้ตัวอย่างสมมุติ?',
+         'เพราะข้อมูล GOOGL ทั้งชุดเป็นเทรนด์แรง+ผันผวนพอเหมาะตลอด (ADX 24–50, ATR% ~2.3–2.7%) → 3 ช่วงจริงตกช่อง “เทรดได้” หมด · จะสอนช่อง “หลบ” ด้วยข้อมูลจริงไม่ได้ จึงใช้จุดสมมุติที่ระบุชัด (กฎห้ามแต่งราคา GOOGL ให้ดูแย่)']
+      ];
+      document.getElementById('quizBox').innerHTML=qs.map(q=>`<details><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
+    }
+
+    /* ---------- wire ---------- */
+    function wire(){
+      document.getElementById('dirBtns').addEventListener('click',e=>{const b=e.target.closest('button[data-dir]');if(!b)return;state.dir=b.dataset.dir;renderDirection();});
+      const nr=document.getElementById('noiseR'); nr.min=0;nr.max=1;nr.step=0.05;nr.value=state.noise;
+      ['input','change'].forEach(ev=>nr.addEventListener(ev,()=>{state.noise=+nr.value;renderNoise();}));
+      document.getElementById('ptBtns').addEventListener('click',e=>{const b=e.target.closest('button[data-pt]');if(!b)return;state.sel=b.dataset.pt;renderMatrix();});
+    }
+
+    document.getElementById('foot').innerHTML=
+      `ข้อมูล: GOOGL รายวัน (yfinance) · as of ${E.META.as_of} · ทิศ/ADX/ATR% คำนวณสดจาก <span class="eq">_kit/engine.js</span> (แหล่งเดียว) · ส่วนที่ระบุ “สมมุติ” เป็นภาพประกอบ ไม่ใช่ราคาจริง · self-contained / offline · MyInvest Visual Library`;
+
+    renderHero(); renderDirection(); renderNoise(); renderMatrix(); renderGate(); renderQuiz(); wire();
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

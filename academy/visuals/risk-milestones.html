@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>เกราะกันพัง — Drawdown + บันไดปลดล็อกเงินจริง | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  .phaseflow { display:flex; gap:.6rem; align-items:stretch; flex-wrap:wrap; margin-top:22px; }
+  .phasebox { flex:1; min-width:210px; background:var(--bg2); border-radius:var(--radius); padding:1rem 1.125rem; }
+  .phasebox h4 { font-size:1rem; line-height:1.35; margin-bottom:.4rem; }
+  .phasebox p { font-size:.875rem; color:var(--ink2); margin-top:.5rem; max-width:none; }
+  .phasearrow { align-self:center; color:var(--ink3); font-weight:700; font-size:1.25rem; }
+  .bchk { display:flex; gap:.875rem; align-items:flex-start; padding:.85rem 1rem; background:var(--bg2); border-radius:var(--radius); margin-bottom:.55rem; }
+  .bchk .n { flex:none; width:30px; height:30px; border-radius:50%; background:var(--blue); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:.9rem; }
+  .bchk.manual .n { background:var(--warn); }
+  .bchk .b { flex:1; }
+  .bchk h4 { font-size:1rem; line-height:1.4; }
+  .bchk p { font-size:.875rem; color:var(--ink2); margin-top:.25rem; max-width:none; }
+  .lightcap { font-size:.9rem; color:var(--ink2); margin-top:.6rem; max-width:none; }
+  .whycol h4 { font-size:1rem; margin-bottom:.35rem; }
+  .whycol p { font-size:.9rem; color:var(--ink2); max-width:none; }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">เกราะกันพัง — Drawdown + บันไดปลดล็อกเงินจริง</h1>
+    <p class="lead">หน้านี้คือระบบเบรกของพอร์ต swing: ด่านสภาพตลาด (regime) ที่ต้องผ่านทุกวัน ·
+      บันไดพักอัตโนมัติเมื่อพอร์ตย่อ (drawdown) · และหมุดหมาย (milestones) ที่ต้องครบก่อนแตะเงินจริง ·
+      กฎทุกข้อเล่าซ้ำจาก <b>soul-swing.md</b> พร้อมระบุที่มา และเลขดึงจากกล่องกติกากลาง (canon) ตัวเดียวกับที่เครื่องใช้</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#regime" class="on">ด่านแรกของทุกวัน</a>
+    <a href="#drawdown">บันได 4 ขั้นเมื่อพอร์ตย่อ</a>
+    <a href="#milestones">5 หมุดหมายก่อนแตะเงินจริง</a>
+    <a href="#behave">ก่อนกดซื้อทุกครั้ง</a>
+    <a href="#quiz">แบบทดสอบ</a>
+  </nav>
+
+  <!-- ===== A · REGIME ===== -->
+  <section id="regime" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ด่านแรกของทุกวัน: สภาพตลาด (regime)</h2>
+      <p class="lead" id="regimeLead"></p>
+      <div class="card" style="margin-top:22px">
+        <div id="regimePill" style="margin-bottom:.7rem"></div>
+        <div class="row">
+          <div class="col">
+            <svg id="skGreen" viewBox="0 0 320 160" width="100%" aria-label="ภาพร่างแนวคิด: SPY ปิดเหนือเส้นค่าเฉลี่ย = เปิดไม้ใหม่ได้"></svg>
+            <p class="lightcap" id="capGreen"></p>
+          </div>
+          <div class="col">
+            <svg id="skRed" viewBox="0 0 320 160" width="100%" aria-label="ภาพร่างแนวคิด: SPY ปิดใต้เส้นค่าเฉลี่ย = ห้ามเปิดไม้ใหม่"></svg>
+            <p class="lightcap" id="capRed"></p>
+          </div>
+        </div>
+        <div class="note" id="regimeNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B · DRAWDOWN LADDER (centerpiece) ===== -->
+  <section id="drawdown" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">บันได <span id="ddN"></span> ขั้นเมื่อพอร์ตย่อ (drawdown)</h2>
+      <p class="lead">drawdown (การย่อจากจุดสูงสุด) ของพอร์ต Active วัดจากจุดสูงสุดล่าสุดเสมอ ·
+        ย่อลึกถึงเส้นไหน เบรกขั้นนั้นทำงานทันที · ยิ่งลึกเบรกยิ่งแรง และทุกขั้นมีการบ้านบังคับ ไม่ใช่แค่นั่งรอเวลา</p>
+      <div class="card" style="margin-top:22px">
+        <div id="ladderPill" style="margin-bottom:.5rem"></div>
+        <div class="chartwrap">
+          <svg id="ladderSvg" viewBox="0 0 700 350" width="100%" aria-label="บันไดลงทีละขั้นของกติกาพักเมื่อพอร์ตย่อ"></svg>
+        </div>
+      </div>
+      <div class="card">
+        <h3>ความหมายของแต่ละขั้น</h3>
+        <div id="ddRows" style="margin-top:14px"></div>
+      </div>
+      <div class="card" id="recoveryBox"></div>
+      <div class="card" id="whyLadder"></div>
+    </div>
+  </section>
+
+  <!-- ===== C · MILESTONES ===== -->
+  <section id="milestones" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title"><span id="msN"></span> หมุดหมาย (milestones) ก่อนแตะเงินจริง</h2>
+      <p class="lead">ระบบไม่ปลดล็อกเงินจริงด้วยเวลา แต่ปลดล็อกด้วยผลงานและวินัยที่วัดได้จริงจากพอร์ตกระดาษ ·
+        ครบทุกข้อเท่านั้นจึงขยับขั้น</p>
+      <div class="phaseflow" id="phaseFlow"></div>
+      <div id="msRows" style="margin-top:22px"></div>
+      <div class="card" id="msNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== D · BEHAVIOR ===== -->
+  <section id="behave" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ก่อนกดซื้อทุกครั้ง: เช็กลิสต์พฤติกรรม <span id="behN"></span> ข้อ</h2>
+      <p class="lead">ด่านสุดท้ายไม่ใช่ตลาด แต่คือพฤติกรรมตัวเอง · ทุกข้อต้องตอบ “ใช่” ครบ · มีข้อเดียวเป็น “ไม่” = ไม่เข้าไม้</p>
+      <div class="card" style="margin-top:22px">
+        <div id="behList"></div>
+        <div class="note" id="behNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== E · QUIZ ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ: เกราะกันพัง</h2>
+      <p class="lead">8 ข้อ ตอบแล้วเฉลยทันทีพร้อมที่มาของกฎ · เกณฑ์ผ่าน 80% · ทำใหม่ได้ ระบบสลับข้อและตัวเลือกให้</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var E=window.ENGINE, CH=window.CHARTS, C=CH.C, CN=window.CANON, X=window.CANON_X, G=E.GATES;
+    var f=function(n,dp){return E.fmt(n,dp==null?2:dp);};
+    function usd(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+
+    /* ---------- canon-derived values (ห้าม hardcode แถวกติกา) ---------- */
+    var DD=X.drawdown, MS=X.milestones, P=X.port.usd;
+    var LD=DD[DD.length-1], RG=CN.regime.spy_sma_len;
+    function ddStr(d){return '−'+Math.abs(d)+'%';}
+    function lvl(d){return Math.round(P*(1+d/100));}            // เพดานดอลลาร์ของแต่ละขั้น (ปัดเต็มดอลลาร์)
+    var recPct=(function(){var m=String(X.drawdown_recovery).match(/(\d+)\s*%/);return m?+m[1]:50;})();
+    function mNum(i){var m=String(MS[i].rule).match(/\d+/);return m?m[0]:'?';}
+    var loss1=P-lvl(DD[0].dd);                                  // ส่วนที่หายเมื่อแตะขั้นแรก
+    var rec1=Math.ceil(loss1*recPct/100);                       // ต้องกู้กลับอย่างน้อยเท่านี้
+
+    /* ---------- hero ---------- */
+    document.getElementById('heroKpis').innerHTML=[
+      [String(DD.length),'ขั้นบันได drawdown',ddStr(DD[0].dd)+' → '+ddStr(LD.dd)],
+      [recPct+'%','กู้คืนก่อนกลับมาเข้าไม้','วัดจากส่วนที่หายไป'],
+      [String(MS.length),'หมุดหมายปลดล็อก','ครบทุกข้อเท่านั้น'],
+      ['5%','ทุนจริงเมื่อเข้า Phase 2','แบ่งจากเล่ม Passive']
+    ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+' · '+k[2]+'</span></div>';}).join('');
+
+    /* ---------- A · regime ---------- */
+    document.getElementById('regimeLead').innerHTML='ก่อนมองหุ้นรายตัว ระบบบังคับให้เช็คด่านเดียวก่อนทุกวัน: '+
+      'ดัชนีตลาดรวม SPY ยังปิดเหนือเส้นค่าเฉลี่ย '+RG+' วัน (SMA'+RG+') หรือไม่ · ถ้าไม่ ระบบสั่ง “ห้ามเปิดไม้ใหม่” ทั้งกระดาน';
+    document.getElementById('regimePill').innerHTML='<span class="pill y">ภาพร่างแนวคิด (ไม่ใช่ราคาจริง)</span> '+
+      '<span class="pill g">เกณฑ์จริงจาก canon: SPY ปิดเหนือ SMA'+RG+'</span>';
+    function sketch(above){
+      var sma  = above?'M16,116 C90,108 200,94 304,80':'M16,80 C90,84 200,96 304,106';
+      var price= above?'M16,124 C66,114 116,110 166,88 C212,68 258,58 304,40':'M16,52 C66,62 116,68 166,94 C212,116 258,124 304,136';
+      var pc=above?C.up:C.down, tc=above?'var(--up)':'var(--down)';
+      var badge=above?'เปิดไม้ใหม่ได้':'ห้ามเปิดไม้ใหม่';
+      var endY=above?40:136, spyY=above?32:152, smaY=above?98:96;
+      return '<rect x="80" y="12" width="160" height="28" rx="14" fill="'+pc+'" opacity=".13"/>'+
+        '<circle cx="98" cy="26" r="6" fill="'+pc+'"/>'+
+        '<text x="112" y="31" font-size="13" font-weight="700" style="fill:'+tc+'" font-family="inherit">'+badge+'</text>'+
+        '<path d="'+sma+'" fill="none" stroke="'+C.mute+'" stroke-width="2" stroke-dasharray="5 4"/>'+
+        '<path d="'+price+'" fill="none" stroke="'+pc+'" stroke-width="2.6" stroke-linecap="round"/>'+
+        '<circle cx="304" cy="'+endY+'" r="4.5" fill="'+pc+'"/>'+
+        '<text x="300" y="'+spyY+'" text-anchor="end" font-size="12" font-weight="700" style="fill:'+tc+'" font-family="inherit">SPY</text>'+
+        '<text x="300" y="'+smaY+'" text-anchor="end" font-size="12" fill="'+C.mute+'" font-family="inherit">SMA'+RG+'</text>';
+    }
+    document.getElementById('skGreen').innerHTML=sketch(true);
+    document.getElementById('skRed').innerHTML=sketch(false);
+    document.getElementById('capGreen').innerHTML='<b class="up">ไฟเขียว</b> · SPY ปิดเหนือ SMA'+RG+' · เปิดไม้ใหม่ได้ตามปกติ (ยังต้องผ่านเกณฑ์ setup รายตัวอีกชั้น)';
+    document.getElementById('capRed').innerHTML='<b class="down">ไฟแดง</b> · SPY ปิดใต้ SMA'+RG+' · ห้ามเปิดไม้ใหม่ทั้งระบบ · ไม้ที่ถืออยู่แล้วไม่ต้องขายหนี ยังถือและออกตามแผนเดิม (stop / เป้า / time-stop)';
+    document.getElementById('regimeNote').innerHTML='<b>เปรียบง่าย ๆ:</b> นี่คือไฟแดงที่หัวถนน · ต่อให้รถเราสวยแค่ไหนก็ต้องหยุด · '+
+      'หุ้นที่เฝ้าจะเข้าเกณฑ์ breakout เป๊ะทุกข้อ ถ้า regime แดงก็ยังเข้าไม่ได้ เพราะตลาดรวมขาลงกดความน่าจะเป็นของทุกไม้พร้อมกัน · '+
+      'ของจริงเครื่องตรวจข้อนี้ให้อัตโนมัติใน <span class="eq">/swing-checklist</span> (engine <span class="eq">src/backtest/live.py</span>) · '+
+      'เกณฑ์อยู่ในกล่องกติกากลาง <span class="eq">CANON.regime</span> (mirror ของ <span class="eq">src/backtest/rules.py</span>)';
+
+    /* ---------- B · drawdown ladder (วาดจาก loop array — กติกาเปลี่ยน หน้าเปลี่ยนตาม) ---------- */
+    document.getElementById('ddN').textContent=String(DD.length);
+    document.getElementById('ladderPill').innerHTML='<span class="pill y">ตัวอย่างคำนวณจากทุนกระดาษ $'+usd(P)+' · สมมุติจุดสูงสุดเท่าทุนตั้งต้น</span>';
+    function renderLadder(){
+      var W=700, yTop=64, yBot=300, x0=72, platW=116, padR=26;
+      var n=DD.length;
+      var maxAbs=Math.max.apply(null,DD.map(function(r){return Math.abs(r.dd);}));
+      var treadW=(W-padR-x0-platW)/n;
+      function yOf(dd){return yTop+Math.abs(dd)/maxAbs*(yBot-yTop);}
+      var s='';
+      s+='<text x="'+x0+'" y="'+(yTop-32)+'" class="vlbl" style="font-size:.8rem">จุดสูงสุดของพอร์ต (peak)</text>';
+      s+='<text x="'+x0+'" y="'+(yTop-12)+'" style="fill:var(--ink);font-size:.95rem;font-weight:700" font-family="inherit">$'+usd(P)+' = ทุนตั้งต้นพอร์ตกระดาษ</text>';
+      s+='<line x1="'+x0+'" y1="'+yTop+'" x2="'+(x0+platW)+'" y2="'+yTop+'" stroke="'+C.adx+'" stroke-width="5" stroke-linecap="round"/>';
+      s+='<line x1="'+(x0+platW)+'" y1="'+yTop+'" x2="'+(W-padR)+'" y2="'+yTop+'" style="stroke:var(--line)" stroke-width="1" stroke-dasharray="3 4"/>';
+      DD.forEach(function(r,i){
+        var xs=x0+platW+i*treadW, xe=xs+treadW;
+        var y=yOf(r.dd), yPrev=i?yOf(DD[i-1].dd):yTop;
+        var cv=(i===n-1)?'var(--down)':'var(--flat)';
+        s+='<line x1="'+x0+'" y1="'+y+'" x2="'+xs+'" y2="'+y+'" style="stroke:var(--line)" stroke-width="1" stroke-dasharray="2 5"/>';
+        s+='<text x="'+(x0-10)+'" y="'+(y+4)+'" text-anchor="end" style="fill:'+cv+';font-size:.85rem;font-weight:700" font-family="inherit">'+ddStr(r.dd)+'</text>';
+        s+='<line x1="'+xs+'" y1="'+yPrev+'" x2="'+xs+'" y2="'+y+'" style="stroke:var(--ink3)" stroke-width="2"/>';
+        s+='<line x1="'+xs+'" y1="'+y+'" x2="'+xe+'" y2="'+y+'" style="stroke:'+cv+'" stroke-width="5" stroke-linecap="round"/>';
+        s+='<circle cx="'+(xs+20)+'" cy="'+(y-20)+'" r="12" style="fill:'+cv+'"/>'+
+           '<text x="'+(xs+20)+'" y="'+(y-15.5)+'" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--panel)" font-family="inherit">'+(i+1)+'</text>';
+        s+='<text x="'+(xs+treadW/2+12)+'" y="'+(y+20)+'" text-anchor="middle" class="vlbl" style="font-weight:700">แตะ $'+usd(lvl(r.dd))+'</text>';
+      });
+      s+='<text x="'+x0+'" y="340" class="vlbl">ลึกขึ้น = เบรกแรงขึ้น · เพดานเงินแต่ละขั้น = จุดสูงสุด × (1 − เปอร์เซ็นต์ย่อ) ปัดเป็นดอลลาร์เต็ม</text>';
+      document.getElementById('ladderSvg').innerHTML=s;
+    }
+    renderLadder();
+    document.getElementById('ddRows').innerHTML=DD.map(function(r,i){
+      var cv=(i===DD.length-1)?'var(--down)':'var(--flat)';
+      return '<div class="step" style="margin-bottom:10px"><div class="n" style="background:'+cv+'">'+(i+1)+'</div><div class="b">'+
+        '<h4>ข้ามเส้น '+ddStr(r.dd)+' · พอร์ตแตะ $'+usd(lvl(r.dd))+'</h4>'+
+        '<p style="margin:.3rem 0">'+r.action+'</p>'+
+        '<p class="tag">ที่มาของเลข: '+usd(P)+' × '+(1+r.dd/100).toFixed(2)+' ≈ $'+usd(lvl(r.dd))+'</p>'+
+        '</div></div>';
+    }).join('');
+    document.getElementById('recoveryBox').innerHTML=
+      '<h3>กฎกู้คืน (recovery rule): ครบเวลาอย่างเดียวยังไม่พอ</h3>'+
+      '<p class="muted" style="margin-top:8px">กติกาต้นทางเขียนว่า: “'+X.drawdown_recovery+'”</p>'+
+      '<div class="eq b">ตัวอย่างที่ขั้น '+ddStr(DD[0].dd)+': หายไป '+usd(P)+' − '+usd(lvl(DD[0].dd))+' = $'+usd(loss1)+
+      ' · ต้องกู้กลับ ≥ '+recPct+'% ของ '+usd(loss1)+' = <b>$'+usd(rec1)+'</b>'+
+      ' · พอร์ตต้องกลับมาแตะ ≥ $'+usd(lvl(DD[0].dd)+rec1)+' ก่อนเริ่มเข้าไม้ใหม่</div>'+
+      '<p class="note">จังหวะกลับมาเทรดถูกตัดสินด้วย “พอร์ตเริ่มฟื้นจริง” ไม่ใช่แค่ปฏิทินครบ: ตลาดหรือฝีมือ อย่างน้อยหนึ่งอย่างต้องเริ่มกลับมาก่อน</p>';
+    document.getElementById('whyLadder').innerHTML=
+      '<h3>ทำไมต้องเป็นขั้นบันได ไม่ใช่เส้นเดียวที่ '+ddStr(LD.dd)+'</h3>'+
+      '<div class="row" style="margin-top:14px">'+
+      '<div class="col whycol"><h4>พอร์ต swing ย่อเร็วกว่า Passive</h4><p>ถือสั้นและหมุนไม้ไว ความเสียหายจึงสะสมได้ในไม่กี่สัปดาห์ · กติกาต้นทางระบุตรง ๆ ว่าออกแบบการพักให้แรงโดยตั้งใจ (aggressive on purpose)</p></div>'+
+      '<div class="col whycol"><h4>เบรกเล็กแต่เนิ่น ถูกกว่าเบรกใหญ่ทีหลัง</h4><p>หยุดสั้น ๆ ตั้งแต่ขั้นแรก เสียโอกาสนิดเดียว แลกกับการตัดวงจรขาดทุนก่อนความเสียหายทบต้น · ดีกว่ารอให้ถึงขั้นแช่แข็งทั้งเล่มแล้วค่อยมาคิด</p></div>'+
+      '<div class="col whycol"><h4>ทุกขั้นบังคับทบทวนกระบวนการ</h4><p>ไม่มีขั้นไหนเป็นการนั่งรอเวลาเฉย ๆ · ทุกขั้นมีการบ้านชัดเจน เช่น ไล่ดูไม้ล่าสุดเพื่อหา pattern ความผิดพลาด · การพักจึงเป็นรอบเรียนรู้ ไม่ใช่บทลงโทษ</p></div>'+
+      '</div>';
+
+    /* ---------- C · milestones (loop array) ---------- */
+    document.getElementById('msN').textContent=String(MS.length);
+    document.getElementById('phaseFlow').innerHTML=
+      '<div class="phasebox"><h4>Phase 1 · เทรดกระดาษ (paper)</h4><span class="pill g">ตอนนี้อยู่ตรงนี้</span><p>ฝึกด้วยเงินสมมุติ แต่เก็บสถิติจริงทุกไม้: ผลลัพธ์ วินัย และบันทึกหลังปิด</p></div>'+
+      '<div class="phasearrow">→</div>'+
+      '<div class="phasebox"><h4>ครบหมุดหมายทั้ง '+MS.length+' ข้อ</h4><span class="pill y">ต้องครบทุกข้อ (AND)</span><p>ขาดข้อเดียวก็ยังไม่ผ่าน · ไม่มีทางลัด ไม่มีโหวตข้าม</p></div>'+
+      '<div class="phasearrow">→</div>'+
+      '<div class="phasebox"><h4>Phase 2 · เงินจริงก้อนแรก</h4><span class="pill r">ยังล็อกอยู่</span><p>แบ่งทุนจริง 5% จากเล่ม Passive มาเริ่ม ไม่ใช่ยกทั้งพอร์ต (ที่มา soul-swing.md §Phase Unlock) · แต่ละ Phase มีหมุดหมายของตัวเอง</p></div>';
+    document.getElementById('msRows').innerHTML=MS.map(function(m,i){
+      var isEdge=/expectancy/i.test(m.name);
+      return '<div class="step" style="margin-bottom:10px"><div class="n">'+(i+1)+'</div><div class="b">'+
+        '<h4>'+m.name+(isEdge?' <span class="pill g">นิยามของ “edge ยังดี”</span>':'')+'</h4>'+
+        '<p style="margin:.3rem 0"><b>เกณฑ์:</b> '+m.rule+'</p>'+
+        '<p class="tag">ทำไมต้องมี: '+m.why+(isEdge?
+          ' · ค่าเฉลี่ยกำไรต่อไม้แบบเลื่อนหน้าต่าง (rolling expectancy) ที่บวกซ้ำ ๆ คือคำตอบทางการของคำถาม “ระบบยังได้เปรียบอยู่ไหม” ก่อนแตะเงินจริง · พื้นฐานการอ่านค่านี้อยู่ใน <a href="./backtest-verdict.html">บทอ่านผลสอบ</a>':'')+'</p>'+
+        '</div></div>';
+    }).join('');
+    document.getElementById('msNote').innerHTML=
+      '<h3>หมุดหมายเป็นของคนเทรดคนเดียว · ระบบทำแทนไม่ได้</h3>'+
+      '<p class="muted" style="margin-top:8px">เครื่องช่วยได้แค่คัดหุ้น คำนวณขนาดไม้ และคอยเตือน แต่สิ่งที่หมุดหมายวัดคือ<b>วินัยของคนกดปุ่ม</b>: '+
+      'เข้า ถือ และออกตามแผนจริงไหม จดบันทึกหลังปิด (journal) สม่ำเสมอไหม · ต่อให้ AI เก่งแค่ไหนก็สอบแทนไม่ได้ '+
+      'เพราะข้อสอบคือพฤติกรรมของเรา ไม่ใช่ความสามารถของเครื่อง</p>';
+
+    /* ---------- D · behavioral checklist (ฉบับย่อ — ตัวเต็ม soul-swing.md) ---------- */
+    var BEH=[
+      ['ตรวจ setup แล้ว (verified)','ผ่าน <span class="eq">/swing-checklist</span>: ข้อบังคับครบ 4 + ข้อเสริมอย่างน้อย '+CN.breakout.optional_min_pass+' จาก 2 (canonical_v2)',true],
+      ['คำนวณขนาดไม้แล้ว (sized)','<span class="eq">/swing-sizer</span>: เสี่ยง '+CN.sizing.risk_pct+'% ของพอร์ตต่อไม้ และน้ำหนักไม้ไม่เกิน '+CN.sizing.max_weight_pct+'% ของพอร์ต',true],
+      ['ตั้ง stop ก่อนเข้า','จุดตัดขาดทุน (stop) ถูกเขียนลงตั๋ว (ticket) ก่อนกดซื้อ ไม่ใช่ “เดี๋ยวค่อยคิด”',true],
+      ['R:R ถึงเกณฑ์','ระยะถึงเป้าอย่างน้อย '+G.rrMin+' เท่าของระยะถึง stop (R:R ≥ 1:'+G.rrMin+') · เป้าแบบ r2 ของ breakout ตรึงไว้ที่ '+CN.breakout.rr_gate+' เท่า เกินพื้นนี้อัตโนมัติ',true],
+      ['No FOMO (ไม่ไล่ราคาเพราะกลัวตกรถ)','ถามตัวเอง: ถ้าราคาวิ่งไปแล้ว +3% จากตรงนี้ ยังกล้าเข้าไม้เดิมไหม · ถ้าไม่ = กำลังไล่ราคา → รอ',false],
+      ['งบยังไม่ใกล้','ประกาศผลประกอบการ (earnings) ห่างมากกว่า '+CN.earnings.min_days+' วัน (ราว 3 สัปดาห์) หรือไม้จะปิดก่อนงบ',true],
+      ['ความกระจุกตัวไม่เกินเพดาน','ไม่เติมไม้เข้ากลุ่มอุตสาหกรรม (sector) ที่แตะ '+CN.sizing.max_sector_pct+'% ของพอร์ต swing แล้ว',true]
+    ];
+    document.getElementById('behN').textContent=String(BEH.length);
+    document.getElementById('behList').innerHTML=BEH.map(function(b,i){
+      return '<div class="bchk'+(b[2]?'':' manual')+'"><div class="n">'+(i+1)+'</div><div class="b">'+
+        '<h4>'+b[0]+' '+(b[2]?'<span class="badge pass">เครื่องเช็คให้</span>':'<span class="badge warn">ต้องตอบเอง</span>')+'</h4>'+
+        '<p>'+b[1]+'</p></div></div>';
+    }).join('');
+    document.getElementById('behNote').innerHTML='หกข้อในนี้ <span class="eq">/swing-checklist</span> กับ <span class="eq">/swing-ticket</span> ตรวจให้อัตโนมัติแล้ว · '+
+      'เหลือข้อเดียวที่เครื่องตรวจแทนไม่ได้คือ <b>No FOMO</b> ต้องตอบเองตามตรงทุกครั้ง · '+
+      'ฉบับเต็มอยู่ใน <span class="eq">soul-swing.md</span> §Behavioral Checklist (หน้านี้คือฉบับย่อที่เล่าซ้ำพร้อมระบุที่มา)';
+
+    /* ---------- E · quiz (เลขกติกาประกอบ string จาก CANON/CANON_X) ---------- */
+    var QUIZ_BANK={
+      id:'risk-milestones', pass:0.8,
+      questions:[
+        { q:'พอร์ตเคยขึ้นไปสูงสุด $'+usd(P)+' ตอนนี้เหลือ $2,900 (ลงมา ~'+f((P-2900)/P*100,1)+'%) — ต้องทำอะไร?',
+          choices:['ไม่ต้องทำอะไร ยังไม่ถึง '+ddStr(DD[1].dd),'หยุดเข้าไม้ใหม่ 3 วัน + ทบทวน 5 ไม้ล่าสุด (ไม้เก่าถือ/ออกตามแผนเดิม)','ขายทุกไม้ทิ้งทันที','เพิ่มขนาดไม้เพื่อเอาคืน'], answer:1,
+          why:'ข้ามเส้น '+ddStr(DD[0].dd)+' จาก peak = ขั้นแรกของบันได — เบรกเล็กบังคับทบทวน ไม่ใช่ขายหนี และห้ามเร่งมือเอาคืน (revenge trade)',
+          ref:'soul-swing.md §Drawdown Protocol แถว '+ddStr(DD[0].dd) },
+        { q:'ถ้าพอร์ตลงไป '+ddStr(LD.dd)+' จาก peak เกิดอะไรขึ้น?',
+          choices:['พัก 2 สัปดาห์','ลดขนาดไม้ครึ่งหนึ่ง','แช่แข็งทั้งเล่ม Active · ทบทวนใหญ่กับ Kim · ตัดสินใจ ไปต่อ/ปรับ/ปิดระบบ','สลับไปเทรดท่าอื่น'], answer:2,
+          why:ddStr(LD.dd)+' คือขั้นสุดท้าย: ระบบหยุดสนิทจนกว่าการทบทวนเต็มรูปจะได้ข้อสรุป — กติกานี้เขียนไว้ก่อนเจ็บจริง เพื่อไม่ต้องตัดสินใจตอนใจพัง',
+          ref:'soul-swing.md §Drawdown Protocol แถว '+ddStr(LD.dd) },
+        { q:'กฎกู้คืน (recovery rule) ว่ายังไง?',
+          choices:['พักครบเวลาแล้วกลับมาเทรดได้เลย','พักต่อจนพอร์ตกู้คืนอย่างน้อย '+recPct+'% ของส่วนที่หายไปจาก peak','ต้องกลับไปเท่ากับ peak เป๊ะ','ต้องชนะ 3 ไม้ติด'], answer:1,
+          why:'เวลาครบอย่างเดียวไม่พอ — ตลาด/ฝีมือต้องเริ่มกลับมาก่อน วัดด้วยการกู้คืนครึ่งหนึ่งของที่เสียไป',
+          ref:'soul-swing.md §Drawdown Recovery rule' },
+        { q:'SPY ปิดใต้ SMA'+RG+' แต่หุ้นที่เฝ้าเข้าเกณฑ์ breakout เป๊ะทุกข้อ — เข้าได้ไหม?',
+          choices:['ได้ เพราะเกณฑ์ตัวหุ้นครบ','ได้ครึ่งไม้','ไม่ได้ — regime แดง = ห้ามเปิดไม้ใหม่ทั้งระบบ','ได้ ถ้าวอลุ่มเกิน 200%'], answer:2,
+          why:'regime คือด่านหน้าสุดและตัดทุกอย่าง: ตลาดรวมเป็นขาลง ความน่าจะเป็นของ breakout สำเร็จต่ำลงทั้งกระดาน',
+          ref:'CANON.regime: SPY > SMA'+RG+' เท่านั้น' },
+        { q:'หมุดหมายข้อ “'+MS[2].rule+'” คือนิยามของอะไร?',
+          choices:['ความเร็วในการเทรด','คำนิยามทางการของ “edge ยังดี” ก่อนแตะเงินจริง','จำนวนไม้ขั้นต่ำต่อเดือน','กำไรรวมขั้นต่ำ'], answer:1,
+          why:'ค่าเฉลี่ยกำไรต่อไม้แบบเลื่อนหน้าต่าง (rolling) ที่บวกซ้ำ ๆ 3 รอบ = หลักฐานว่าระบบยังได้เปรียบจริง ไม่ใช่ดวงช่วงสั้น',
+          ref:'soul-swing.md §Phase Unlock milestone 3' },
+        { q:'ปิดครบ '+mNum(0)+' ไม้แล้ว แต่ทำตามแผนได้แค่ 70% ของไม้ — ปลดล็อก Phase 2 ได้ไหม?',
+          choices:['ได้ เพราะจำนวนไม้ครบแล้ว','ได้ ถ้ากำไรรวมเป็นบวก','ไม่ได้ — ต้องครบทั้ง '+MS.length+' หมุดหมาย รวมถึงวินัยตามแผน ≥ '+mNum(3)+'%','ได้ โดยลดทุนจริงลงครึ่งหนึ่ง'], answer:2,
+          why:'หมุดหมายเป็นเงื่อนไข AND ทั้ง '+MS.length+' ข้อ — เงินจริงขยายทั้งกำไรและความผิดพลาด วินัยที่หลวมบนกระดาษจะแพงขึ้นทันทีของจริง',
+          ref:'soul-swing.md §Phase Unlock (ALL '+MS.length+')' },
+        { q:'ทำไมบันได drawdown ถึงเป็นขั้น ๆ แทนที่จะมีเส้นเดียวที่ '+ddStr(LD.dd)+'?',
+          choices:['ให้ดูเป็นระบบเฉย ๆ','เพราะ drawdown ฝั่ง swing มาเร็ว — เบรกเล็กแต่เนิ่น บังคับทบทวนก่อนความเสียหายทบต้น ถูกกว่ารอพังใหญ่','เพราะโบรกบังคับ','เพื่อให้เทรดได้ถี่ขึ้น'], answer:1,
+          why:'แต่ละขั้นคือ circuit breaker ที่เล็กพอจะไม่เจ็บ แต่บังคับหยุด-คิด: หา pattern ความผิดพลาดตั้งแต่ '+ddStr(DD[0].dd)+' ไม่ใช่ '+ddStr(LD.dd),
+          ref:'soul-swing.md §Drawdown (aggressive on purpose)' },
+        { q:'ปลดล็อก Phase 2 แล้ว ใช้เงินจริงเท่าไหร่?',
+          choices:['ทั้งพอร์ต Passive','แบ่ง 5% ของทุนจริงจากเล่ม Passive มาเริ่ม','$10,000','เท่าไหร่ก็ได้ตามสะดวก'], answer:1,
+          why:'เริ่มเล็กเสมอ: 5% จาก Passive — แต่ละ Phase มีหมุดหมายของตัวเอง ค่อยขยายเมื่อพิสูจน์เพิ่ม',
+          ref:'soul-swing.md §Phase Unlock (After all '+MS.length+')' }
+      ]
+    };
+
+    /* ---------- foot ---------- */
+    document.getElementById('foot').innerHTML='ที่มาของกฎ: <span class="eq">soul-swing.md</span> (§Drawdown Protocol · §Phase Unlock · §Behavioral Checklist) = ตัวบทหลัก · '+
+      'หน้านี้เล่าซ้ำพร้อมระบุที่มา ตัวจริงยึดตามไฟล์ต้นทาง · เลขกติกาดึงจาก <span class="eq">_kit/canon.js</span> (CANON / CANON_X — mirror ของ <span class="eq">src/backtest/rules.py</span> + soul-swing.md) · '+
+      'ตัวอย่างดอลลาร์คำนวณสดจากทุนกระดาษ $'+usd(P)+' (สมมุติจุดสูงสุดเท่าทุนตั้งต้น) · self-contained / offline · MyInvest Visual Library';
+
+    window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>อ่านผลสอบ backtest ให้เป็น | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  .warnstep .n { background:var(--warn); }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">อ่านผลสอบ backtest ให้เป็น</h1>
+    <p class="lead">ท่า breakout เพิ่งผ่านการสอบใหญ่รอบ P0 · หน้านี้สอนวิธีอ่าน "ใบรายงานผลสอบ" แบบมือใหม่:
+      ข้อสอบเก่ากับข้อสอบใหม่ต่างกันตรงไหน ทำไมข้อสอบจริงรันได้ครั้งเดียว
+      และคำเตือนอะไรติดมากับเลขสวย ๆ บ้าง</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#what" class="on">backtest คืออะไร</a>
+    <a href="#split">ข้อสอบเก่า vs ข้อสอบใหม่</a>
+    <a href="#once">ทำไม OOS รันได้ครั้งเดียว</a>
+    <a href="#results">ผลสอบจริงของ breakout</a>
+    <a href="#warnings">คำเตือน 3 ข้อ</a>
+    <a href="#quiz">แบบทดสอบ</a>
+  </nav>
+
+  <!-- ===== A · WHAT ===== -->
+  <section id="what" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">backtest คืออะไร</h2>
+      <p class="lead">backtest (จำลองเทรดย้อนหลัง) คือการนั่งไทม์แมชชีนกลับไปเทรดตามกติกาเป๊ะ ๆ
+        กับราคาในอดีต แล้ววัดว่าโดยเฉลี่ยได้หรือเสียไม้ละเท่าไหร่ ในหน่วย R
+        (1R = เงินที่ยอมเสี่ยงต่อไม้)</p>
+      <div style="margin-top:22px">
+        <div class="step" style="margin-bottom:10px"><div class="n">1</div><div class="b">
+          <h4>เขียนกติกาเป็นสูตรตายตัว</h4>
+          <p>เข้าเมื่อไหร่ ตั้งจุดตัดขาดทุน (stop) ตรงไหน ขายตรงไหน · ทุกข้อเป็นสูตรที่เครื่องอ่านได้
+            ไม่เหลือช่องให้ใช้ความรู้สึก</p>
+        </div></div>
+        <div class="step" style="margin-bottom:10px"><div class="n">2</div><div class="b">
+          <h4>เครื่องเล่นเทปราคาในอดีตวันต่อวัน</h4>
+          <p>เจอสัญญาณตามกติกาก็เข้า ชน stop ก็ออก ถึงเป้าก็ขาย · เหมือนเทรดจริงทุกอย่าง
+            ต่างแค่เป็นการซ้อมกับอดีต ไม่ใช่เงินจริง</p>
+        </div></div>
+        <div class="step"><div class="n">3</div><div class="b">
+          <h4>สรุปผลเป็นหน่วย R</h4>
+          <p>ทุกไม้ถูกแปลงเป็นหน่วยเดียวกัน: เสี่ยงไป 1 ส่วน ได้กลับมากี่ส่วน ·
+            ค่าเฉลี่ยต่อไม้เรียกว่ากำไรคาดหวัง (expectancy) ·
+            ตัวอย่างเลขกลม (สมมุติ): เสี่ยงไม้ละ $50 ไม้ที่ชนะ +2R ได้ $100 ไม้ที่แพ้เต็มไม้ เสีย $50</p>
+        </div></div>
+      </div>
+      <div class="note">หน่วย R กับกำไรคาดหวังมีบทของตัวเอง: <a href="./rr-expectancy.html">R:R &amp; Expectancy</a> ·
+        ส่วนกติกาที่ถูกจับสอบในหน้านี้คือ <a href="./setup-patterns.html">กติกา Breakout v2</a></div>
+    </div>
+  </section>
+
+  <!-- ===== B · SPLIT ===== -->
+  <section id="split" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ข้อสอบเก่า vs ข้อสอบใหม่</h2>
+      <p class="lead">แบ่งข้อมูลอดีตเป็น 2 ก้อนตั้งแต่ก่อนเริ่ม: ก้อนฝึก (in-sample) เอาไว้คิดและปรับกติกา
+        กับก้อนสอบ (out-of-sample หรือ OOS) ที่ระบบไม่เคยเห็น เอาไว้วัดของจริง</p>
+      <p class="muted" style="margin-top:14px">เหตุผลเหมือนการติวสอบ: นักเรียนที่ทำข้อสอบเก่าชุดเดิมซ้ำ ๆ จนคะแนนเต็ม
+        อาจแค่จำเฉลย ไม่ได้เข้าใจจริง · กติกาเทรดก็เช่นกัน ถ้าใช้ข้อมูลก้อนเดียวทั้งคิดทั้งตรวจ
+        กติกาจะถูกดัดให้พอดีกับอดีตก้อนนั้นจนเลขสวยเกินจริง อาการนี้เรียกว่าการจำข้อสอบ (overfitting)</p>
+      <div class="card" style="margin-top:22px">
+        <div class="chartwrap"><svg id="timelineSvg" viewBox="0 0 700 140" width="100%" aria-label="เส้นเวลาแบ่งช่วงฝึกกับช่วงข้อสอบ"></svg></div>
+        <div class="legend" id="tlLegend"></div>
+        <div class="note">ช่วงฝึกถูกใช้คิดและปรับกติกาหลายรอบจนได้ฉบับ canonical_v2 ·
+          ส่วน 12 เดือนล่าสุดถูกกันไว้เป็นข้อสอบที่ระบบไม่เคยเห็นเลย จนถึงวันสอบจริง</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== C · ONCE ===== -->
+  <section id="once" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทำไมข้อสอบ OOS รันได้ครั้งเดียว</h2>
+      <p class="lead">หัวใจของหน้านี้: ถ้ารันข้อสอบซ้ำหลายรอบแล้วกลับไปแก้กติกาจนผลออกมาสวย
+        เท่ากับเลือกคำตอบที่ถูกใจโดยไม่รู้ตัว · อาการนี้เรียกว่าการแอบส่องข้อมูล (data snooping)</p>
+      <p class="muted" style="margin-top:14px">ทุกครั้งที่เห็นผลสอบแล้วย้อนไปแก้กติกา ข้อสอบชุดนั้นจะกลายเป็นข้อสอบเก่าทันที
+        เพราะคำตอบรั่วเข้าไปอยู่ในกติกาแล้ว · รอบ P0 จึงวางลำดับไว้แบบนี้:</p>
+      <div style="margin-top:18px">
+        <div class="step" style="margin-bottom:10px"><div class="n">1</div><div class="b">
+          <h4>ประกาศเกณฑ์ก่อนรัน</h4>
+          <p>เขียนเกณฑ์ผ่านหรือตกลงเอกสารล่วงหน้า (<span class="eq">quant/backtest-p0-design.md</span>)
+            ก่อนใครได้เห็นผลข้อสอบแม้แต่ตัวเดียว</p>
+        </div></div>
+        <div class="step" style="margin-bottom:10px"><div class="n">2</div><div class="b">
+          <h4>ปรับกติกาได้เฉพาะในช่วงฝึก</h4>
+          <p>สนามฝึกรันกี่รอบก็ได้ ปรับจนได้กติกาฉบับ canonical_v2 แล้วล็อกเลขทุกตัวไว้ก่อนสอบ</p>
+        </div></div>
+        <div class="step"><div class="n">3</div><div class="b">
+          <h4>รัน OOS ครั้งเดียวแล้วจบ</h4>
+          <p>ผลออกมายังไงตัดสินตามนั้น: ผ่านก็ใช้ต่อ ตกก็พักท่า ·
+            ไม่มีการปรับจูนแล้วขอสอบใหม่ เพราะนั่นคือการแอบส่องข้อมูลนั่นเอง</p>
+        </div></div>
+      </div>
+      <div class="note" id="onceNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== D · RESULTS ===== -->
+  <section id="results" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ผลสอบจริงของ breakout</h2>
+      <p class="lead">สองแถวนี้คือใบรายงานผลรอบ P0 ของท่า breakout ·
+        ตัวเลขทุกตัวดึงสดจากกล่องเลขกลาง (canon) ตัวเดียวกับที่ทุกหน้าในห้องสมุดใช้</p>
+      <div class="card" style="margin-top:22px">
+        <div class="scroll" id="resWrap"></div>
+        <div class="note">เครื่องหมาย "–" = ไม่ได้วัดในรอบนั้น: อัตราชนะรายงานไว้เฉพาะรอบข้อสอบ
+          ส่วนตารางความทนรันเฉพาะช่วงฝึก · ข้อสอบ OOS คือ 12 เดือนล่าสุด รันครั้งเดียว</div>
+      </div>
+      <div class="row" style="margin-top:18px">
+        <div class="card col">
+          <h3>ช่วงเชื่อมั่น (confidence interval, CI) อ่านยังไง</h3>
+          <p class="muted" style="margin-top:8px">ค่าเฉลี่ยจากไม้จำนวนจำกัดมีดวงปนเสมอ ·
+            CI 90% คือช่วงที่ค่าจริงน่าจะอยู่ ถ้าวัดซ้ำในเงื่อนไขเดิมหลาย ๆ ครั้ง</p>
+          <div class="note" id="ciRead"></div>
+        </div>
+        <div class="card col">
+          <h3>ตารางทดสอบความทน (sensitivity) คืออะไร</h3>
+          <p class="muted" style="margin-top:8px">ลองขยับค่าตั้งของกติกาทีละนิด ซ้ายบ้างขวาบ้าง
+            แล้วดูว่าผลยังบวกไหม · ถ้าบวกเฉพาะค่าเป๊ะ ๆ ค่าเดียว แปลว่าน่าสงสัยว่าฟลุก</p>
+          <div class="note" id="sensRead"></div>
+        </div>
+      </div>
+      <div class="note" id="pbNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== E · WARNINGS ===== -->
+  <section id="warnings" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">คำเตือน 3 ข้อที่ติดมากับผลสอบ</h2>
+      <p class="lead">ใบรายงานผลแนบคำเตือนมาด้วยเสมอ · สามข้อนี้ถูกบันทึกไว้ในกล่องเลขกลางคู่กับตัวเลข
+        เพื่อไม่ให้เลขสวยถูกเล่าโดด ๆ</p>
+      <div id="warnBox" style="margin-top:22px"></div>
+      <div class="card" id="edgeExample" style="margin-top:18px"></div>
+    </div>
+  </section>
+
+  <!-- ===== F · QUIZ ===== -->
+  <section id="quiz" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ</h2>
+      <p class="lead">8 ข้อ ตอบแล้วเฉลยทันทีพร้อมที่มาของกฎ · เกณฑ์ผ่าน 80% ·
+        ปุ่มทำใหม่จะสลับทั้งลำดับข้อและลำดับตัวเลือก</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var E=window.ENGINE, CH=window.CHARTS, C=CH.C, X=window.CANON_X, S=window.CANON.sizing;
+    var ins=X.results.insample, oos=X.results.oos;
+    var sensN=ins.cells_positive.split('/')[1];           // จำนวนช่องของตาราง sensitivity (จาก canon)
+    /* เลขบริบทของท่า pullback ที่ยังไม่อยู่ใน canon.js · ที่มา: รายงาน P0
+       quant/backtests/2026-06-11-p0-oos-canonical_v2/report.md
+       (trend_pullback รอบข้อสอบ exp +0.027R ปัดเป็น +0.03R · ช่วงฝึกติดลบ 25 จาก 27 ช่อง sensitivity) */
+    var PB_OOS_R='+0.03', PB_CELLS_NEG='25/'+sensN;
+
+    function thous(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+    function ciTxt(ci){ return '[+'+ci[0]+', +'+ci[1]+']'; }
+
+    /* ---------- hero KPIs ---------- */
+    function renderHero(){
+      document.getElementById('heroKpis').innerHTML=[
+        ['+'+ins.exp_r+'R','เฉลี่ยต่อไม้','ช่วงฝึก (in-sample) '+ins.trades+' ไม้'],
+        ['+'+oos.exp_r+'R','เฉลี่ยต่อไม้','ข้อสอบ (OOS) '+oos.trades+' ไม้'],
+        [oos.win_pct+'%','อัตราชนะ','รอบข้อสอบ OOS'],
+        [ins.cells_positive,'ช่องทดสอบความทน','ขยับค่าแล้วยังบวก']
+      ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+' · '+k[2]+'</span></div>';}).join('');
+    }
+
+    /* ---------- timeline (#split) ---------- */
+    function renderTimeline(){
+      var Y0=2018, SPLIT=2025.45, Y1=2026.45;   // ช่วงฝึก 2018 → กลางปี 2025 · ข้อสอบ 12 เดือนถัดมา
+      var x0=36, w=628;
+      function xOf(t){ return x0+(t-Y0)/(Y1-Y0)*w; }
+      var yBar=52, hBar=40, xs=xOf(SPLIT), xe=xOf(Y1);
+      var midTrain=((x0+xs)/2).toFixed(1);
+      var svg='';
+      svg+='<rect x="'+x0+'" y="'+yBar+'" width="'+(xs-x0-2).toFixed(1)+'" height="'+hBar+'" rx="9" style="fill:var(--blue)"/>';
+      svg+='<rect x="'+(xs+2).toFixed(1)+'" y="'+yBar+'" width="'+(xe-xs-2).toFixed(1)+'" height="'+hBar+'" rx="9" style="fill:var(--up)"/>';
+      svg+='<text x="'+midTrain+'" y="22" text-anchor="middle" class="vlbl" style="font-size:.8rem;font-weight:700;fill:var(--blue-ink)">ช่วงฝึก (in-sample) · 2018 → กลางปี 2025</text>';
+      svg+='<text x="'+midTrain+'" y="40" text-anchor="middle" class="vlbl">เห็นผลได้ ปรับกติกาได้ · เทรดจำลอง '+ins.trades+' ไม้</text>';
+      svg+='<text x="'+xe.toFixed(1)+'" y="22" text-anchor="end" class="vlbl" style="font-size:.8rem;font-weight:700;fill:var(--up)">ข้อสอบ (OOS)</text>';
+      svg+='<text x="'+xe.toFixed(1)+'" y="40" text-anchor="end" class="vlbl">12 เดือนล่าสุด · '+oos.trades+' ไม้</text>';
+      svg+='<line x1="'+xs.toFixed(1)+'" y1="12" x2="'+xs.toFixed(1)+'" y2="'+(yBar+hBar+8)+'" stroke="'+C.ink+'" stroke-width="1.4" stroke-dasharray="4 3"/>';
+      [2018,2020,2022,2024,2026].forEach(function(yr){
+        svg+='<text x="'+xOf(yr).toFixed(1)+'" y="112" text-anchor="middle" class="vlbl">'+yr+'</text>';
+      });
+      svg+='<text x="'+(xs-8).toFixed(1)+'" y="132" text-anchor="end" class="vlbl">ตอนคิดและปรับกติกา ระบบไม่เคยเห็นข้อมูลหลังเส้นนี้</text>';
+      document.getElementById('timelineSvg').innerHTML=svg;
+      document.getElementById('tlLegend').innerHTML=
+        '<span><i style="background:var(--blue)"></i>ก้อนฝึก · คิดและปรับกติกา</span>'+
+        '<span><i style="background:var(--up)"></i>ก้อนสอบ · แตะได้ครั้งเดียว</span>';
+    }
+
+    /* ---------- once note (#once) ---------- */
+    function renderOnce(){
+      document.getElementById('onceNote').innerHTML=
+        '<b>บันทึกในกล่องเลขกลาง (canon):</b> "'+oos.note+'" · '+
+        '<b>แล้วหลักฐานชิ้นถัดไปมาจากไหน?</b> ไม้กระดาษจริงทุกไม้ที่ปิด คือข้อสอบใหม่ที่ไหลเข้ามาเอง '+
+        'วัดสะสมเป็นค่าเฉลี่ยแบบหน้าต่างเลื่อน (rolling expectancy) · '+
+        'เกณฑ์ทางการอยู่ในด่านปลดล็อกข้อ 3: "'+X.milestones[2].rule+'"';
+    }
+
+    /* ---------- results table (#results) ---------- */
+    function renderResults(){
+      var html='<table class="adxtbl"><thead><tr>'+
+        '<th>รอบสอบ</th><th>ไม้</th><th>เฉลี่ย/ไม้ (R)</th><th>ช่วงเชื่อมั่น 90%</th><th>ชนะ</th><th>ความทน (sensitivity)</th>'+
+        '</tr></thead><tbody>';
+      html+='<tr><td>ช่วงฝึก (in-sample)</td><td>'+ins.trades+'</td>'+
+        '<td><b class="up">+'+ins.exp_r+'</b></td><td>'+ciTxt(ins.ci90)+'</td><td>–</td>'+
+        '<td>บวกครบ '+ins.cells_positive+' ช่อง</td></tr>';
+      html+='<tr class="hot"><td>ข้อสอบ (OOS · 12 เดือนล่าสุด)</td><td>'+oos.trades+'</td>'+
+        '<td><b class="up">+'+oos.exp_r+'</b></td><td>'+ciTxt(oos.ci90)+'</td><td>'+oos.win_pct+'%</td>'+
+        '<td>–</td></tr>';
+      html+='</tbody></table>';
+      document.getElementById('resWrap').innerHTML=html;
+      document.getElementById('ciRead').innerHTML=
+        '<b>ของจริงรอบนี้:</b> ช่วงฝึก CI '+ciTxt(ins.ci90)+' และข้อสอบ CI '+ciTxt(oos.ci90)+
+        ' · ทั้งสองช่วงอยู่ฝั่งบวกทั้งแท่ง ไม่คร่อมศูนย์ = มั่นใจขึ้นมากว่ามีความได้เปรียบ (edge) จริง'+
+        ' (ถ้าช่วงคร่อมศูนย์เมื่อไหร่ แปลว่ายังฟันธงไม่ได้)';
+      document.getElementById('sensRead').innerHTML=
+        '<b>ของจริงรอบนี้:</b> breakout ยังบวกครบ '+ins.cells_positive+' ช่อง = ขยับค่าตั้งซ้ายขวาแล้วกำไรเฉลี่ยยังบวกทุกช่อง'+
+        ' ไม่ใช่ฟลุกของการตั้งค่าเดียว · ข้อควรจำ: ตารางนี้ใช้ตอบว่า "ทนไหม" เท่านั้น ห้ามใช้เลือกช่องที่สวยสุดมาเทรด';
+      document.getElementById('pbNote').innerHTML=
+        '<b>แถมท้าย:</b> อีกท่าหนึ่งคือย่อในเทรนด์ (trend pullback) สอบไม่ผ่าน · ช่วงฝึกติดลบ '+
+        X.pullback_insample_r+'R ต่อไม้ → สถานะ '+X.pattern_status.trend_pullback+' (พักการเทรด) · '+
+        'เรื่องเต็มอยู่ในบท <a href="./setup-patterns.html">กติกา Breakout v2 · ทำไม Pullback ถูกพัก</a>';
+    }
+
+    /* ---------- warnings (#warnings) ---------- */
+    function renderWarnings(){
+      var expl=[
+        'ความหมาย: ในฉากทดสอบที่คิดค่าเสียดทาน (friction) แบบโหดสุด ช่วงเชื่อมั่นลงมาแตะศูนย์พอดี · '+
+          'แปลว่ากำไรเฉลี่ยบางพอที่ค่าธรรมเนียม ส่วนต่างราคาที่ซื้อได้จริง (slippage) และความหละหลวมจากแผน จะกัดจนหมดได้จริง · '+
+          'ทางปฏิบัติ: ตั้งราคาแบบมีเพดาน (limit) ทุกไม้ วัด slippage ทุกไม้ และทำตามแผนให้ครบทุกขั้น',
+        'ความหมาย: ปีที่ตลาดเอื้อปีเดียวแบกผลงานเกือบทั้งหมด ปีอื่นเสมอตัวหรือขาดทุนบาง ๆ เป็นเรื่องปกติของท่านี้ · '+
+          'ทางปฏิบัติ: เตรียมใจกับปีแห้ง อย่าทิ้งระบบกลางคันเพราะผลช่วงสั้น · '+
+          'มีตาข่ายรองรับอยู่แล้ว: การทบทวนเพื่อหยุดระบบ (kill-review) จะทำงานเมื่อครบ 15 ไม้ขึ้นไปแล้วกำไรคาดหวังยังติดลบ',
+        'ความหมาย: ข้อสอบกินเวลาแค่ 1 ปี และเป็นปีที่ตลาดเข้าทางท่านี้พอดี เลขรอบสอบจึงอาจสูงกว่าฝีมือจริงระยะยาว · '+
+          'ทางปฏิบัติ: เวลาตั้งความคาดหวัง ให้ยึดเลขช่วงฝึกที่ต่ำกว่าเป็นฐาน แล้วปล่อยให้ไม้จริงทยอยยืนยัน'
+      ];
+      document.getElementById('warnBox').innerHTML=X.results.warnings.map(function(w,i){
+        return '<div class="step warnstep" style="margin-bottom:10px"><div class="n">'+(i+1)+'</div><div class="b">'+
+          '<h4>'+w+'</h4><p>'+expl[i]+'</p></div></div>';
+      }).join('');
+      // ตัวอย่างเลขกลม "edge บางหน้าตาเป็นยังไง" · derive จาก CANON.sizing ทั้งหมด
+      var riskExact=S.start_equity*S.risk_pct/100;     // 1% ของพอร์ต
+      var riskRound=Math.floor(riskExact);             // ปัดเป็นเลขกลม
+      var expRound=Math.round(ins.exp_r*100)/100;      // ค่าเฉลี่ยช่วงฝึก ปัด 2 ตำแหน่ง
+      var total10=Math.round(10*expRound*riskRound);   // 10 ไม้รวม
+      document.getElementById('edgeExample').innerHTML=
+        '<h3>"edge บาง" หน้าตาเป็นตัวเงินยังไง (ตัวอย่างเลขกลม)</h3>'+
+        '<p class="muted" style="margin-top:8px">เงินเสี่ยงต่อไม้ = '+S.risk_pct+'% ของพอร์ต $'+thous(S.start_equity)+
+          ' = $'+E.fmt(riskExact,2)+' ปัดเป็นเลขกลม $'+riskRound+' ต่อ 1R</p>'+
+        '<div class="eq b">10 ไม้ × เฉลี่ย +'+expRound+'R ต่อไม้ × $'+riskRound+' ต่อ R ≈ <b>+$'+total10+'</b> รวมทั้งสิบไม้</div>'+
+        '<p class="tag">ฐานคิดใช้ค่าเฉลี่ยช่วงฝึก +'+ins.exp_r+'R ปัดเหลือ +'+expRound+'R · จงใจใช้ตัวที่ต่ำกว่ารอบข้อสอบ เพื่อคาดหวังแบบปลอดภัยไว้ก่อน</p>'+
+        '<p class="muted" style="margin-top:8px">บวกจริงแต่บางจริง: แค่ค่าธรรมเนียมหรือความพลาดไม้ละไม่กี่ดอลลาร์ ก็กินก้อนนี้ไปสัดส่วนใหญ่แล้ว · '+
+          'นี่คือเหตุผลที่วินัยตามแผนและ slippage ถูกนับเป็นด่านปลดล็อกของระบบ</p>';
+    }
+
+    /* ---------- quiz bank ---------- */
+    var QUIZ_BANK={
+      id:'backtest-verdict', pass:0.8,
+      questions:[
+        { q:'in-sample กับ out-of-sample (OOS) ต่างกันยังไง?',
+          choices:['ช่วงตลาดขึ้น vs ช่วงตลาดลง','ข้อมูลที่ใช้ฝึก/ปรับกติกา vs ข้อมูลใหม่ที่ระบบไม่เคยเห็น','หุ้นใน watchlist vs นอก watchlist','เทรดมือ vs เทรดเครื่อง'], answer:1,
+          why:'in-sample = สนามฝึก (ปรับกติกาได้) · OOS = ข้อสอบจริงที่แตะได้ครั้งเดียว — ผ่านทั้งคู่ถึงเชื่อได้ว่าไม่ได้แค่จำข้อสอบ',
+          ref:'quant/backtest-p0-design.md' },
+        { q:'ทำไมห้ามรันข้อสอบ OOS ซ้ำ?',
+          choices:['เปลืองเวลาเครื่อง','ข้อมูลจะหมดอายุ','รันซ้ำแล้วเลือกรอบที่ผลสวย = หลอกตัวเองโดยไม่รู้ตัว (data snooping)','กฎหมายห้าม'], answer:2,
+          why:'ทุกครั้งที่เห็นผลแล้วกลับไปแก้กติกา ข้อสอบจะกลายเป็นข้อสอบเก่า — ความศักดิ์สิทธิ์ของ OOS อยู่ที่รันครั้งเดียว',
+          ref:'กติกา P0 (ประกาศเกณฑ์ก่อนรัน)' },
+        { q:'OOS ได้ +'+oos.exp_r+'R/ไม้ แปลว่าไม้ถัดไปจะได้ +'+(Math.round(oos.exp_r*10)/10)+'R ใช่ไหม?',
+          choices:['ใช่ ระบบการันตีแล้ว','ไม่ใช่ — เป็นค่าเฉลี่ยในอดีตจาก '+oos.trades+' ไม้ ไม้เดี่ยว ๆ ยังสุ่มแพ้/ชนะ','ใช่ ถ้าตลาดเป็นขาขึ้น','ไม่ใช่ เพราะตัวเลขถูกปัดเศษ'], answer:1,
+          why:'ผลสอบ = อ้างอิงในอดีต ไม่ใช่คำสัญญา · ค่าเฉลี่ยโผล่เมื่อทำซ้ำมาก ๆ ภายใต้วินัยเดิม — ไม้เดียวบอกอะไรไม่ได้',
+          ref:'CANON_X.results (อ้างอิง ไม่ใช่คำสัญญา)' },
+        { q:'ตารางทดสอบความทน (sensitivity) '+sensN+' ช่อง มีไว้ทำไม?',
+          choices:['หาช่องที่กำไรสูงสุดแล้วใช้ค่านั้น','วัดว่าผลบวกทนต่อการขยับตั้งค่าไหม — ไม่ใช่เครื่องมือหาค่าที่ดีที่สุด','เพิ่มจำนวนไม้ให้สถิติแน่น','ทดสอบความเร็วของโค้ด'], answer:1,
+          why:'ถ้าเอาช่องที่สวยสุดมาใช้ = overfit ย้อนหลัง · ค่าที่ใช้จริงประกาศก่อนเห็นผล แล้วใช้ตารางแค่ตอบว่า "ขยับแล้วยังบวกไหม" (breakout บวก '+ins.cells_positive+')',
+          ref:'backtest-p0-design §sensitivity ≠ optimizer' },
+        { q:'คำเตือน "edge บาง" ใช้ทำอะไรในทางปฏิบัติ?',
+          choices:['เลิกเทรดไปเลย','เพิ่มขนาดไม้ชดเชย','เคารพทุกรายละเอียดที่กัดกำไร: ค่าธรรมเนียม slippage และวินัยตามแผน เพราะฉากโหด CI แตะศูนย์','เปลี่ยนไปเทรดถี่ขึ้น'], answer:2,
+          why:'edge บางคือกำไรเฉลี่ยที่บางพอที่ friction จะกินหมดได้ — ระบบนี้จึงบังคับวัด slippage และวินัย ≥80% ใน milestone',
+          ref:'CANON_X.results.warnings' },
+        { q:'รู้ว่าปี 2024 แบกกำไรราว 3/4 ของทั้งหมด — ควรตีความยังไง?',
+          choices:['ระบบใช้ได้เฉพาะปี 2024','กำไรของท่านี้มาเป็นพัก ๆ ปีเสมอตัวหรือลบบางเป็นเรื่องปกติ — อย่าตัดสินระบบจากช่วงแห้งสั้น ๆ','ควรเทรดเฉพาะปีเลขคู่','แปลว่าข้อมูลผิด'], answer:1,
+          why:'breakout เป็นท่าที่พึ่งช่วงตลาดเอื้อ · จึงมีทั้ง kill-review (expectancy ติดลบหลัง ≥15 ไม้ → ทบทวน) และ milestone regime ≥2 แบบ คอยกันไม่ให้หลงทั้งสองทาง',
+          ref:'CANON_X.results.warnings · _PLAYBOOK kill-review' },
+        { q:'pullback ได้ OOS '+PB_OOS_R+'R (บวกนิดหน่อย) ทำไมยังโดนพัก?',
+          choices:['เพราะคะแนนติดลบใน in-sample หนัก ('+X.pullback_insample_r+'R, ลบ '+PB_CELLS_NEG+' ช่อง) และ '+PB_OOS_R+' คร่อมศูนย์ = ไม่มีหลักฐานพอ','เพราะโค้ดมีบั๊ก','เพราะถือนานเกิน','เพราะไม่มีใครชอบท่านี้'], answer:0,
+          why:'เกณฑ์ตัดสินประกาศก่อนรัน: ต้องผ่านทั้งช่วงฝึกและข้อสอบ · บวกจิ๋วที่คร่อมศูนย์หลังช่วงฝึกที่แพ้ยับ ไม่นับเป็นหลักฐาน',
+          ref:'soul-swing.md §Setup Patterns (PARKED)' },
+        { q:'หลักฐานชิ้นถัดไปว่าระบบยังมี edge จะมาจากไหน?',
+          choices:['รัน backtest ซ้ำทุกเดือน','ไม้กระดาษจริงทุกไม้ที่ปิด — คือข้อสอบใหม่ที่ไหลเข้ามาต่อเนื่อง วัดผ่าน rolling expectancy','ข่าวการเงินรายวัน','ความรู้สึกหลังเทรด'], answer:1,
+          why:'OOS รันซ้ำไม่ได้แล้ว → expectancy สะสมจากไม้จริง + milestone "'+X.milestones[2].rule+'" คือคำนิยามทางการของ "edge ยังดี"',
+          ref:'soul-swing.md §Phase Unlock (milestone 3)' }
+      ]
+    };
+
+    document.getElementById('foot').innerHTML='ผลสอบ P0 อ้างอิง <span class="eq">quant/backtests/2026-06-11-p0-oos-canonical_v2/</span> · '+
+      'เลขผลสอบทุกตัวดึงจาก <span class="eq">_kit/canon.js</span> (<span class="eq">CANON_X.results</span> + <span class="eq">CANON.sizing</span>) · '+
+      'ตัวเลขอ้างอิงในอดีต ไม่ใช่คำสัญญาผลตอบแทน · self-contained / offline · MyInvest Visual Library';
+
+    renderHero(); renderTimeline(); renderOnce(); renderResults(); renderWarnings();
+    window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

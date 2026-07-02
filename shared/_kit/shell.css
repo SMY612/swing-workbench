@@ -1,0 +1,166 @@
+/* ============================================================================
+   shared/_kit/shell.css — เปลือกร่วม (sidebar เดสก์ท็อป + bottom-nav มือถือ)
+   Liquid Glass: เปลือกเป็นกระจกโปร่งลอยมน (translucent + blur + rounded + rim)
+   key ด้วย semantic token จาก tokens.css → themeable มืด/สว่างอัตโนมัติ
+   ============================================================================ */
+
+.sw-layout { display: flex; align-items: stretch; min-height: 100vh; position: relative; z-index: 1; }
+.sw-main { flex: 1 1 auto; min-width: 0; }
+
+/* ---- ฉากพาสเทลร่วม (sw-scene · ฉีดโดย shell.js) — ให้กระจกอ่านออกทุกหน้า ----
+   กระจกโชว์สิ่งที่อยู่หลังมัน → ต้องมีสีอ่อน ๆ หลังเปลือกทุกหน้า ไม่งั้นเปลือกดูทึบ */
+.sw-scene {
+  position: fixed; inset: -10%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(460px circle at 26% 12%, rgba(244,160,205,.34), transparent 60%),
+    radial-gradient(500px circle at 92% 8%,  rgba(240,212,96,.30),  transparent 60%),
+    radial-gradient(580px circle at 86% 82%, rgba(150,190,245,.34), transparent 62%),
+    radial-gradient(460px circle at 12% 94%, rgba(120,200,200,.28), transparent 60%),
+    radial-gradient(440px circle at 58% 56%, rgba(190,165,235,.26), transparent 64%);
+  /* ไม่ใส่ filter:blur — gradient นุ่มอยู่แล้ว + กระจก (sidebar/การ์ด) เบลอฉากให้เอง
+     · เลี่ยงเลเยอร์ blur เต็มจอ = ลดภาระ compositing (กัน cursor เพี้ยน/screenshot ค้างบนจอ 2x) */
+}
+:root[data-theme="dark"] .sw-scene { opacity: .4; }
+
+/* self-contained — เปลือกต้องหน้าตาเหมือนกันทุกหน้า ไม่ขึ้นกับ reset/ฟอนต์ของหน้าที่ฝัง */
+.sw-shell-side, .sw-shell-side *,
+.sw-shell-top, .sw-shell-top *,
+.sw-shell-bottom, .sw-shell-bottom * { box-sizing: border-box; }
+
+/* ---- glass tokens ของเปลือก (light default + dark override) ---- */
+.sw-shell-side, .sw-shell-top, .sw-shell-bottom {
+  --sw-font: "IBM Plex Sans Thai", -apple-system, "Segoe UI", "Sarabun", system-ui, Tahoma, sans-serif;
+  --sw-glass: rgba(255,255,255,.60);
+  --sw-glass-brd: rgba(255,255,255,.55);
+  --sw-glass-rim: linear-gradient(150deg, rgba(255,255,255,.55), rgba(255,255,255,.1) 30%, rgba(255,255,255,0) 60%, rgba(255,255,255,.2));
+  --sw-glass-sh: 0 8px 30px rgba(40,52,84,.13);
+  --sw-glass-hi: rgba(255,255,255,.5);
+}
+:root[data-theme="dark"] .sw-shell-side,
+:root[data-theme="dark"] .sw-shell-top,
+:root[data-theme="dark"] .sw-shell-bottom {
+  --sw-glass: rgba(30,30,34,.55);
+  --sw-glass-brd: rgba(255,255,255,.12);
+  --sw-glass-rim: linear-gradient(150deg, rgba(255,255,255,.35), rgba(255,255,255,.08) 32%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
+  --sw-glass-sh: 0 10px 32px rgba(0,0,0,.55);
+  --sw-glass-hi: rgba(255,255,255,.18);
+}
+
+/* ---------- sidebar (เดสก์ท็อป) — กระจกลอยมน ---------- */
+.sw-shell-side {
+  flex: 0 0 248px; width: 248px;
+  position: sticky; top: 14px; align-self: flex-start; height: calc(100vh - 28px);
+  margin: 14px 0 14px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 12px;
+  background: var(--sw-glass);
+  -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+  border: 1px solid var(--sw-glass-brd);
+  border-radius: 24px;
+  box-shadow: var(--sw-glass-sh), inset 0 1px 0 var(--sw-glass-hi);
+  font-family: var(--sw-font);
+  transition: width .18s ease, flex-basis .18s ease;
+  overflow: hidden;
+}
+.sw-brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 16px; }
+.sw-logo { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; color: var(--text); text-decoration: none; }
+.sw-logo-mark {
+  flex: none; width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(140deg, #5BC6D6, #9B6FD8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+}
+.sw-logo-text { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
+/* ปุ่ม ☰ อยู่ "ซ้ายสุด" ของ brand (ก่อนโลโก้) — ตอนย่อ โลโก้หาย เหลือปุ่มที่ตำแหน่งเดิม
+   → ปุ่มแทบไม่ขยับ (~3px) กดซ้ำที่เดิมได้ · ระยะห่างจากโลโก้ใช้ gap ของ .sw-brand */
+.sw-collapse { flex: none; }
+
+.sw-nav { display: flex; flex-direction: column; gap: 3px; }
+.sw-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 11px; border-radius: 12px;
+  color: var(--text-muted); font-size: 14px; text-decoration: none;
+  white-space: nowrap; transition: background .14s ease, color .14s ease;
+}
+.sw-nav-item:hover { background: var(--surface-2); color: var(--text); }
+.sw-nav-item.active {
+  background: var(--accent-soft); color: var(--accent-ink); font-weight: 600;
+  box-shadow: inset 0 1px 0 var(--sw-glass-hi);
+}
+.sw-nav-item svg, .sw-tab svg { flex: none; }
+/* กันขีดเส้นใต้ตอน hover — หน้าอื่นมี global a:hover{underline} (wb.css / replay / theme.css) ทับเข้ามา */
+.sw-logo:hover, .sw-logo:focus,
+.sw-nav-item:hover, .sw-nav-item:focus,
+.sw-tab:hover, .sw-tab:focus { text-decoration: none; }
+
+.sw-side-foot { margin-top: auto; padding-top: 10px; display: flex; }
+
+.sw-iconbtn {
+  width: 34px; height: 34px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--text-muted);
+  transition: background .14s ease, color .14s ease;
+}
+.sw-iconbtn:hover { background: var(--surface-2); color: var(--text); }
+.sw-iconbtn:active { transform: scale(.94); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+
+/* ---------- collapsed sidebar ---------- */
+.sw-collapsed .sw-shell-side { flex-basis: 64px; width: 64px; padding-left: 9px; padding-right: 9px; }
+.sw-collapsed .sw-label { display: none; }
+.sw-collapsed .sw-logo { display: none; }            /* ย่อแล้วซ่อนโลโก้ เหลือแต่ปุ่ม ☰ */
+/* คงปุ่มชิดซ้าย (ไม่ center) → x เท่ากับตอนขยาย · ปุ่มกว้าง 34px ชิดซ้าย = กึ่งกลาง glyph
+   ตรงกับไอคอนเมนูที่จัดกึ่งกลางในแถบย่อพอดี */
+.sw-collapsed .sw-brand { justify-content: flex-start; padding-bottom: 12px; }
+.sw-collapsed .sw-collapse { margin-left: 0; }
+.sw-collapsed .sw-nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+
+/* ---------- top-bar + bottom-nav (มือถือ/แท็บเล็ต) — ซ่อนบนจอใหญ่ ---------- */
+.sw-shell-bottom, .sw-shell-top { display: none; }
+
+/* ≤1024 = สลับเป็นเลย์เอาต์มือถือ (เมนูล่าง + แถบบน) เนื้อหาเต็มกว้าง
+   ─ ทำไม 1024 ไม่ใช่ 720: sidebar เดสก์ท็อป 248px + masonry 3 คอลัมน์ (ต้องการเนื้อที่ ~860px)
+     ทำให้ช่วง ~720-1024 (แท็บเล็ตแนวตั้ง + แนวนอนแคบ) เนื้อหาเหลือ ~500-770px = อึด/ครึ่งๆกลาง
+   ─ ยกมาที่ 1024 → แท็บเล็ต (ทั้ง 2 ท่า) ได้เนื้อหาเต็มกว้าง masonry จัดคอลัมน์เองสบาย
+     เดสก์ท็อปจริง (>1024) ยังได้ sidebar ปกติ (เนื้อที่พอสำหรับ 3 คอลัมน์) */
+@media (max-width: 1024px) {
+  .sw-shell-side { display: none; }
+  .sw-shell-top {
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+    padding: 9px 14px;
+    background: var(--sw-glass);
+    -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--sw-glass-brd);
+    font-family: var(--sw-font);
+  }
+  .sw-shell-top .sw-logo-text { font-size: 15px; }
+  .sw-top-actions { display: flex; align-items: center; gap: 6px; }
+  .sw-shell-bottom {
+    display: flex; position: sticky; bottom: 0; z-index: 50;
+    margin: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    border-radius: 20px;
+    background: var(--sw-glass);
+    -webkit-backdrop-filter: blur(20px) saturate(165%); backdrop-filter: blur(20px) saturate(165%);
+    border: 1px solid var(--sw-glass-brd);
+    box-shadow: var(--sw-glass-sh), inset 0 1px 0 var(--sw-glass-hi);
+    padding: 4px 6px;
+    font-family: var(--sw-font);
+  }
+  .sw-main { padding-bottom: 6px; }
+  .sw-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 7px 0 6px; min-height: 52px; justify-content: center;
+    color: var(--text-faint); font-size: 11px; text-decoration: none;
+    border-radius: 14px;
+  }
+  .sw-tab.active { color: var(--accent); }
+  .sw-tab:active { background: var(--surface-2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-shell-side { transition: none; }
+  .sw-iconbtn:active { transform: none; }
+}

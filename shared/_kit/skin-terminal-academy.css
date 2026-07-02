@@ -1,0 +1,159 @@
+/* ============================================================================
+   shared/_kit/skin-terminal-academy.css — TERMINAL skin · ชั้น Academy (หน้าสอน)
+   ----------------------------------------------------------------------------
+   โหลดคู่ skin-terminal.css บนหน้าที่ตั้ง <html data-skin="terminal"> เฉพาะ
+   academy/visuals/*.html (เขียนด้วย theme.css = Apple-Store LIGHT + dark override).
+   สกินกลาง skin-terminal.css ทำ token สี/ฟอนต์/มุม + body ให้แล้ว — ไฟล์นี้เก็บงาน
+   ที่ theme.css ถือเอง (สกินกลางไม่ถึง):
+     1) token เฉพาะ academy ที่ theme.css ฮาร์ดโค้ด (ไม่ผ่าน semantic layer ของ
+        tokens.css) → remap ให้วิ่งตามสกิน  *สำคัญ: --blue-ink เดิม = var(--accent-ink)
+        ซึ่งในสกิน = สีเกือบเท่าพื้น → ลิงก์/หัวข้อจะจางหาย → ชี้กลับ var(--blue)*
+     2) แบนมุมมน/กระจก/gradient ที่ theme.css ฮาร์ดโค้ด (--radius ไม่ถึง) → เหลี่ยมคม
+     3) ลุค terminal เต็ม: label layer = mono uppercase + hatch คั่น + การ์ดโปร่งเส้นขอบ
+   ⚠️ ไม่แตะเนื้อความไทยยาว (p / .lead / h1-3 / .qz-q / .step body / .note) — คงฟอนต์อ่านสบาย
+   specificity: [data-skin="terminal"] .x = (0,2,0) ชนะ theme.css .x (0,1,0)
+   + โหลดหลัง theme.css → token block เสมอกัน (0,2,0) ก็ชนะด้วยลำดับ
+   ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1) TOKEN REMAP — ตัวแปรเฉพาะ academy ที่ theme.css ตั้งค่าคงที่ ไม่ผ่าน semantic
+   layer → ชี้ไปโทเคนสกินที่สลับมืด-สว่างเองแล้ว (บล็อกเดียวพอ · ตัวที่อ้างถึงพลิกธีมเอง)
+   --------------------------------------------------------------------------- */
+:root[data-skin="terminal"]{
+  --bg2:var(--surface-2);      /* section--alt / .step / .eq / well */
+  --bg3:var(--surface);        /* alt field รอง */
+  /* น้ำเงินเว็บ #2c6fd0 (--blue) ไม่เข้าลุค terminal → ใช้ accent (ดำ light / ลาเวนเดอร์ dark)
+     --blue-ink คุม CTA .lib-go/ลิงก์/.accent/.real/.val · ส่วน --blue เอง (motif index ·
+     slider/quiz-fill/dots/scrub) อยู่ใน 14-color contract ของ skin-terminal.css (0,3,0)
+     → ต้อง override ที่บล็อกธีมด้านล่าง (0,3,0) · content-page charts อ่าน --accent อยู่แล้ว */
+  --blue-ink:var(--accent);
+  --flat:var(--amber);         /* .flat = ทรงตัว/เท่าทุน */
+  --warn:var(--amber);
+  --cross:var(--purple);
+}
+/* soft tint "ระวัง/caution" (amber) — โทเคนเดียวที่ tokens.css ไม่มี (มีแค่ ok/bad)
+   ใช้ใน SVG สอน (heatmap read-the-chart · แท่ง Active passive-vs-active) */
+:root[data-skin="terminal"][data-theme="light"]{ --warn-bg:rgba(148,107,0,.13); --blue:var(--accent); }
+:root[data-skin="terminal"][data-theme="dark"]{  --warn-bg:rgba(210,175,100,.20); --blue:var(--accent); } /* ทองมิวต์ — แยก salmon/green ชัด · --blue→accent (override contract 0,3,0) */
+
+/* ---------------------------------------------------------------------------
+   2) FLATTEN — มุมมน/กระจก/gradient ที่ theme.css ฮาร์ดโค้ด (--radius ไม่ถึง) → คม
+   (radius ที่ผ่าน var(--radius*) แบนเองจากสกินกลางแล้ว: .step/.qz-result/.btn/.pill ฯลฯ)
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .eq,
+[data-skin="terminal"] .gate,
+[data-skin="terminal"] .selfcheck details,
+[data-skin="terminal"] .stepper select,
+[data-skin="terminal"] .qz-choice,
+[data-skin="terminal"] .qz-letter,
+[data-skin="terminal"] .qz-fb,
+[data-skin="terminal"] .tooltip,
+[data-skin="terminal"] .step .n,
+[data-skin="terminal"] .dots i,
+[data-skin="terminal"] .hero-card{ border-radius:0; }
+
+/* การ์ดทุกชนิด → กล่องโปร่ง (พื้นเท่าหน้าเว็บ --bg) + เส้นขอบ 1px + มุม 0
+   (เดิม .tile/.lib-feature/.ln-* พื้น --surface ขาว = สว่างเกิน → โปร่งให้กลืนพื้นหน้า) */
+[data-skin="terminal"] .card,
+[data-skin="terminal"] .tile,
+[data-skin="terminal"] .lib-feature,
+[data-skin="terminal"] .hero-card,
+[data-skin="terminal"] .gate,
+[data-skin="terminal"] .selfcheck details,
+[data-skin="terminal"] .ln-prev,
+[data-skin="terminal"] .ln-next{
+  background:transparent; border:1px solid var(--border); box-shadow:none; border-radius:0;
+}
+
+/* section--tint (hero wash gradient) → พื้นเรียบ · chipnav (แถบขาว/ดำโปร่ง) → กลืนพื้น */
+[data-skin="terminal"] .section--tint{ background:var(--surface-2); }
+[data-skin="terminal"] .chipnav{ background:var(--bg); border-bottom:1px solid var(--border); }
+
+/* ---------------------------------------------------------------------------
+   3) ACCENT BUTTONS + number badges — contrast fix ธีมมืด
+   (.btn/.qz-retry เดิม color:#fff บน --blue สว่าง = ขาวบนฟ้าอ่อน อ่านยาก)
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .btn,
+[data-skin="terminal"] .qz-retry{ background:var(--accent); color:var(--accent-ink); }
+[data-skin="terminal"] .btn:hover,
+[data-skin="terminal"] .qz-retry:hover{ background:var(--accent); opacity:.85; }
+
+/* เลขลำดับ (ขั้นตอน/คอร์ส/ตัวเลือก quiz) → ชิปเหลี่ยม mono นิ่ง (เดิมวงกลม accent+ขาว) */
+[data-skin="terminal"] .step .n,
+[data-skin="terminal"] .qz-letter,
+[data-skin="terminal"] .course li::before{
+  background:var(--surface-2); color:var(--text);
+  border:1px solid var(--border); border-radius:0; font-family:var(--mono);
+}
+
+/* ---------------------------------------------------------------------------
+   4) TERMINAL เต็ม — label layer = mono uppercase (เฉพาะ label สั้น · ไม่แตะเนื้อความ)
+   + hatch คั่นใต้ hero + เส้นคั่น section (ledger look)
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .eyebrow{
+  font-family:var(--mono); font-size:.75rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint);
+}
+[data-skin="terminal"] .tag,
+[data-skin="terminal"] .kpi span,
+[data-skin="terminal"] .legend,
+[data-skin="terminal"] .vlbl{ font-family:var(--mono); }
+[data-skin="terminal"] .kpi b,
+[data-skin="terminal"] .gate .k{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+[data-skin="terminal"] .sec-title{ letter-spacing:-.02em; }
+
+/* hatch ปิดท้าย hero (ลายเซ็น edgeskool · เหมือน .bf-hatch ของ briefing) */
+[data-skin="terminal"] .hero::after{
+  content:""; display:block; max-width:980px; margin:30px auto 0; height:20px;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:repeating-linear-gradient(135deg,var(--border) 0 1px,transparent 1px 7px);
+}
+/* เส้นคั่นระหว่าง section เนื้อหา (terminal ledger) */
+[data-skin="terminal"] .section + .section{ border-top:1px solid var(--border-soft); }
+
+/* ---------------------------------------------------------------------------
+   5) INDEX (หน้ารวม academy/visuals/index.html) — page-local classes
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .lib-tile .motif,
+[data-skin="terminal"] .lib-feature .motif,
+[data-skin="terminal"] .lib-badge{ border-radius:0; }
+/* motif = แผงกราฟจิ๋วในการ์ด → กรอบ terminal ให้เด่น (pop) + พื้น surface-2 ตัดกับการ์ด */
+[data-skin="terminal"] .motif{ border:1px solid var(--border); }
+
+/* ---------------------------------------------------------------------------
+   6) REFINE (user review live) — prev/next สมมาตร · process-map เหลี่ยม · badge อ่านออก
+   --------------------------------------------------------------------------- */
+/* ปุ่มบทก่อนหน้า/ถัดไป (.lesson-nav) เดิมกว้างเต็ม (>เนื้อหา 980px) → ล้นเกินคอลัมน์บทความ
+   = ดู "ชิดขอบ" · cap 980 + จัดกลาง ให้ตรงแนวบทความด้านบน */
+[data-skin="terminal"] .lesson-nav{ max-width:980px; margin-left:auto; margin-right:auto; }
+
+/* process-map — กล่อง flow/loop/funnel band → เหลี่ยมคม · node โปร่งกลืนพื้น (เหมือนการ์ด) */
+[data-skin="terminal"] .mapnode,
+[data-skin="terminal"] .flow-loop,
+[data-skin="terminal"] .fband{ border-radius:0; }
+[data-skin="terminal"] .mapnode{ background:transparent; }
+/* node ที่ถูกเลือก (aria-pressed) เดิม box-shadow:0 0 0 2px = เส้นดำหนา/เงาไม่เข้ากรอบอื่น
+   → แบนเงา + ใช้พื้น surface-2 บอกสถานะเลือก (ขอบ 1px เท่ากันทุก node) */
+[data-skin="terminal"] .mapnode[aria-pressed="true"]{ box-shadow:none; background:var(--surface-2); }
+
+/* status chips (.pill / .badge) เดิมไม่มีขอบ → ตัว neutral/manual (พื้น surface-2/โปร่ง)
+   จมพื้นทั้ง 2 ธีม · เพิ่มขอบ terminal: สี (g/y/pass/warn) ขอบจาง · neutral โปร่ง+ขอบเข้มให้เห็นกรอบ */
+[data-skin="terminal"] .pill,
+[data-skin="terminal"] .badge{ border:1px solid var(--border-soft); }
+[data-skin="terminal"] .pill.n,
+[data-skin="terminal"] .badge:not(.pass):not(.fail):not(.warn){ background:transparent; border-color:var(--border); }
+
+/* process-map จอแคบ (≤760): flow stack เป็นกล่องเต็มกว้างแต่เนื้อหาชิดซ้าย = ขวาโล่ง
+   → จัด mapnode เป็นแถว (ชื่อกินพื้นที่ซ้าย · สถานะดันขวา) เต็มความกว้าง ดูบาลานซ์ */
+@media (max-width:760px){
+  [data-skin="terminal"] .mapnode{ flex-direction:row; align-items:center; justify-content:space-between; gap:.5rem .9rem; flex-wrap:wrap; }
+  [data-skin="terminal"] .mapnode .nm{ flex:1 1 auto; }
+  [data-skin="terminal"] .mapnode .pill{ flex:0 0 auto; }
+}
+
+/* ป้าย interactive/quiz (.lib-badge) เดิม color:var(--accent-ink) = สีตัวอักษรบน-fill
+   (ขาวเกือบเท่าพื้นในธีมสว่าง) → กลืนหาย · ทำเป็น tag terminal: โปร่ง+ขอบ+mono อ่านออก 2 ธีม */
+[data-skin="terminal"] .lib-badge{
+  background:transparent; border:1px solid var(--border-soft); color:var(--text-muted);
+  border-radius:0; font-family:var(--mono); text-transform:uppercase; letter-spacing:.04em;
+}

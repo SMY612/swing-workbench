@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>แผนที่กระบวนการเทรด — กรวยคัดหุ้น + วงจรถือ-ออก-ทบทวน | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+<style>
+  /* ---- process-map page-scoped (ยืม token จาก theme.css ทั้งหมด) ---- */
+  .stack-arrow { text-align:center; color:var(--ink3); font-size:.85rem; font-weight:600; margin:.5rem 0; }
+  .pill.n { background:var(--bg2); color:var(--ink2); }
+  .flow { margin-top:.5rem; }
+  .flow-half-label { font-size:.8125rem; font-weight:700; color:var(--ink2); margin:.25rem 0 .6rem; }
+  .flow-row { display:flex; align-items:stretch; gap:.4rem; overflow-x:auto; padding-bottom:.6rem; }
+  .cell { display:flex; align-items:center; gap:.4rem; flex:0 0 auto; }
+  .mapnode { display:flex; flex-direction:column; gap:.4rem; align-items:flex-start; text-align:left;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:.75rem .875rem; cursor:pointer;
+    min-height:44px; min-width:120px; font-family:var(--font); color:var(--ink); box-shadow:var(--shadow); }
+  .mapnode:hover { background:var(--bg3); }
+  .mapnode[aria-pressed="true"] { border-color:var(--ink); box-shadow:0 0 0 2px var(--ink); }
+  .mapnode.roadmap { border-style:dashed; }
+  .mapnode .nm { font-weight:700; font-size:.9375rem; line-height:1.3; }
+  .mapnode .nm small { color:var(--ink3); font-weight:400; font-size:.78em; }
+  .edge { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--ink3); font-size:.68rem; max-width:120px; text-align:center; line-height:1.25; flex:0 0 auto; }
+  .edge b { font-size:1.15rem; color:var(--blue); line-height:1; }
+  .flow-link { text-align:center; color:var(--ink2); font-size:.82rem; font-weight:600; margin:.7rem 0; }
+  .flow-loop { margin-top:1rem; padding:.7rem 1rem; border:1.5px dashed var(--blue); border-radius:12px;
+    color:var(--blue-ink); font-size:.85rem; font-weight:600; text-align:center; background:var(--accent-soft); }
+  .linklist { list-style:none; }
+  .linklist li { padding:.5rem 0; border-bottom:1px solid var(--line2); font-size:.95rem; }
+  .linklist li:last-child { border-bottom:none; }
+  /* funnel (กรวยกรอง — graft จากตัว dark, ทำใหม่เป็น light) */
+  .funnel { display:flex; flex-direction:column; align-items:center; gap:.4rem; margin-top:.5rem; width:100%; }
+  .fband { width:var(--w); max-width:100%; background:var(--bg2); border:1px solid var(--line2); border-radius:12px; padding:.65rem 1rem; text-align:center; }
+  .fband b { display:block; font-size:.9375rem; line-height:1.3; }
+  .fband span { font-size:.8rem; color:var(--ink2); }
+  .fband.trade { background:var(--ok-bg); border-color:var(--ok-line); }
+  .ffilter { font-size:.78rem; color:var(--ink2); text-align:center; line-height:1.35; max-width:34rem; }
+  .ffilter .eq { font-size:.72rem; }
+  /* stage summary table */
+  .stgtbl { width:100%; border-collapse:collapse; font-size:.85rem; }
+  .stgtbl th, .stgtbl td { padding:.5rem .6rem; text-align:left; border-bottom:1px solid var(--line2); vertical-align:top; }
+  .stgtbl th { color:var(--ink2); font-weight:600; background:var(--bg2); white-space:nowrap; }
+  .stgtbl tr.sec td { background:var(--bg2); font-weight:700; font-size:.8rem; }
+  .stgtbl .cmd { font-family:var(--mono); font-size:.78rem; color:var(--ink); }
+  @media (max-width:760px){
+    .flow-row { flex-direction:column; align-items:stretch; overflow:visible; }
+    .cell { flex-direction:column; align-items:stretch; }
+    .mapnode { width:100%; }
+    .edge { max-width:none; flex-direction:row; gap:.4rem; padding:.2rem 0; justify-content:center; }
+    .edge b { transform:rotate(90deg); }
+  }
+</style>
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">แผนที่กระบวนการเทรด</h1>
+    <p class="lead">เห็นทั้งระบบเทรดสั้น (swing) ในภาพเดียว: หา → เลือก → เข้า → ถือ → ออก → ทบทวน ↺
+      คลิกแต่ละขั้นเพื่อดูว่าใช้คำสั่งอะไร ได้ไฟล์อะไร ตัดสินใจด้วยเกณฑ์ไหน และสร้างเสร็จหรือยัง</p>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#stack" class="on">ระบบ 3 ชั้น</a>
+    <a href="#map">แผนที่</a>
+    <a href="#gates">จุดตัดสินใจ</a>
+    <a href="#links">ลิงก์บทเรียน</a>
+    <a href="#quiz">เช็ก</a>
+  </nav>
+
+  <!-- ===== A · 3-TIER AUTHORITY STACK ===== -->
+  <section id="stack" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ระบบ 3 ชั้น — กฎมาจากไหน</h2>
+      <p class="lead">ทุกการตัดสินใจอยู่ใต้ลำดับชั้นอำนาจ (authority) เดียวกัน: กลยุทธ์กำหนดกฎ → กลวิธีลงรายละเอียด → คำสั่งลงมือ</p>
+      <div style="margin-top:22px">
+        <div class="card">
+          <span class="pill y">ชั้น 1 · authority (กฎสูงสุด)</span>
+          <h3 style="margin-top:.55rem">ชั้นกลยุทธ์ — กำหนดเพดานความเสี่ยง</h3>
+          <p class="muted" style="margin-top:.4rem">floor / ความเสี่ยงต่อไม้ 1% / ขนาดสูงสุด 10% ต่อไม้ / กลุ่ม (sector) ≤30% / กฎออก (exit) / เงื่อนไขปลดล็อก (milestone)</p>
+          <p style="margin-top:.55rem"><span class="eq">soul-swing.md</span></p>
+        </div>
+        <div class="stack-arrow">▼ ชั้นล่าง “ห้ามขัด” · ค่าที่ยกมาเขียนซ้ำต้องอ้างที่มา (Provenance)</div>
+        <div class="card">
+          <span class="pill n">ชั้น 2 · tactics (กลวิธี)</span>
+          <h3 style="margin-top:.55rem">ชั้นกลวิธี — รายละเอียดการคัด/เข้า</h3>
+          <p class="muted" style="margin-top:.4rem">7 เกณฑ์คัดเข้า (inclusion) · 5 ธง U·A·R·D·V · พารามิเตอร์รูปแบบ (pattern): ความลึกการย่อ / วอลุ่ม / ความกว้างฐาน</p>
+          <p style="margin-top:.55rem"><span class="eq">setups/_WATCHLIST.md</span> <span class="eq">setups/_SCREENING.md</span> <span class="eq">setups/_PLAYBOOK.md</span></p>
+        </div>
+        <div class="stack-arrow">▼</div>
+        <div class="card">
+          <span class="pill g">ชั้น 3 · execution (ลงมือ)</span>
+          <h3 style="margin-top:.55rem">ชั้นลงมือ — คำสั่ง + engine กลาง</h3>
+          <p class="muted" style="margin-top:.4rem">คำสั่ง <span class="eq">/swing-*</span> ทุกตัวเรียกใช้ engine ตัวเดียว (single source) สำหรับ ADX / ATR / RR / ธง / เกณฑ์</p>
+          <p style="margin-top:.55rem"><span class="eq">/swing-curate · /swing-screen · /swing-checklist · /swing-sizer · /swing-ticket</span> <span class="eq">src/indicators.py</span></p>
+        </div>
+      </div>
+      <div class="note">ชั้น 2–3 ปรับได้ตามสถานการณ์ แต่ <b>ห้ามขัดกฎชั้น 1</b> — เช่น ปรับความลึกการย่อ (pullback) ได้ แต่ห้ามดันความเสี่ยงเกิน 1% ต่อไม้</div>
+    </div>
+  </section>
+
+  <!-- ===== B · FUNNEL + LOOP MAP ===== -->
+  <section id="map" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แผนที่: กรวยขาเข้า + วงจรขาถือ</h2>
+      <p class="lead">คลิกแต่ละขั้นเพื่อดูรายละเอียดด้านล่าง — สี/ขอบบอกสถานะว่าสร้างเสร็จหรือยัง</p>
+
+      <div class="card" style="margin-top:22px">
+        <h3>กรวยกรอง: จากทั้งตลาด → 1 ไม้</h3>
+        <p class="tag" style="margin-top:.3rem">ชั้น 1→2 = คุณสมบัติถาวร (เปลี่ยนช้า) · ชั้น 2→3 = สภาพตลาดวันนี้ (เปลี่ยนทุกวัน)</p>
+        <div class="funnel">
+          <div class="fband" style="--w:100%"><b>ตลาดทั้งหมด (Universe)</b><span>หุ้น US ทั้งตลาด — พันๆ ตัว</span></div>
+          <div class="ffilter">▼ 7 เกณฑ์คัดเข้า (inclusion) + บัญชีห้าม (blocklist) · <span class="eq">/swing-curate</span></div>
+          <div class="fband" style="--w:80%"><b>วอตช์ลิสต์ (Watchlist)</b><span>~30 ตัว — สนามที่เล่น swing ได้</span></div>
+          <div class="ffilter">▼ สแกน breakout v2 (เครื่องตรวจ <span class="eq">live.py</span>) + regime SPY · 5 ธง = คะแนนบริบทประกอบ · <span class="eq">/swing-screen</span></div>
+          <div class="fband" style="--w:58%"><b>ตัวเข้ารอบ (Candidates)</b><span>ตัวที่ผ่านกติกา breakout “วันนี้”</span></div>
+          <div class="ffilter">▼ กติกา v2: 4 ข้อบังคับครบ + เสริม ≥1/2 + ขนาด ≤10% · <span class="eq">/swing-checklist → sizer → ticket</span></div>
+          <div class="fband trade" style="--w:36%"><b>เข้าถือ (Trade)</b><span>1 ไม้ → กดซื้อเองที่โบรก ◇</span></div>
+        </div>
+        <div class="note"><b>กับดักที่ต้องระวัง:</b> R:R สูงอย่างเดียว<b>ไม่พอ</b> — หุ้นขาลง (ธง U ไม่ติด) มักมี R:R สูงหลอกตา เพราะระยะถึงยอดเก่ายังไกล แต่ยอดนั้นอาจไม่กลับมา → ต้องมีธง U + A คุมก่อนเสมอ</div>
+      </div>
+
+      <div class="card" style="margin-top:22px">
+        <div class="legend">
+          <span><i style="background:#1f9d57"></i>✓ มีแล้ว (built)</span>
+          <span><i style="background:#b25e00"></i>○ วางแผน — ยังไม่สร้าง (ขอบประ)</span>
+          <span><i style="background:#8a8f9a"></i>◇ ทำมือ (manual)</span>
+          <span><i style="background:#b25e00"></i>△ บางส่วน</span>
+        </div>
+
+        <div class="flow" id="flow">
+          <div class="flow-half-label">① ครึ่งขาเข้า · หา → เลือก → เข้า (กรวยคัดให้แคบลง)</div>
+          <div class="flow-row">
+            <div class="cell">
+              <button class="mapnode" data-stage="universe" aria-pressed="false">
+                <span class="nm">ตลาดทั้งหมด <small>Universe</small></span>
+                <span class="pill n">◇ หุ้น US ทั้งตลาด</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>7 เกณฑ์ · /swing-curate ✓</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="watchlist" aria-pressed="false">
+                <span class="nm">วอตช์ลิสต์ <small>Watchlist</small></span>
+                <span class="pill g">✓ ~30 ตัว</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>สแกน breakout v2 · /swing-screen ✓</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="candidates" aria-pressed="false">
+                <span class="nm">ตัวเข้ารอบ <small>Candidates</small></span>
+                <span class="pill g">✓ 2–5 ตัว</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>checklist → sizer → ticket ✓</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="trade" aria-pressed="false">
+                <span class="nm">เข้าถือ <small>Trade</small></span>
+                <span class="pill n">◇ 1 ไม้</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flow-link" aria-hidden="true">↓ เข้าถือ · กดเองที่โบรก (broker) ◇</div>
+
+          <div class="flow-half-label">② ครึ่งขาถือ-ออก-ทบทวน · ถือ → ออก → ปรับ</div>
+          <div class="flow-row">
+            <div class="cell">
+              <button class="mapnode roadmap" data-stage="manage" aria-pressed="false">
+                <span class="nm">เฝ้าไม้ <small>Manage</small></span>
+                <span class="pill y">○ รายวัน</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>ชน trigger ออก</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="exit" aria-pressed="false">
+                <span class="nm">ออก <small>Exit</small></span>
+                <span class="pill y">△ ตาม trigger</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>/swing-journal ✓</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="journal" aria-pressed="false">
+                <span class="nm">จดบันทึก <small>Journal</small></span>
+                <span class="pill g">✓ ทุกไม้</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>สรุปรายสัปดาห์</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode roadmap" data-stage="review" aria-pressed="false">
+                <span class="nm">ทบทวน <small>Review</small></span>
+                <span class="pill y">○ รายสัปดาห์</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>expectancy / pattern</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode roadmap" data-stage="milestone" aria-pressed="false">
+                <span class="nm">หมุดหมาย <small>Milestone</small></span>
+                <span class="pill y">○ 5 ข้อ</span>
+              </button>
+              <span class="edge" aria-hidden="true"><b>→</b>ปลดล็อก Phase 2</span>
+            </div>
+            <div class="cell">
+              <button class="mapnode" data-stage="learn" aria-pressed="false">
+                <span class="nm">เก็บบทเรียน <small>Learn</small></span>
+                <span class="pill n">◇ my-lessons</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flow-loop">↺ “เก็บบทเรียน” วนกลับไปปรับวอตช์ลิสต์ / playbook แล้วเริ่มกรวยใหม่</div>
+        </div>
+
+        <div class="step stepbody" style="margin-top:1.3rem">
+          <div class="n" id="stageGlyph" style="background:var(--bg2);color:var(--ink)">◇</div>
+          <div class="b" id="stageDetail">
+            <h4>ตลาดทั้งหมด <small style="color:var(--ink3);font-weight:400">(Universe)</small> <span class="badge">◇ ทำมือ</span></h4>
+            <p>จุดเริ่ม — หุ้นสหรัฐ (US) ทั้งตลาดเป็นวัตถุดิบตั้งต้น ยังไม่กรองอะไร</p>
+            <p class="tag">เกณฑ์ผ่านไปต่อ: ผ่าน 7 เกณฑ์คัดเข้า (inclusion) + ไม่ติดบัญชีห้าม (blocklist) → เข้าวอตช์ลิสต์</p>
+            <p style="margin-top:.4rem"><span class="eq">/swing-curate</span> · ไฟล์: <span class="eq">setups/_WATCHLIST.md</span></p>
+            <p class="tag">○ กรวยฉบับเต็มอยู่ในหน้านี้ (§แผนที่ ด้านบน)</p>
+          </div>
+        </div>
+      </div>
+      <div class="note">ครึ่งล่าง (เฝ้าไม้ / ทบทวน / หมุดหมาย) ส่วนใหญ่ยังเป็น <b>แผนงาน (roadmap)</b> — จงใจรอจนมีข้อมูลไม้จริง 2–3 ไม้ก่อนค่อยสร้าง (YAGNI: ออกแบบจากของจริง ไม่เดา)</div>
+
+      <div class="selfcheck" style="margin-top:1rem">
+        <details>
+          <summary>ดูตารางสรุปทุกขั้น (เห็นครบทีเดียว)</summary>
+          <div class="scroll" style="margin-top:.75rem">
+            <table class="stgtbl" id="stageTable">
+              <thead><tr><th>ขั้น</th><th>สถานะ</th><th>คำสั่ง</th><th>ไฟล์/ผลลัพธ์</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="note">เครื่องมือฝั่ง Passive (<span class="eq">/exit-check</span> · <span class="eq">/kill-sweep</span> ฯลฯ) ใช้กับ swing ไม่ได้ — คนละ logic (thesis vs stop/target/time-stop) จึงต้องมี <span class="eq">/swing-*</span> ของตัวเอง</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== C · DECISION GATES ===== -->
+  <section id="gates" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">จุดตัดสินใจ — รวมเกณฑ์ไว้ที่เดียว</h2>
+      <p class="lead">เกณฑ์เข้า (ต้องผ่านครบ) · เงื่อนไขออก (ชนข้อใดข้อหนึ่งก็ออก) · เพดานพอร์ต · เงื่อนไขปลดล็อก Phase 2</p>
+
+      <div class="card" style="margin-top:1.3rem">
+        <h3>ประตูเข้าจริง — กติกา Breakout canonical_v2 <span class="pill g">ท่าเดียวที่สอบผ่าน</span></h3>
+        <p class="muted" style="margin-top:.5rem" id="v2GateText"></p>
+        <p class="tag" style="margin-top:.5rem">เครื่องตรวจ: <span class="eq">src/backtest/live.py</span> (detector ตัวเดียวกับที่สอบผ่าน backtest P0) · เรียนละเอียด + ตัวอย่างเลข: <a href="./setup-patterns.html">บทกติกา Breakout v2</a> · Trend Pullback = <span class="pill r">PARKED</span> ห้ามเทรดจนพิสูจน์ใหม่</p>
+      </div>
+
+      <h3 style="margin-top:1.3rem">5 ธงบริบท U·A·R·D·V (คะแนนจัดอันดับตัวเฝ้า — ไม่ใช่ประตูเข้า)</h3>
+      <div class="gate-grid">
+        <div class="gate"><div class="k">U</div><div class="d">ราคา &gt; SMA50</div><span class="pill y">เทรนด์ใหญ่</span></div>
+        <div class="gate"><div class="k">A</div><div class="d">ADX ≥ <span class="gnum" data-g="adxMin">25</span></div><span class="pill y">เทรนด์แรง</span></div>
+        <div class="gate"><div class="k">R</div><div class="d">R:R ≥ <span class="gnum" data-g="rrMin">2</span></div><span class="pill y">คุ้มเสี่ยง (legacy)</span></div>
+        <div class="gate"><div class="k">D</div><div class="d">+DI &gt; −DI</div><span class="pill y">ยืนยันเด้ง</span></div>
+        <div class="gate"><div class="k">V</div><div class="d">ATR% <span class="gnum" data-g="atrPctMin">1.5</span>–<span class="gnum" data-g="atrPctMax">4</span>%</div><span class="pill y">ผันผวนพอเหมาะ</span></div>
+      </div>
+      <div class="note">+ เช็กภาวะตลาด (regime): ดัชนี SPY ต้องอยู่เหนือ SMA50 (ตลาดรวมเป็นขาขึ้น) ไม่งั้นไม่เปิดไม้ใหม่ · ตัวเลขธงดึงจาก engine กลาง (<span class="eq">ENGINE.GATES</span> = ค่าเดียวกับ <span class="eq">src/indicators.py</span>) · เลขกติกา breakout ดึงจาก <span class="eq">_kit/canon.js</span> (mirror ของ <span class="eq">src/backtest/rules.py</span>)</div>
+
+      <div class="card" style="margin-top:1.3rem">
+        <h3>เงื่อนไขออก (exit) — ชนข้อใดข้อหนึ่งก็ออก</h3>
+        <p class="muted" style="margin-top:.5rem" id="exitText">• ชน <b>stop</b> · • ถึง <b>target</b> · • <b>time-stop</b> (ถือเกิน 21 วัน <b>และ</b> กำไร &lt; +0.5R) · • <b>thesis แตก</b> (เหตุผลที่เข้าพังไป เช่น งบพลาดแรง) · • ETF กลุ่ม (sector) ร่วง &gt;5% ใน 1 วัน (ทบทวนใน 24 ชม.)</p>
+        <p class="tag">ไม่มี “หลุด SMA50” และ “DI flip” ในเงื่อนไขออก — ทดสอบแล้วไม่ช่วย (มติ ค1, 2026-06-11) · ละเอียดในบท <a href="./stop-target-exit.html">Stop · Target · ออกเมื่อไหร่</a></p>
+      </div>
+      <div class="card">
+        <h3>เพดานพอร์ต (portfolio ceilings)</h3>
+        <p class="muted" style="margin-top:.5rem">≤ 5–7 ไม้พร้อมกัน · 1 กลุ่ม (sector) ≤30% · 1 ไม้ ≤10% · ความเสี่ยง 1% ต่อไม้ · ขาดทุนสะสม (drawdown): −5% พัก 3 วัน / −10% พัก 1 สัปดาห์ / −15% พัก 2 สัปดาห์ / −20% หยุด</p>
+      </div>
+      <div class="card">
+        <h3>ปลดล็อก Phase 2 (ครบทั้ง 5 ข้อ)</h3>
+        <p class="muted" style="margin-top:.5rem">≥30 ไม้ปิดแล้ว · เห็น ≥2 ภาวะตลาด (regime) · ค่าคาดหวัง (expectancy) ย้อนหลัง 30 ไม้ &gt;0 ติดกัน 3 ครั้ง · ทำตามแผน ≥80% · มี journal ≥25 ไม้</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== D · CROSS-LINKS ===== -->
+  <section id="links" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เรียนลึกแต่ละจุด</h2>
+      <p class="lead">แต่ละขั้น/เกณฑ์ในแผนที่เชื่อมไปบทที่สอนเรื่องนั้นโดยตรง</p>
+      <div class="card" style="margin-top:22px">
+        <h3>บทที่มีแล้ว</h3>
+        <ul class="linklist" style="margin-top:.5rem">
+          <li>เกณฑ์ U·A·R·D·V (ขั้น screen) → <a href="./read-the-chart.html">อ่านกราฟให้เป็น</a></li>
+          <li>A = ADX ≥ 25 (เทรนด์แรง) → <a href="./adx.html">ADX / +DI / −DI</a></li>
+          <li>ขนาดไม้ (เสี่ยง 1% ÷ stop, เพดาน 10%) → <a href="./position-sizing.html">Position Sizing</a></li>
+          <li>R:R ≥ 2 (คุ้มเสี่ยง) → <a href="./rr-expectancy.html">R:R &amp; Expectancy</a></li>
+        </ul>
+      </div>
+      <div class="note">บทคู่กันในคอร์ส v2: <b><a href="./setup-patterns.html">กติกา Breakout v2</a></b> (4 บังคับ + ≥1/2 เสริม) · <b><a href="./stop-target-exit.html">Stop · Target · ออกเมื่อไหร่</a></b> · <b><a href="./backtest-verdict.html">อ่านผลสอบ backtest</a></b> · <b><a href="./risk-milestones.html">เกราะกันพัง + บันไดปลดล็อก</a></b> — ครบทั้งคอร์สที่ <a href="./index.html">หน้ารวม</a></div>
+    </div>
+  </section>
+
+  <!-- ===== E · QUIZ ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">แบบทดสอบ — แผนที่กระบวนการ</h2>
+      <p class="lead">5 ข้อ ตอบแล้วเฉลยทันที — ผ่านที่ 80%</p>
+      <div id="quizHost"></div>
+      <noscript class="note">เปิด JavaScript เพื่อทำแบบทดสอบ — เนื้อหาบทเรียนด้านบนอ่านได้ปกติ</noscript>
+    </div>
+  </section>
+
+  <div class="foot" id="foot">
+    แผนที่สรุปจาก <span class="eq">setups/_PROCESS.md</span> · กฎทั้งหมดมาจาก <span class="eq">soul-swing.md</span> (authority) · เกณฑ์คำนวณจาก <span class="eq">src/indicators.py</span> · หน้านี้ <b>อ่าน/อ้างอิง</b> ไม่ได้แก้ไฟล์เหล่านั้น · self-contained / offline · MyInvest Visual Library
+  </div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script src="./_kit/quiz.js?v=1782967287"></script>
+  <script>
+  (function(){
+    var E = window.ENGINE, UI = window.UI;
+    var G = (E && E.GATES) || null;
+
+    /* ---- single source for detail panel + KPI (สถานะตรงกับ node ใน markup) ---- */
+    var STAGES = [
+      { key:'universe', name:'ตลาดทั้งหมด', en:'Universe', status:'manual',
+        does:'จุดเริ่ม — หุ้นสหรัฐ (US) ทั้งตลาดเป็นวัตถุดิบตั้งต้น ยังไม่กรองอะไร',
+        gate:'ผ่าน 7 เกณฑ์คัดเข้า (inclusion) + ไม่ติดบัญชีห้าม (blocklist) → เข้าวอตช์ลิสต์',
+        cmd:'/swing-curate', artifact:'setups/_WATCHLIST.md',
+        link:null, linkLabel:'กรวยฉบับเต็มอยู่ในหน้านี้ (§แผนที่ ด้านบน)' },
+      { key:'watchlist', name:'วอตช์ลิสต์', en:'Watchlist', status:'done',
+        does:'รายชื่อ ~30 ตัวที่ผ่านเกณฑ์คัดเข้าแล้ว เฝ้าดูรอจังหวะ',
+        gate:'ผ่านสแกน breakout v2 (เครื่องตรวจ live.py) + เช็กภาวะตลาด (SPY) → เป็นตัวเข้ารอบ · 5 ธง U·A·R·D·V = คะแนนบริบทไว้จัดอันดับ',
+        cmd:'/swing-screen', artifact:'รายชื่อ candidate (เปลี่ยนรายวัน)',
+        link:'./read-the-chart.html', linkLabel:'อ่านกราฟให้เป็น — เกณฑ์ U·A·R·D·V ละเอียด' },
+      { key:'candidates', name:'ตัวเข้ารอบ', en:'Candidates', status:'done',
+        does:'2–5 ตัวที่คะแนนดีสุดของวันนั้น — พร้อมตรวจ setup ละเอียด',
+        gate:'ผ่านกติกา v2 ครบ (4 ข้อบังคับ + เสริม ≥1/2 — breakout เท่านั้น) → คำนวณขนาดไม้ → ออกทิคเก็ต',
+        cmd:'/swing-checklist → /swing-sizer → /swing-ticket', artifact:'trades/swing/<TICKER>.md',
+        link:'./position-sizing.html', linkLabel:'Position Sizing — เสี่ยง 1% ÷ stop, เพดาน 10%' },
+      { key:'trade', name:'เข้าถือ', en:'Trade', status:'manual',
+        does:'กดซื้อเองที่โบรก (broker) ตามทิคเก็ต — ระบบไม่ส่งคำสั่งซื้อขายเอง',
+        gate:'เข้าสู่ครึ่งขาถือ → เฝ้าไม้รายวัน',
+        cmd:'— (กดเองที่โบรก)', artifact:'books/swing-portfolio.csv (ไม้ที่เปิดอยู่)',
+        link:null, linkLabel:null },
+      { key:'manage', name:'เฝ้าไม้', en:'Manage', status:'roadmap',
+        does:'เฝ้าไม้ที่ถืออยู่ทุกวัน เทียบกับเงื่อนไขออก',
+        gate:'ชน trigger ออกข้อใดข้อหนึ่ง → ออก',
+        cmd:'/swing-monitor', artifact:'—',
+        link:null, linkLabel:'ยังไม่สร้าง — รอข้อมูลไม้จริง 2–3 ไม้' },
+      { key:'exit', name:'ออก', en:'Exit', status:'warn',
+        does:'ปิดไม้เมื่อชนเงื่อนไข (stop / target / time-stop / thesis แตก / sector ร่วง)',
+        gate:'บันทึก journal “หลัง” ออก (ไม่ใช่ก่อน) — จึงเป็นสถานะบางส่วน',
+        cmd:'(ออกจากการเฝ้าไม้)', artifact:'—',
+        link:'./stop-target-exit.html', linkLabel:'Stop · Target · ออกเมื่อไหร่' },
+      { key:'journal', name:'จดบันทึก', en:'Journal', status:'done',
+        does:'บันทึกไม้ที่ปิดแล้ว: ทำตามแผนไหม + บทเรียน',
+        gate:'ให้คะแนนกระบวนการ (process score) ≥4/5 + จดบทเรียน',
+        cmd:'/swing-journal', artifact:'setups/_TEMPLATE.md (journal ต่อไม้)',
+        link:null, linkLabel:null },
+      { key:'review', name:'ทบทวน', en:'Review', status:'roadmap',
+        does:'สรุปรายสัปดาห์: ค่าคาดหวัง (expectancy) ต่อ pattern + เช็ก kill-review',
+        gate:'expectancy < 0 ใน 15 ไม้ → ทบทวนใหญ่; ผ่าน → สะสมหมุดหมาย',
+        cmd:'/swing-review', artifact:'—',
+        link:null, linkLabel:'ยังไม่สร้าง' },
+      { key:'milestone', name:'หมุดหมาย', en:'Milestone', status:'roadmap',
+        does:'นับความคืบหน้าปลดล็อก Phase 2 (จาก paper → ทุนจริง)',
+        gate:'ครบ 5 หมุดหมาย → ปลดล็อก Phase 2',
+        cmd:'(จากขั้นทบทวน)', artifact:'—',
+        link:null, linkLabel:'ยังไม่สร้าง' },
+      { key:'learn', name:'เก็บบทเรียน', en:'Learn', status:'manual',
+        does:'สรุปบทเรียนเข้าคลังความรู้ (First-Brain: เข้าใจจริงก่อนเข้าไม้)',
+        gate:'↺ วนกลับไปปรับวอตช์ลิสต์ / playbook แล้วเริ่มกรวยใหม่',
+        cmd:'— (my-lessons.md)', artifact:'my-lessons.md',
+        link:null, linkLabel:null }
+    ];
+
+    var GLYPH = { done:'✓', roadmap:'○', manual:'◇', warn:'△' };
+    var SLABEL = { done:'มีแล้ว', roadmap:'วางแผน (ยังไม่สร้าง)', manual:'ทำมือ', warn:'บางส่วน' };
+    var BADGE = { done:'badge pass', roadmap:'badge warn', manual:'badge', warn:'badge warn' };
+
+    function byKey(k){ for(var i=0;i<STAGES.length;i++){ if(STAGES[i].key===k) return STAGES[i]; } return null; }
+
+    function detailHTML(s){
+      var tail = s.link
+        ? '<p class="note">ไปลึก: <a href="'+s.link+'">'+s.linkLabel+'</a></p>'
+        : (s.linkLabel ? '<p class="tag">○ '+s.linkLabel+'</p>' : '');
+      var art = (s.artifact && s.artifact !== '—') ? ' · ไฟล์: <span class="eq">'+s.artifact+'</span>' : '';
+      return '<h4>'+s.name+' <small style="color:var(--ink3);font-weight:400">('+s.en+')</small> '
+        + '<span class="'+BADGE[s.status]+'">'+GLYPH[s.status]+' '+SLABEL[s.status]+'</span></h4>'
+        + '<p>'+s.does+'</p>'
+        + '<p class="tag">เกณฑ์ผ่านไปต่อ: '+s.gate+'</p>'
+        + '<p style="margin-top:.4rem"><span class="eq">'+s.cmd+'</span>'+art+'</p>'
+        + tail;
+    }
+
+    function selectStage(k){
+      var s = byKey(k); if(!s) return;
+      document.getElementById('stageGlyph').textContent = GLYPH[s.status];
+      document.getElementById('stageDetail').innerHTML = detailHTML(s);
+      var btns = document.querySelectorAll('button[data-stage]');
+      for(var i=0;i<btns.length;i++){ btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-stage')===k ? 'true':'false'); }
+    }
+
+    function renderKpis(){
+      var c = { done:0, roadmap:0, manual:0, warn:0 };
+      STAGES.forEach(function(s){ c[s.status]++; });
+      var items = [
+        [STAGES.length, 'ขั้นตอนทั้งหมด'],
+        [c.done, '✓ มีแล้ว'],
+        [c.roadmap, '○ ยังไม่สร้าง'],
+        [c.manual + c.warn, '◇/△ ทำมือ·บางส่วน']
+      ];
+      document.getElementById('heroKpis').innerHTML = items.map(function(k){
+        return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';
+      }).join('');
+    }
+
+    function fillGates(){
+      if(!G) return;  /* ถ้า engine โหลดไม่ทัน → คงเลขใน markup (ตรงกับ GATES อยู่แล้ว) */
+      var map = { adxMin:G.adxMin, atrPctMin:G.atrPctMin, atrPctMax:G.atrPctMax, rrMin:G.rrMin };
+      var spans = document.querySelectorAll('.gnum');
+      for(var i=0;i<spans.length;i++){ var key = spans[i].getAttribute('data-g'); if(map[key] != null) spans[i].textContent = map[key]; }
+    }
+
+    function renderTable(){
+      var tb = document.querySelector('#stageTable tbody'); if(!tb) return;
+      function row(s){
+        var art = (s.artifact && s.artifact !== '—') ? s.artifact : '—';
+        return '<tr><td><b>'+s.name+'</b> <small style="color:var(--ink3)">'+s.en+'</small></td>'
+          + '<td><span class="'+BADGE[s.status]+'">'+GLYPH[s.status]+'</span></td>'
+          + '<td class="cmd">'+s.cmd+'</td><td>'+art+'</td></tr>';
+      }
+      var html = '<tr class="sec"><td colspan="4">▼ ครึ่งขาเข้า (หา → เลือก → เข้า)</td></tr>';
+      STAGES.slice(0,4).forEach(function(s){ html += row(s); });
+      html += '<tr class="sec"><td colspan="4">▼ ครึ่งขาถือ-ออก-ทบทวน (ถือ → ออก → ปรับ)</td></tr>';
+      STAGES.slice(4).forEach(function(s){ html += row(s); });
+      tb.innerHTML = html;
+    }
+
+    document.getElementById('flow').addEventListener('click', function(e){
+      var b = e.target.closest('button[data-stage]');
+      if(b) selectStage(b.getAttribute('data-stage'));
+    });
+
+    /* ---- ประตูเข้าจริง: ข้อความประกอบจาก CANON (ห้าม hardcode เลขกติกา) ---- */
+    function fillV2Gate(){
+      var el = document.getElementById('v2GateText');
+      var B = window.CANON && window.CANON.breakout; if(!el || !B) return;
+      el.innerHTML =
+        '<b>บังคับ 4 ข้อ:</b> ฐานราคา ' + B.base_days + ' วัน กว้าง &lt; ' + (B.base_width_max*100) + '% · '
+        + 'แตะแนวต้าน ≥ ' + B.touch_min + ' ครั้ง (High ≥ ' + (100 - B.touch_tol*100) + '% ของแนวต้าน ห่าง ≥ ' + B.touch_min_gap_days + ' วันทำการ) · '
+        + 'วอลุ่มวันทะลุ ≥ ' + (B.vol_spike_ratio*100) + '% ของเฉลี่ย ' + B.vol_avg_len + ' วัน · '
+        + 'ราคา<b>ปิด</b>เหนือแนวต้าน (แตะระหว่างวันไม่นับ)<br>'
+        + '<b>เสริม ≥ 1 จาก 2:</b> งบประกาศห่าง &gt; 3 สัปดาห์ · ETF กลุ่มปิดบวกวันทะลุ';
+    }
+
+    var QUIZ_BANK = {
+      id: 'process-map', pass: 0.8,
+      questions: [
+        { q: 'ประตูตัดสินว่า “เข้าไม้ได้” คืออะไร?',
+          choices: ['ติดธง U·A·R·D·V ครบ 5 ตัว', 'ผ่าน checklist ≥ 5/6 ข้อ', 'ผ่านกติกา breakout canonical_v2 (4 บังคับ + เสริม ≥1/2) จากเครื่องตรวจ live.py', 'R:R สูงกว่า 2 ก็พอ'],
+          answer: 2,
+          why: 'ธง 5 ตัวเป็นแค่คะแนนบริบทไว้จัดอันดับตัวเฝ้า ส่วน “≥5/6” คือกติกาเก่าที่เลิกใช้แล้ว — ประตูจริงคือกติกา v2 ที่สอบผ่าน backtest',
+          ref: 'soul-swing.md §Setup gate · src/backtest/live.py' },
+        { q: 'เงื่อนไขออก (exit) ข้อไหน “ไม่มี” ในกติกา v2?',
+          choices: ['ชน stop', 'time-stop 21 วัน + กำไร < +0.5R', 'ราคาปิดหลุด SMA50', 'ETF กลุ่มร่วง >5% ใน 1 วัน'],
+          answer: 2,
+          why: '“หลุด SMA50” เคยอยู่ใน _PROCESS แต่ backtest พิสูจน์ว่าไม่ช่วย (expectancy ลดลง) จึงถูกตัดออก — เหลือ stop / target / time-stop / thesis แตก / sector ร่วง',
+          ref: 'มติ ค1 (2026-06-11) · soul-swing.md §Exit Discipline' },
+        { q: '“○” บนแผนที่ (เช่น เฝ้าไม้ / ทบทวน) แปลว่าอะไร?',
+          choices: ['สร้างเสร็จแล้วแต่ปิดใช้งาน', 'ยังไม่ได้สร้าง — จงใจรอข้อมูลไม้จริงก่อนออกแบบ', 'ใช้เครื่องมือฝั่ง Passive แทนได้', 'ต้องทำมือทุกวัน'],
+          answer: 1,
+          why: 'ขั้น Manage/Review/Milestone รอไม้จริง 2–3 ไม้ก่อนสร้าง (/swing-monitor, /swing-review = งาน P2) — ออกแบบจากของจริง ไม่เดา (YAGNI) · ระหว่างนี้ /swing พาเช็คมือ',
+          ref: 'knowledge/swing-architecture.md §7 (P2)' },
+        { q: 'ทำไม soul-swing.md ถึง “ห้ามขัด”?',
+          choices: ['เพราะแก้ไฟล์ไม่ได้ทางเทคนิค', 'เพราะเป็น authority ชั้นสูงสุดที่กำหนดเพดานความเสี่ยง — ชั้นล่างปรับรายละเอียดได้แต่ห้ามขัด', 'เพราะ Kim เป็นคนเขียน', 'เพราะถูก backtest พิสูจน์ทุกบรรทัด'],
+          answer: 1,
+          why: 'ระบบ 3 ชั้น: กลยุทธ์ (soul-swing) > กลวิธี (setups/_*) > ลงมือ (/swing-*) · ค่าที่ยกมาเขียนซ้ำต้องอ้างที่มา (Provenance) กันเลขเพี้ยน',
+          ref: 'soul-swing.md (authority) · setups/_*.md headers' },
+        { q: '“engine กลาง” ของระบบนี้มี 2 ตัว — ตัวไหนทำหน้าที่อะไร?',
+          choices: ['indicators.py คิดธง/อินดิเคเตอร์ · live.py ตรวจกติกา breakout v2', 'engine.js คือตัวจริง ที่เหลือเป็นเดโม่', 'live.py คิด ADX · indicators.py ตรวจ breakout', 'มีตัวเดียวคือ indicators.py'],
+          answer: 0,
+          why: 'src/indicators.py = คณิตอินดิเคเตอร์ + 5 ธง + 7 เกณฑ์คัด · src/backtest/live.py = จุดตรวจกติกา breakout v2 (reuse detector ที่สอบผ่าน P0) · ส่วน engine.js ใน academy เป็นเดโม่ภาพ (GOOGL ฝัง) คนละ domain โดยตั้งใจ',
+          ref: 'setups/_CHEATSHEET.md · academy/_VISUAL-GUIDE.md (หมายเหตุ 2 engine)' }
+      ]
+    };
+
+    renderKpis();
+    fillGates();
+    fillV2Gate();
+    renderTable();
+    selectStage('universe');
+    if(window.QUIZ) window.QUIZ.mount('#quizHost', QUIZ_BANK);
+    if(UI){ UI.reveal && UI.reveal(); UI.chipNav && UI.chipNav(); }
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

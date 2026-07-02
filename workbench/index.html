@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" data-shell-root=".." data-skin="terminal">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swing Workbench — MyInvest</title>
+<!-- ตั้งธีมก่อน first paint (กัน FOUC) — ต้องอยู่ก่อน stylesheet ใด ๆ. key ร่วมทั้งเว็บ = sw_theme -->
+<script src="../shared/_kit/theme-boot.js?v=1782967287"></script>
+<style>
+/* critical fallback — กันจอขาว/ฟอนต์เพี้ยนถ้า kit/wb.css โหลดไม่ขึ้น */
+html, body { margin: 0; background: #000; }
+body {
+  color: #f2f2f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text",
+               "Segoe UI", "Leelawadee UI", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
+  font-size: 13px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+.boot-note {
+  max-width: 540px; margin: 18vh auto; padding: 24px 28px; text-align: center;
+  background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 12px;
+  font-size: 15px; line-height: 1.7;
+}
+</style>
+<link rel="stylesheet" href="kit/wb.css?v=1782967287d">
+<link rel="stylesheet" href="../shared/_kit/earnings-calendar.css?v=1782967287">
+<!-- เปลือกร่วม (sidebar/bottom-nav/ปุ่มธีม) — ใช้ semantic token จาก tokens.css ที่ wb.css @import มาแล้ว -->
+<link rel="stylesheet" href="../shared/_kit/shell.css?v=1782967287b">
+<!-- terminal skin (flat · เลื่อนจาก glass) — สกินกลาง (token/nav) + ชั้น workbench (board+replay) -->
+<link rel="stylesheet" href="../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../shared/_kit/skin-terminal-wb.css?v=1782967287">
+</head>
+<body data-nav="board">
+
+<noscript>
+  <div class="wb-noscript boot-note">
+    หน้านี้ต้องเปิด JavaScript ก่อนถึงจะแสดงข้อมูลได้<br>
+    (ข้อมูลทั้งหมดอยู่ในเครื่อง — ไม่มีการเรียกออกอินเทอร์เน็ต)<br>
+    เปิด JavaScript ในเบราว์เซอร์แล้วรีเฟรชหน้านี้อีกครั้ง
+  </div>
+</noscript>
+
+<header class="wb-header">
+  <div class="hd-left">
+    <span class="hd-logo">Swing Workbench</span>
+    <span class="chip chip-neutral" id="chipRuleset">—</span>
+    <span class="chip chip-neutral" id="chipPattern">—</span>
+  </div>
+  <div class="hd-center" id="regimeLamp"></div>
+  <div class="hd-right">
+    <span class="asof" id="asOf">—</span>
+    <a class="chip chip-action" href="replay.html" title="เครื่องฝึกย้อนเวลา — เดินทีละแท่ง จับสัญญาณจริงของ engine"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-7 3.3"/><path d="M3 4v3.5h3.5"/><path d="M12 8v4l3 2"/></svg> ฝึกย้อนเวลา</a>
+    <button type="button" class="chip chip-action" id="refreshHint" title="คัดลอกคำสั่งรีเฟรชข้อมูล"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg> รีเฟรชข้อมูล</button>
+  </div>
+</header>
+
+<div id="modeBanner" class="mode-banner" hidden></div>
+<div id="liveStrip" class="live-strip" hidden></div>
+<div id="sectorStrip" class="sector-strip" aria-label="ความร้อนรายกลุ่มอุตสาหกรรม"></div>
+<div id="alertRibbon" class="alert-ribbon" aria-label="การแจ้งเตือน"></div>
+
+<nav class="tabbar" id="tabbar">
+  <button type="button" class="tab-btn active" data-tab="board">① กระดานเฝ้าดู</button>
+  <button type="button" class="tab-btn" data-tab="calendar">② ปฏิทินงบ</button>
+  <button type="button" class="tab-btn" data-tab="port">③ พอร์ต &amp; เป้าหมาย</button>
+  <button type="button" class="tab-btn" data-tab="backtest">④ หลักฐาน backtest</button>
+  <button type="button" class="tab-btn" data-tab="rules">⑤ กติกา v2</button>
+</nav>
+
+<main>
+
+<!-- ① กระดานเฝ้าดู -->
+<section id="tab-board" class="tab-panel active">
+  <details class="orient-card t-reveal" id="orientCard" open>
+    <summary>วิธีอ่านจอนี้ (สำหรับมือใหม่ — แตะเพื่อย่อ/ขยาย)</summary>
+    <ol>
+      <li><b>ไฟกลมบนหัวจอ</b> = สภาพตลาด: เขียว = เปิดรับ เข้าไม้ได้ · แดง = ห้ามเปิดไม้ใหม่</li>
+      <li><b>แถบเตือนใต้หัวจอ</b>: แดง = ห้าม/อันตราย · เหลือง = ระวัง · เขียว = โอกาส · ฟ้า = ข้อมูลทั่วไป</li>
+      <li><b>ชิปตัวกรอง</b> (ทั้งหมด / เข้าเกณฑ์ / ใกล้ / ติดงบ): แตะเพื่อกรองรายชื่อหุ้น</li>
+      <li><b>แตะหุ้น 1 ตัว</b> → กราฟ + การ์ดระดับราคา + เช็คลิสต์ 7 ข้อของตัวนั้นจะแสดง (มือถือ: อยู่ใต้รายการ)</li>
+      <li><b>เช็คลิสต์ 7 ข้อ</b>: ระบบเช็คให้อัตโนมัติตามกติกา v2 — ผ่านครบ = เข้าเกณฑ์ breakout ไม่ต้องคำนวณเอง</li>
+    </ol>
+  </details>
+  <p class="tab-subtitle">ทุกตัวเลขในจอนี้มาจาก<b>ราคาปิดของเมื่อคืน</b> — ตัดสินใจวันละครั้ง ไม่ไล่ราคาระหว่างวัน</p>
+  <div class="board-grid t-reveal">
+    <div class="board-left">
+      <div class="board-controls">
+        <div class="view-tabs" id="viewTabs">
+          <button type="button" class="view-btn active" data-view="market">ตลาด (Market)</button>
+          <button type="button" class="view-btn" data-view="status">คำตัดสิน (Status)</button>
+        </div>
+        <div class="filter-row" id="filterRow">
+          <button type="button" class="fchip active" data-filter="all">ทั้งหมด</button>
+          <button type="button" class="fchip" data-filter="pass"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> เข้าเกณฑ์</button>
+          <button type="button" class="fchip" data-filter="near"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ใกล้</button>
+          <button type="button" class="fchip" data-filter="earnings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg> ติดงบ</button>
+          <button type="button" class="fchip" data-filter="problem"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg> มีปัญหา</button>
+          <input type="search" id="searchBox" class="search-box" placeholder="ค้นหา ticker — กด /" autocomplete="off">
+        </div>
+      </div>
+      <div class="table-wrap" id="tableWrap"></div>
+    </div>
+    <div class="board-right">
+      <div id="chartTitle" class="chart-title"></div>
+      <div class="range-row" id="rangeRow">
+        <button type="button" class="range-btn" data-range="63">3M</button>
+        <button type="button" class="range-btn active" data-range="126">6M</button>
+        <button type="button" class="range-btn" data-range="252">1Y</button>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartCanvas"></canvas>
+        <div id="chartEmpty" class="chart-empty" hidden></div>
+      </div>
+      <div id="levelsCard" class="side-card"></div>
+      <div id="checklistCard" class="side-card"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ② ปฏิทินงบ -->
+<section id="tab-calendar" class="tab-panel">
+  <h2 class="panel-title">ปฏิทินงบ (earnings calendar)</h2>
+  <p class="tab-subtitle">วันประกาศงบของหุ้นทุกตัวที่เฝ้าดู — ตัวที่ติดป้าย “ติดงบ” = ใกล้งบเกินไป ห้ามเปิดไม้ใหม่ตามกติกา</p>
+  <div id="calendarWrap"></div>
+  <p class="caption">
+    กติกา (ข้อเสริม o5): เข้าไม้ได้เมื่องบห่าง &gt; 3 สัปดาห์ —
+    <a href="../academy/visuals/setup-patterns.html" target="_blank" rel="noopener">ดูบทเรียน</a>
+  </p>
+</section>
+
+<!-- ③ พอร์ต & เป้าหมาย -->
+<section id="tab-port" class="tab-panel">
+  <h2 class="panel-title">พอร์ต &amp; เป้าหมาย</h2>
+  <p class="tab-subtitle">พอร์ตซ้อม (paper) — มูลค่า ไม้ที่เปิด/ปิด และด่านปลดล็อก 5 ข้อที่ต้องผ่านก่อนใช้เงินจริง</p>
+  <div id="portCards" class="card-row"></div>
+  <div class="panel-card">
+    <h3>ไม้ที่เปิดอยู่ (open positions)</h3>
+    <div id="openPosWrap"></div>
+  </div>
+  <div class="panel-card">
+    <h3>ไม้ที่ปิดแล้ว</h3>
+    <div id="closedPosWrap"></div>
+  </div>
+  <div class="panel-card">
+    <h3>ด่านปลดล็อก 5 ข้อ (milestones)</h3>
+    <div id="milestonesWrap"></div>
+    <p class="caption">5 ด่านปลดล็อกเงินจริง — ผ่านได้ด้วยการซ้อมจริงเท่านั้น (soul-swing §Phase Unlock)</p>
+  </div>
+  <div class="panel-card">
+    <h3>ความจุความเสี่ยง (risk capacity)</h3>
+    <div id="riskCapWrap"></div>
+  </div>
+</section>
+
+<!-- ④ หลักฐาน backtest -->
+<section id="tab-backtest" class="tab-panel">
+  <p class="tab-subtitle">ที่มาของความเชื่อมั่นในกติกา — ผลทดสอบกับข้อมูลย้อนหลัง ไม่ใช่ผลเทรดจริง</p>
+  <div class="bt-banner">ตัวเลขจากผลสอบ backtest — ไม่ใช่ผลเทรดจริง · OOS รันครั้งเดียวแล้วปิดผนึก</div>
+  <div id="runPills" class="run-pills"></div>
+  <div id="btStats" class="card-row"></div>
+  <div class="bt-grid">
+    <div class="panel-card"><h3>เส้นทุนสะสม (cumulative R)</h3><canvas class="bt-canvas" id="btEquity"></canvas></div>
+    <div class="panel-card"><h3>การกระจายผลตอบแทน (R histogram)</h3><canvas class="bt-canvas" id="btHist"></canvas></div>
+    <div class="panel-card"><h3>ส่วนผสมทางออก (exit mix)</h3><canvas class="bt-canvas" id="btExit"></canvas></div>
+    <div class="panel-card"><h3>วันที่ถือ (days held)</h3><canvas class="bt-canvas" id="btDays"></canvas></div>
+    <div class="panel-card"><h3>ปฏิทิน R รายเดือน (เดือนที่ปิดไม้)</h3><canvas class="bt-canvas" id="btMonthly"></canvas></div>
+    <div class="panel-card"><h3>MFE vs R ที่เก็บได้จริง (ไม้ชนะ)</h3><canvas class="bt-canvas" id="btMaeMfe"></canvas></div>
+  </div>
+  <p class="caption">edge บาง กำไรมาเป็นพัก ๆ —
+    <a href="../academy/visuals/backtest-verdict.html" target="_blank" rel="noopener">อ่านรายละเอียดในบทเรียน</a>
+  </p>
+</section>
+
+<!-- ⑤ กติกา v2 -->
+<section id="tab-rules" class="tab-panel">
+  <h2 class="panel-title">กติกา v2 <span class="chip chip-neutral" id="rulesName"></span></h2>
+  <p class="tab-subtitle">กติกาที่ระบบใช้ตัดสินทุกอย่างในจอนี้ — ดึงจากโค้ดจริง (rules.py) อัตโนมัติ ไม่มีคัดลอกมือ</p>
+  <div id="patternChips" class="pattern-chips"></div>
+  <div id="rulesGrid"></div>
+  <p class="caption">
+    ค่าทั้งหมด generate จาก <code>src/backtest/rules.py</code> ตอนรีเฟรช — ไม่มีการคัดลอกมือ ·
+    <a href="../academy/visuals/index.html" target="_blank" rel="noopener">คอร์สเต็ม 10 บท</a> ·
+    <a href="../academy/visuals/v2-exam.html" target="_blank" rel="noopener">ข้อสอบ v2</a>
+  </p>
+</section>
+
+</main>
+
+<footer class="wb-footer" id="wbFooter"></footer>
+
+<script src="data/data.js?v=1782967287b"></script>
+<script src="data/live.js?v=1782967287b"></script>
+<script src="kit/util.js?v=1782967287"></script>
+<script src="kit/candles.js?v=1782967287b"></script>
+<script src="kit/table.js?v=1782967287d"></script>
+<script src="kit/panels.js?v=1782967287d"></script>
+<!-- ปฏิทินงบ shared component (ก่อน app.js → window.SWEarnCal พร้อมตอน renderCalendar) -->
+<script src="../shared/_kit/earnings-calendar.js?v=1782967287d"></script>
+<script src="kit/app.js?v=1782967287d"></script>
+<!-- เปลือกร่วม: nav registry → shell (ฉีด sidebar/bottom-nav/ปุ่มธีม) ท้าย body หลัง app.js -->
+<script src="../shared/_kit/nav.js?v=1782967287"></script>
+<script src="../shared/_kit/shell.js?v=1782967287"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>ซื้อกี่หุ้นดี? — Position Sizing (GOOGL) | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">ซื้อกี่หุ้นดี?</h1>
+    <p class="lead">การกำหนดขนาดไม้ (position sizing) ไม่ได้เริ่มจาก “มีเงินเท่าไหร่”
+      แต่เริ่มจาก “ถ้าผิดทาง ยอมเสียกี่บาท” แล้วถอยกลับมาเป็นจำนวนหุ้น</p>
+    <div class="hero-card">
+      <svg id="heroBars" viewBox="0 0 560 120" width="100%" aria-label="เทียบจำนวนหุ้นตามความเสี่ยง vs เพดาน"></svg>
+      <p class="tag center" id="heroCaption" style="margin-top:.5rem"></p>
+    </div>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#why" class="on">หลักคิด</a>
+    <a href="#formula">สูตร 3 ชั้น</a>
+    <a href="#sim">ลองปรับค่า</a>
+    <a href="#frac">เศษหุ้น</a>
+    <a href="#quiz">เช็กความเข้าใจ</a>
+  </nav>
+
+  <!-- ===== A · WHY RISK-FIRST ===== -->
+  <section id="why" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เริ่มจาก “ความเสี่ยง” ไม่ใช่ “เงินที่มี”</h2>
+      <p class="lead">คำถามเปลี่ยนไป 1 คำ แต่เปลี่ยนผลลัพธ์ทั้งพอร์ต — จาก “เงินเท่านี้ซื้อได้กี่หุ้น” เป็น “ถ้าหุ้นไปผิดทาง ฉันยอมเจ็บกี่บาท”</p>
+      <div class="row" style="margin-top:22px">
+        <div class="card col">
+          <h3 class="down">✗ คิดแบบเริ่มจากเงิน</h3>
+          <p class="muted" id="naiveText" style="margin-top:8px"></p>
+        </div>
+        <div class="card col">
+          <h3 class="up">✓ คิดแบบเริ่มจากความเสี่ยง</h3>
+          <p class="muted" id="proText" style="margin-top:8px"></p>
+        </div>
+      </div>
+      <div class="note">กฎพอร์ต Active (swing): เสี่ยง <b>1% ของพอร์ตต่อไม้</b> และไม่เกิน <b>10% ของพอร์ตต่อหุ้น</b> (เพดานความกระจุก) — ดูใน <span class="eq">soul-swing.md</span></div>
+    </div>
+  </section>
+
+  <!-- ===== B · 3-LAYER FORMULA ===== -->
+  <section id="formula" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">สูตร 3 ชั้น กับเคสจริง GOOGL</h2>
+      <p class="lead">พอร์ตกระดาษ 100,000 บาท (≈ $3,069) อยากเข้า GOOGL ที่ราคาปิด 5 มิ.ย. — เดินทีละชั้นว่าจะได้กี่หุ้น</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" style="flex:1.05">
+          <svg id="formBars" viewBox="0 0 520 120" width="100%" aria-label="เทียบขนาดไม้ตามเสี่ยง vs เพดาน"></svg>
+          <div class="legend" id="formLegend" style="justify-content:center"></div>
+        </div>
+        <div class="col" id="formSteps"></div>
+      </div>
+      <div class="note" id="formNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== C · INTERACTIVE SIM ===== -->
+  <section id="sim" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ลากดูว่าใคร “คุม” ขนาดไม้</h2>
+      <p class="lead">ปรับ <b>เงินพอร์ต</b> และ <b>ความกว้าง stop</b> (เป็นกี่เท่าของ ATR) แล้วดูว่าตัวบีบขนาดคือ “ความเสี่ยง 1%” หรือ “เพดาน 10%”</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col">
+          <div class="slider-row"><label>พอร์ต</label><input type="range" id="sPort"><span class="val" id="sPortv"></span></div>
+          <div class="slider-row"><label>stop</label><input type="range" id="sK"><span class="val" id="sKv"></span></div>
+          <div class="note">stop = ราคาเข้า − (k × ATR) · ATR ปัจจุบัน ≈ <b id="atrShow" class="accent"></b>/วัน · ราคาเข้าคงที่ $<span id="entryShow"></span></div>
+          <svg id="simBars" viewBox="0 0 460 90" width="100%" style="margin-top:14px" aria-label="เทียบขนาดไม้สด"></svg>
+        </div>
+        <div class="col" id="simOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== D · FRACTIONAL ===== -->
+  <section id="frac" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เศษหุ้น (fractional) ปลดล็อกพอร์ตเล็ก</h2>
+      <p class="lead">พอร์ต $3,069 + GOOGL $368 ต่อหุ้น เกิดปัญหาที่พอร์ตเล็กเจอบ่อย: เพดาน 10% ซื้อหุ้นเต็มไม่ได้แม้แต่ตัวเดียว</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" style="flex:1.1">
+          <svg id="fracBars" viewBox="0 0 480 110" width="100%" aria-label="เทียบงบเพดานกับราคา 1 หุ้นเต็ม"></svg>
+        </div>
+        <div class="col" id="fracText"></div>
+      </div>
+      <div class="note">โบรกที่รองรับเศษหุ้น (เช่น IBKR, Robinhood) ทำให้พอร์ตเล็กคุมขนาดไม้ได้แม่นเท่าพอร์ตใหญ่ · ถ้าโบรกซื้อได้เฉพาะหุ้นเต็ม พอร์ตเล็กอาจต้อง “ข้าม” หุ้นราคาแพงไปเลย</div>
+    </div>
+  </section>
+
+  <!-- ===== E · SELF CHECK ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เช็กความเข้าใจ</h2>
+      <div class="selfcheck" id="quizBox"></div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script>
+  (function(){
+    const E = window.ENGINE, CH = window.CHARTS, C = CH.C;
+    const f  = (n,dp) => E.fmt(n,dp);
+    const usd = (n,dp) => '$'+f(n,dp==null?2:dp);
+    const S  = E.SIZING_EXAMPLE;                  // {portfolioTHB, fx, portfolioUSD, entry, capPct, riskPct, k, rrGate, atr, stop, target — stop/target derived per canonical_v2}
+    const ATR   = E.adx14(E.GOOGL).slice(-1)[0].atr;   // 10.02 — single source
+    const entry = S.entry;                        // 368.53
+    const target= S.target;                       // 408.61
+
+    // core sizing helper (everything derived from ENGINE inputs)
+    function size(port, k){
+      const stop = entry - k*ATR;
+      const ps = E.positionSize({portfolio:port, riskPct:S.riskPct, entry, stop, capPct:S.capPct});
+      const riskBudget = port*S.riskPct;
+      const capDollar  = port*S.capPct;
+      const riskRaw = riskBudget/ps.stopDist;     // un-floored shares the 1% rule allows
+      const capRaw  = capDollar/entry;            // un-floored shares the 10% cap allows
+      const fracReal = Math.min(riskRaw, capRaw); // true fractional position
+      return Object.assign(ps, {stop, riskBudget, capDollar, riskRaw, capRaw, fracReal,
+        wantValue:riskRaw*entry, capValue:capDollar});
+    }
+    const base = size(S.portfolioUSD, S.k);       // the $3,069 worked example
+
+    /* ---------- HERO ---------- */
+    function bars(elId, port, k, w){
+      const r = size(port, k);
+      const bc = CH.barCompare([
+        {label:'ตามเสี่ยง 1%', value:r.wantValue, valueLabel:f(r.wantValue/port*100,1)+'%', color:C.adx},
+        {label:'เพดาน 10%',   value:r.capValue,  valueLabel:'10%',                          color:C.cross}
+      ], {max:Math.max(r.wantValue,r.capValue)*1.3, bindingIdx:(r.binding==='risk'?0:1), w:w||520});
+      const svg = document.getElementById(elId);
+      svg.setAttribute('viewBox','0 0 '+(w||520)+' '+bc.height);
+      svg.innerHTML = bc.svg;
+      return r;
+    }
+    function renderHero(){
+      bars('heroBars', S.portfolioUSD, S.k, 560);
+      document.getElementById('heroCaption').innerHTML =
+        'ความเสี่ยง 1% “อยากได้” ไม้ใหญ่ถึง '+f(base.wantValue/S.portfolioUSD*100,1)+'% ของพอร์ต — แต่เพดาน 10% บีบไว้';
+      document.getElementById('heroKpis').innerHTML = [
+        [usd(S.portfolioUSD,0),'พอร์ต','('+f(S.portfolioTHB/1000,0)+'k บาท ÷ '+f(S.fx,1)+')'],
+        [usd(entry),'ราคาเข้า','GOOGL 5 มิ.ย.'],
+        [usd(base.stop),'stop','−'+f((entry-base.stop)/entry*100,1)+'% ('+S.k+'×ATR fallback)'],
+        [usd(target),'เป้า','r2 = entry + '+S.rrGate+'×เสี่ยง']
+      ].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]} · ${k[2]}</span></div>`).join('');
+    }
+
+    /* ---------- A · why ---------- */
+    function renderWhy(){
+      const naiveShares = Math.floor(S.portfolioUSD/entry);
+      document.getElementById('naiveText').innerHTML =
+        `“มี ${usd(S.portfolioUSD,0)} ราคาหุ้น ${usd(entry)} → ซื้อได้ ${naiveShares} หุ้น เอา ${naiveShares} เลย”<br><br>`+
+        `ปัญหา: ไม่รู้เลยว่าถ้าหุ้นลงไปโดน stop จะเสียกี่บาท — ขนาดไม้ลอยตามราคาหุ้น ไม่ได้ผูกกับความเจ็บที่รับไหว`;
+      document.getElementById('proText').innerHTML =
+        `“ยอมเสีย 1% = ${usd(base.riskBudget)} ถ้าผิดทาง · stop ห่าง ${usd(base.stopDist)}/หุ้น → ${usd(base.riskBudget)} ÷ ${usd(base.stopDist)} ≈ ${f(base.riskRaw,2)} หุ้น”<br><br>`+
+        `ทุกไม้เจ็บเท่ากัน (1%) ไม่ว่าหุ้นถูกหรือแพง — ความเจ็บคงที่ คุมพอร์ตได้`;
+    }
+
+    /* ---------- B · 3-layer formula ---------- */
+    function renderFormula(){
+      const r = bars('formBars', S.portfolioUSD, S.k, 520);
+      document.getElementById('formLegend').innerHTML = CH.legend([
+        {color:C.adx,label:'ตามเสี่ยง 1%'},{color:C.cross,label:'เพดาน 10% (ตัวที่บีบ)'}]);
+      const steps = [
+        ['งบความเสี่ยง','ยอมเสียกี่บาทถ้าผิดทาง',
+          `<span class="eq b">งบเสี่ยง = 1% × พอร์ต = 1% × ${usd(S.portfolioUSD,0)}</span>`+
+          `<p>→ <b class="real">${usd(r.riskBudget)}</b> คือเงินสูงสุดที่ยอมเสียไม้นี้</p>`],
+        ['ความเสี่ยงต่อหุ้น','ระยะจากราคาเข้าถึง stop',
+          `<span class="eq b">เสี่ยง/หุ้น = ราคาเข้า − stop = ${S.k} × ATR (fallback ของ breakout)</span>`+
+          `<p>= ${usd(entry)} − ${usd(r.stop)} = <b class="real">${usd(r.stopDist)}</b>/หุ้น</p>`],
+        ['จำนวนหุ้น = เอาตัวที่เล็กกว่า','ตามเสี่ยง vs เพดาน',
+          `<span class="eq b">ตามเสี่ยง = ${usd(r.riskBudget)} ÷ ${usd(r.stopDist)} = ${f(r.riskRaw,2)} หุ้น</span>`+
+          `<span class="eq b">เพดาน = 10% × ${usd(S.portfolioUSD,0)} ÷ ${usd(entry)} = ${f(r.capRaw,2)} หุ้น</span>`+
+          `<p>เอา min → <b class="real">${f(r.fracReal,2)} หุ้น</b> (เพดานบีบ) = หุ้นเต็ม <b class="real">${r.shares}</b> ตัว</p>`]
+      ];
+      document.getElementById('formSteps').innerHTML = steps.map((s,i)=>
+        `<div class="step"><div class="n">${i+1}</div><div class="b"><h4>${s[0]} <span class="tag">— ${s[1]}</span></h4>${s[2]}</div></div>`).join('');
+      document.getElementById('formNote').innerHTML =
+        `เพราะ stop แคบแค่ ${f((entry-r.stop)/entry*100,1)}% ความเสี่ยง 1% เลย “อยากได้” ไม้ใหญ่ถึง ${f(r.wantValue/S.portfolioUSD*100,1)}% — `+
+        `<b>เพดาน 10% จึงเป็นตัวบีบ</b> (ไม่ใช่ความเสี่ยง) · ส่วนหุ้นเต็มได้ ${r.shares} ตัวเพราะพอร์ตเล็ก → ไปต่อหัวข้อ “เศษหุ้น”`;
+    }
+
+    /* ---------- C · interactive ---------- */
+    function renderSimControls(){
+      const sp=document.getElementById('sPort'), sk=document.getElementById('sK');
+      sp.min=1000; sp.max=100000; sp.step=1000; sp.value=S.portfolioUSD;
+      sk.min=1;   sk.max=5;     sk.step=0.5;  sk.value=S.k;
+      document.getElementById('atrShow').textContent=usd(ATR);
+      document.getElementById('entryShow').textContent=f(entry);
+      const calc=()=>{
+        const port=+sp.value, k=+sk.value;
+        document.getElementById('sPortv').textContent=usd(port,0);
+        document.getElementById('sKv').textContent=k.toFixed(1)+'×';
+        const r=bars('simBars', port, k, 460);
+        const bind = r.binding==='risk';
+        document.getElementById('simOut').innerHTML =
+          `<h3>ผลลัพธ์สด</h3>`+
+          `<p class="muted" style="margin:8px 0 4px">งบเสี่ยง 1% = <b class="real">${usd(r.riskBudget)}</b> · เสี่ยง/หุ้น = ${k.toFixed(1)}×ATR = <b class="real">${usd(r.stopDist)}</b> (stop ${usd(r.stop)})</p>`+
+          `<div class="eq b">ตามเสี่ยง ${f(r.riskRaw,2)} หุ้น · เพดาน ${f(r.capRaw,2)} หุ้น</div>`+
+          `<p style="margin:6px 0">ตัวบีบขนาด: <span class="pill ${bind?'y':'r'}">${bind?'ความเสี่ยง 1% คุม':'เพดาน 10% คุม'}</span></p>`+
+          `<p class="muted">ซื้อจริง: หุ้นเต็ม <b class="real">${r.shares}</b> ตัว = ${usd(r.value,0)} (${f(r.weight*100,1)}% ของพอร์ต) · เสี่ยงจริง <b class="real">${f(r.actualRiskPct*100,2)}%</b></p>`+
+          `<p class="tag">เศษหุ้นได้ ${f(r.fracReal,2)} หุ้น · ${r.shares===0?'พอร์ตเล็กเกินซื้อหุ้นเต็มใต้เพดานไม่ได้ → ต้องใช้เศษหุ้น':'ลาก stop กว้างขึ้น (k สูง) จะเห็นความเสี่ยงกลับมาเป็นตัวคุม'}</p>`;
+      };
+      ['input','change'].forEach(ev=>{sp.addEventListener(ev,calc);sk.addEventListener(ev,calc);});
+      calc();
+    }
+
+    /* ---------- D · fractional ---------- */
+    function renderFrac(){
+      const capDollar=base.capDollar;
+      const bc = CH.barCompare([
+        {label:'งบเพดาน 10%', value:capDollar,  valueLabel:usd(capDollar,0), color:C.cross},
+        {label:'1 หุ้นเต็ม',  value:entry,       valueLabel:usd(entry,0),     color:C.adx}
+      ], {max:entry*1.25, bindingIdx:1, w:480});
+      const svg=document.getElementById('fracBars');
+      svg.setAttribute('viewBox','0 0 480 '+bc.height); svg.innerHTML=bc.svg;
+      document.getElementById('fracText').innerHTML =
+        `<h3>1 หุ้น > งบทั้งก้อน</h3>`+
+        `<p class="muted" style="margin:8px 0 12px">งบใต้เพดาน 10% = <b>${usd(capDollar)}</b> แต่ GOOGL ราคา <b>${usd(entry)}</b>/หุ้น → ซื้อหุ้นเต็มได้ <b class="down">0 ตัว</b> (1 ตัว = ${f(entry/S.portfolioUSD*100,1)}% เกินเพดาน)</p>`+
+        `<div class="eq b">เศษหุ้น = ${usd(capDollar)} ÷ ${usd(entry)} = ${f(base.capRaw,2)} หุ้น</div>`+
+        `<p class="muted" style="margin-top:8px">ได้ไม้พอดี 10% = ${usd(capDollar)} · เสี่ยงจริงแค่ <b class="real">${f(base.actualRiskPct*100,2)}%</b> (ต่ำกว่างบ 1% เพราะไม้ถูกเพดานหั่นเล็กลง)</p>`;
+    }
+
+    /* ---------- E · quiz ---------- */
+    function renderQuiz(){
+      const qs=[
+        ['ทำไมเริ่มจาก “ยอมเสียกี่บาท” ถึงดีกว่าเริ่มจาก “มีเงินเท่าไหร่”?',
+         'เพราะทุกไม้จะเจ็บเท่ากัน (1% ของพอร์ต) ไม่ว่าหุ้นถูกหรือแพง stop กว้างหรือแคบ — ความเจ็บคงที่ พอร์ตเลยทนไม้ที่ผิดทางติด ๆ กันได้ ส่วนการเริ่มจากเงินทำให้ขนาดความเจ็บลอยตามราคาหุ้น คุมไม่ได้'],
+        ['stop แคบลง (k น้อยลง) ตัวบีบขนาดไม้จะเป็นความเสี่ยงหรือเพดาน?',
+         'เพดาน — stop ยิ่งแคบ ความเสี่ยง/หุ้นยิ่งน้อย “ตามเสี่ยง 1%” เลยอยากได้หุ้นเยอะขึ้นจนชนเพดาน 10% · กลับกัน stop กว้าง (k สูง) ความเสี่ยงต่อหุ้นมาก จำนวนหุ้นตามเสี่ยงน้อยลงจนความเสี่ยง 1% กลับมาเป็นตัวคุม'],
+        ['พอร์ต $3,069 ซื้อ GOOGL ($368) เสี่ยงจริงแค่ '+f(base.actualRiskPct*100,2)+'% ทั้งที่งบ 1% — เพราะอะไร?',
+         'เพราะเพดาน 10% หั่นไม้ให้เหลือ '+f(base.capRaw,2)+' หุ้น (≈ '+usd(base.capDollar,0)+') ซึ่งเล็กกว่าที่งบเสี่ยง 1% อนุญาต — เมื่อไม้ถูกเพดานบีบให้เล็กลง ความเสี่ยงจริงจึงต่ำกว่างบ ไม่ใช่เรื่องเสียหาย แค่แปลว่าหุ้นแพงเทียบพอร์ตจนคุมด้วยเพดานแทน']
+      ];
+      document.getElementById('quizBox').innerHTML = qs.map(q=>
+        `<details><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
+    }
+
+    document.getElementById('foot').innerHTML =
+      `ข้อมูล: GOOGL รายวัน (yfinance) · as of ${E.META.as_of} · ATR/ราคา/ขนาดไม้คำนวณสดจาก <span class="eq">_kit/engine.js</span> (แหล่งเดียว) · self-contained / offline · MyInvest Visual Library`;
+
+    renderHero(); renderWhy(); renderFormula(); renderSimControls(); renderFrac(); renderQuiz();
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>คุ้มเสี่ยงไหม? — R:R &amp; Expectancy (GOOGL) | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">คุ้มเสี่ยงไหม?</h1>
+    <p class="lead">ก่อนกดเข้าเทรด ถาม 2 ชั้น — ครั้งนี้ “คุ้มเสี่ยงไหม” (R:R)
+      และถ้าทำซ้ำเป็นร้อยครั้ง “ได้เปรียบไหม” (expectancy หรือ ค่าคาดหวัง)</p>
+    <div class="hero-card row" style="align-items:center">
+      <div class="col" style="flex:.8"><svg id="heroLadder" viewBox="0 0 300 260" width="100%" aria-label="บันไดราคา risk/reward ของ GOOGL"></svg></div>
+      <div class="col" id="heroSide"></div>
+    </div>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#rr" class="on">R:R ใน 1 ภาพ</a>
+    <a href="#why2">ทำไมต้อง ≥ 2</a>
+    <a href="#exp">Expectancy</a>
+    <a href="#calc">เครื่องคิดเลข</a>
+    <a href="#quiz">เช็กความเข้าใจ</a>
+  </nav>
+
+  <!-- ===== A · R:R IN ONE PICTURE ===== -->
+  <section id="rr" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">R:R = เสี่ยง 1 ส่วน เพื่อลุ้นกี่ส่วน</h2>
+      <p class="lead">Risk:Reward (อัตราเสี่ยงต่อผลตอบแทน) วัดระยะจากราคาเข้าไป stop (ความเสี่ยง) เทียบกับระยะไปเป้า (ผลตอบแทน)</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" id="rrText"></div>
+        <div class="col" style="flex:.9"><svg id="rrLadder" viewBox="0 0 300 280" width="100%" aria-label="บันไดราคา risk/reward"></svg></div>
+      </div>
+      <div class="note" id="rrSrcNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== B · WHY >= 2 ===== -->
+  <section id="why2" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทำไมตั้งเกณฑ์ R:R ≥ 2 (และทำไมไม้จริงได้ 2.5)</h2>
+      <p class="lead">ยิ่ง R:R สูง ยิ่ง “ผิดบ่อยได้” โดยไม่ขาดทุน — เพราะกำไรแต่ละไม้ที่ถูกใหญ่กว่าไม้ที่ผิด ·
+        กฎบ้านตั้งพื้นไว้ ≥ 2 ส่วนไม้ breakout จริงถูก<b>ตรึงที่ 2.5</b> โดยสูตรเป้า r2 (canonical_v2)</p>
+      <div class="card" style="margin-top:22px">
+        <svg id="beBars" viewBox="0 0 520 120" width="100%" aria-label="อัตราชนะคุ้มทุนตาม R:R"></svg>
+        <div class="legend" id="beLegend" style="justify-content:center;margin-top:6px"></div>
+      </div>
+      <div class="note" id="beNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== C · EXPECTANCY ===== -->
+  <section id="exp" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">Expectancy — กำไรเฉลี่ยที่คาดได้ต่อไม้</h2>
+      <p class="lead">R:R ดูครั้งเดียว · expectancy รวม “อัตราชนะ” เข้าไปด้วย เพื่อบอกว่าระบบนี้ระยะยาวบวกหรือลบ (หน่วยเป็น R = เท่าของความเสี่ยงต่อไม้)</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" id="expSteps"></div>
+        <div class="col">
+          <h3>อ่านค่ายังไง</h3>
+          <p class="muted" id="expRead" style="margin-top:8px"></p>
+        </div>
+      </div>
+      <div class="note">1R = เงินที่เสี่ยงต่อไม้ (เช่นไม้ละ 1% ของพอร์ต) · expectancy +0.35R ต่อไม้ ≈ ทุก 1% ที่เสี่ยง ได้คืนเฉลี่ย 0.35% · เป็นค่าเฉลี่ยระยะยาว ไม้เดี่ยว ๆ ยังแพ้ได้</div>
+    </div>
+  </section>
+
+  <!-- ===== D · CALCULATOR ===== -->
+  <section id="calc" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ลองปรับเอง: ระบบนี้มี edge ไหม</h2>
+      <p class="lead">ปรับอัตราชนะ · R:R · และขนาดไม้ที่แพ้ แล้วดูค่าคาดหวังกับเส้นคุ้มทุนสด ๆ</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col">
+          <div class="slider-row"><label>ชนะ %</label><input type="range" id="cWin"><span class="val" id="cWinv"></span></div>
+          <div class="slider-row"><label>R:R</label><input type="range" id="cRR"><span class="val" id="cRRv"></span></div>
+          <div class="slider-row"><label>แพ้ -R</label><input type="range" id="cLoss"><span class="val" id="cLossv"></span></div>
+          <svg id="gauge" viewBox="0 0 440 80" width="100%" style="margin-top:10px" aria-label="เกจอัตราชนะเทียบจุดคุ้มทุน"></svg>
+        </div>
+        <div class="col" id="calcOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== E · SELF CHECK ===== -->
+  <section id="quiz" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เช็กความเข้าใจ</h2>
+      <div class="selfcheck" id="quizBox"></div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script>
+  (function(){
+    const E = window.ENGINE, CH = window.CHARTS, C = CH.C;
+    const f  = (n,dp) => E.fmt(n,dp);
+    const usd= (n,dp) => '$'+f(n,dp==null?2:dp);
+    const S  = E.SIZING_EXAMPLE;
+    const ATR   = E.adx14(E.GOOGL).slice(-1)[0].atr;
+    const entry = S.entry, target = S.target;
+    const stop  = entry - S.k*ATR;
+    const RR    = E.rr({entry, stop, target});          // {rr:2, riskPerShare:20.04, rewardPerShare:40.08}
+    const breakeven = (winR, lossR) => 100*lossR/(winR+lossR);   // % win needed to break even
+
+    document.getElementById('rrSrcNote').innerHTML =
+      `ระยะ stop ในเดโม่นี้ = fallback <span class="eq">entry − ${S.k}×ATR</span> (กติกาเต็ม: ใช้แนวรับโครงสร้างถ้าห่างในกรอบ `+
+      `[${window.CANON.stop.min_atr_mult}, ${window.CANON.stop.max_atr_mult}]×ATR — ดูบท Stop · Target) · เป้า = สูตร r2: `+
+      `<span class="eq">target = entry + ${window.CANON.breakout.rr_gate} × (entry − stop)</span> = ${usd(target)} — canonical_v2 เลิกใช้ swing high เป็นเป้าแล้ว (เป้าโครงสร้างสอบตกเรื่องความถี่ไม้ใน P0)`;
+
+    /* ---------- price ladder ---------- */
+    function ladder(elId, w, h){
+      w=w||300; h=h||280;
+      const top=22, plotH=h-top-30, lo=stop, rng=target-lo;
+      const sy = p => top + plotH - ((p-lo)/rng)*plotH;
+      const xL=64, xR=w-16;
+      let s='';
+      // reward band (entry -> target)
+      s+=`<rect x="${xL}" y="${sy(target).toFixed(1)}" width="${xR-xL}" height="${(sy(entry)-sy(target)).toFixed(1)}" style="fill:var(--ok-bg)"/>`;
+      // risk band (entry -> stop)
+      s+=`<rect x="${xL}" y="${sy(entry).toFixed(1)}" width="${xR-xL}" height="${(sy(stop)-sy(entry)).toFixed(1)}" style="fill:var(--bad-bg)"/>`;
+      const lvl=(p,col,price,tag)=>{
+        s+=`<line x1="${xL}" y1="${sy(p).toFixed(1)}" x2="${xR}" y2="${sy(p).toFixed(1)}" stroke="${col}" stroke-width="2"/>`;
+        s+=`<text x="${xL-6}" y="${(sy(p)+4).toFixed(1)}" text-anchor="end" class="vlbl" fill="${col}">${price}</text>`;
+        s+=`<text x="${xR-4}" y="${(sy(p)-5).toFixed(1)}" text-anchor="end" class="vlbl" fill="${col}">${tag}</text>`;
+      };
+      lvl(target, C.up,  usd(target), 'เป้า +'+f(RR.rr,1)+'R');
+      lvl(entry,  C.adx, usd(entry),  'ราคาเข้า');
+      lvl(stop,   C.down, usd(stop),  'stop −1R');
+      // center R:R callout
+      s+=`<text x="${((xL+xR)/2).toFixed(1)}" y="${(sy(entry)-(sy(entry)-sy(target))/2+4).toFixed(1)}" text-anchor="middle" class="vlbl" style="font-weight:700;fill:var(--ok-ink)">ลุ้น ${usd(RR.rewardPerShare)}</text>`;
+      s+=`<text x="${((xL+xR)/2).toFixed(1)}" y="${(sy(entry)+(sy(stop)-sy(entry))/2+4).toFixed(1)}" text-anchor="middle" class="vlbl" style="font-weight:700;fill:var(--bad-ink)">เสี่ยง ${usd(RR.riskPerShare)}</text>`;
+      const svg=document.getElementById(elId);
+      if(svg){ svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.innerHTML=s; }
+    }
+
+    /* ---------- HERO ---------- */
+    function renderHero(){
+      ladder('heroLadder',300,260);
+      document.getElementById('heroSide').innerHTML =
+        `<div class="eq b" style="font-size:1rem">R:R = ลุ้น ÷ เสี่ยง</div>`+
+        `<p class="muted" style="margin:8px 0">= ${usd(RR.rewardPerShare)} ÷ ${usd(RR.riskPerShare)} = <b class="accent" style="font-size:1.4rem">${f(RR.rr,1)} : 1</b></p>`+
+        `<p class="tag">เสี่ยง 1 ส่วน ($${f(RR.riskPerShare)}) เพื่อลุ้น ${f(RR.rr,1)} ส่วน — ค่านี้ถูกตรึงโดยสูตรเป้า r2 (canonical_v2) จึง ≥ เกณฑ์พื้น 2 เสมอ</p>`;
+      document.getElementById('heroKpis').innerHTML = [
+        [usd(entry),'ราคาเข้า','GOOGL 5 มิ.ย.'],
+        [usd(stop),'stop','−1R = '+usd(RR.riskPerShare)],
+        [usd(target),'เป้า','+'+f(RR.rr,1)+'R = '+usd(RR.rewardPerShare)],
+        [f(RR.rr,1)+':1','R:R','ตรึงโดยสูตร r2']
+      ].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]} · ${k[2]}</span></div>`).join('');
+    }
+
+    /* ---------- A · R:R ---------- */
+    function renderRR(){
+      ladder('rrLadder',300,280);
+      document.getElementById('rrText').innerHTML =
+        `<h3>เคสจริง GOOGL</h3>`+
+        `<div class="step" style="margin-top:12px"><div class="n" style="background:var(--down)">R</div><div class="b"><h4>ความเสี่ยง (risk)</h4>`+
+          `<p>ราคาเข้า ${usd(entry)} → stop ${usd(stop)} = <b class="down">${usd(RR.riskPerShare)}</b>/หุ้น = 1R</p></div></div>`+
+        `<div class="step" style="margin-top:10px;background:#e6f6ec"><div class="n" style="background:var(--up)">R</div><div class="b"><h4>ผลตอบแทน (reward)</h4>`+
+          `<p>ราคาเข้า ${usd(entry)} → เป้า ${usd(target)} = <b class="up">${usd(RR.rewardPerShare)}</b>/หุ้น</p></div></div>`+
+        `<div class="eq b" style="margin-top:12px">R:R = ${usd(RR.rewardPerShare)} ÷ ${usd(RR.riskPerShare)} = <b class="real">${f(RR.rr,2)}</b></div>`;
+    }
+
+    /* ---------- B · breakeven win-rate ---------- */
+    function renderBreakeven(){
+      const rrGate = window.CANON.breakout.rr_gate;   // 2.5 — ค่าจริงของไม้ breakout
+      const rrs=[1,1.5,2,rrGate,4];
+      const items=rrs.map(x=>({label:'R:R '+x+' : 1'+(x===rrGate?' (breakout จริง)':x===2?' (เกณฑ์พื้น)':''), value:breakeven(x,1),
+        valueLabel:f(breakeven(x,1),0)+'%', color:(x===rrGate?C.up:C.adx)}));
+      const bc=CH.barCompare(items,{max:60,w:520,rowH:40});
+      const svg=document.getElementById('beBars');
+      svg.setAttribute('viewBox','0 0 520 '+bc.height); svg.innerHTML=bc.svg;
+      document.getElementById('beLegend').innerHTML=CH.legend([
+        {color:C.up,label:'R:R '+rrGate+' = ของจริง breakout → ชนะ ~'+f(breakeven(rrGate,1),0)+'% ก็คุ้มทุน'},{color:C.adx,label:'R:R อื่น ๆ เทียบ'}]);
+      document.getElementById('beNote').innerHTML=
+        `อัตราชนะคุ้มทุน = 1 ÷ (1 + R:R) · ที่ <b>R:R ${rrGate}</b> (ค่าที่สูตร r2 ตรึงให้ไม้ breakout) ต้องชนะแค่ <b class="real">${f(breakeven(rrGate,1),0)}%</b> ก็ไม่ขาดทุน — `+
+        `ผลสอบ OOS ชนะจริง ${window.CANON_X.results.oos.win_pct}% สูงกว่าเส้นคุ้มทุนพอสมควร (ดูบท "อ่านผลสอบ backtest") · ที่ R:R 1 ต้องชนะ 50% ขึ้นไป ซึ่งยากกว่ามากในทางปฏิบัติ`;
+    }
+
+    /* ---------- C · expectancy worked example ---------- */
+    function renderExp(){
+      const win=0.45, lossR=1, ex=E.expectancy({winPct:win, winR:RR.rr, lossR:lossR});
+      document.getElementById('expSteps').innerHTML =
+        `<div class="step"><div class="n">1</div><div class="b"><h4>สูตร</h4>`+
+          `<span class="eq b">E = (ชนะ% × R:R) − (แพ้% × ขนาดไม้แพ้)</span></div></div>`+
+        `<div class="step" style="margin-top:10px"><div class="n">2</div><div class="b"><h4>แทนค่า (สมมุติชนะ 45%, R:R ${f(RR.rr,1)}, แพ้ 1R)</h4>`+
+          `<span class="eq b">E = (0.45 × ${f(RR.rr,1)}) − (0.55 × 1)</span>`+
+          `<p>= ${f(win*RR.rr,2)} − ${f((1-win)*lossR,2)} → <b class="real">+${f(ex.e,2)}R</b> ต่อไม้</p></div></div>`+
+        `<div class="step" style="margin-top:10px"><div class="n">3</div><div class="b"><h4>ระยะยาว 100 ไม้</h4>`+
+          `<p>คาดได้ ≈ <b class="real">+${f(ex.e*100,0)}R</b> (ถ้าเสี่ยงไม้ละ 1% ≈ +${f(ex.e*100,0)}% ก่อนหักค่าธรรมเนียม)</p></div></div>`;
+      document.getElementById('expRead').innerHTML =
+        `<b class="up">E &gt; 0</b> = ระบบมี edge (ได้เปรียบ) ยิ่งทำซ้ำยิ่งบวก<br>`+
+        `<b class="flat">E = 0</b> = เสมอตัว ค่าธรรมเนียมจะทำให้ขาดทุนจริง<br>`+
+        `<b class="down">E &lt; 0</b> = เสียเปรียบ ยิ่งเทรดยิ่งหด ต่อให้บางไม้กำไรใหญ่<br><br>`+
+        `กับดักที่พบบ่อย: R:R สวยแต่อัตราชนะต่ำเกิน → E ติดลบ · หรือชนะบ่อยแต่กำไรจิ๋ว ขาดทุนก้อนใหญ่ → E ติดลบเช่นกัน`;
+    }
+
+    /* ---------- D · calculator ---------- */
+    function gauge(winPct, bePct){
+      const W=440,x0=40,x1=W-16,trackY=30,h=18, px=p=>x0+(p/100)*(x1-x0);
+      const fill = winPct>=bePct ? C.up : C.down;
+      let s='';
+      s+=`<rect x="${x0}" y="${trackY}" width="${(x1-x0).toFixed(1)}" height="${h}" rx="9" style="fill:var(--surface-2)"/>`;
+      s+=`<rect x="${x0}" y="${trackY}" width="${Math.max(0,px(winPct)-x0).toFixed(1)}" height="${h}" rx="9" fill="${fill}"/>`;
+      s+=`<line x1="${px(bePct).toFixed(1)}" y1="${trackY-9}" x2="${px(bePct).toFixed(1)}" y2="${trackY+h+9}" stroke="${C.ink}" stroke-width="2"/>`;
+      s+=`<text x="${px(bePct).toFixed(1)}" y="${trackY-13}" text-anchor="middle" class="vlbl">คุ้มทุน ${f(bePct,0)}%</text>`;
+      s+=`<text x="${px(winPct).toFixed(1)}" y="${trackY+h+21}" text-anchor="middle" class="vlbl" fill="${fill}" style="font-weight:700">ชนะ ${f(winPct,0)}%</text>`;
+      s+=`<text x="${x0}" y="${trackY+h+21}" class="vlbl">0%</text>`;
+      s+=`<text x="${x1}" y="${trackY+h+21}" text-anchor="end" class="vlbl">100%</text>`;
+      return s;
+    }
+    function renderCalc(){
+      const cw=document.getElementById('cWin'), cr=document.getElementById('cRR'), cl=document.getElementById('cLoss');
+      cw.min=10; cw.max=90; cw.step=1; cw.value=45;
+      cr.min=0.5; cr.max=5; cr.step=0.1; cr.value=f(RR.rr,1);
+      cl.min=0.5; cl.max=2; cl.step=0.1; cl.value=1;
+      const calc=()=>{
+        const win=+cw.value, rr=+cr.value, lossR=+cl.value;
+        document.getElementById('cWinv').textContent=win+'%';
+        document.getElementById('cRRv').textContent=rr.toFixed(1)+':1';
+        document.getElementById('cLossv').textContent='−'+lossR.toFixed(1)+'R';
+        const ex=E.expectancy({winPct:win/100, winR:rr, lossR:lossR});
+        const be=breakeven(rr,lossR);
+        document.getElementById('gauge').innerHTML=gauge(win,be);
+        const verdict = ex.e>0.001 ? ['มี edge (ได้เปรียบ)','g'] : ex.e<-0.001 ? ['ไม่มี edge (เสียเปรียบ)','r'] : ['เสมอตัว','y'];
+        document.getElementById('calcOut').innerHTML=
+          `<h3>ค่าคาดหวัง</h3>`+
+          `<p style="margin:8px 0"><b class="${ex.e>=0?'up':'down'}" style="font-size:2rem">${ex.e>=0?'+':''}${f(ex.e,2)}R</b> <span class="muted">ต่อไม้</span></p>`+
+          `<p style="margin:6px 0"><span class="pill ${verdict[1]}">${verdict[0]}</span></p>`+
+          `<div class="eq b">E = (${(win/100).toFixed(2)}×${rr.toFixed(1)}) − (${(1-win/100).toFixed(2)}×${lossR.toFixed(1)}) = ${ex.e>=0?'+':''}${f(ex.e,2)}R</div>`+
+          `<p class="muted">อัตราชนะคุ้มทุน = <b class="real">${f(be,0)}%</b> · คุณตั้งไว้ ${win}% → ${win>=be?'<b class="up">เหนือเส้นคุ้มทุน</b>':'<b class="down">ต่ำกว่าเส้นคุ้มทุน</b>'}</p>`+
+          `<p class="tag">100 ไม้ คาดได้ ≈ ${ex.e>=0?'+':''}${f(ex.e*100,0)}R</p>`;
+      };
+      ['input','change'].forEach(ev=>[cw,cr,cl].forEach(el=>el.addEventListener(ev,calc)));
+      calc();
+    }
+
+    /* ---------- E · quiz ---------- */
+    function renderQuiz(){
+      const beEx=breakeven(RR.rr,1);
+      const qs=[
+        ['R:R 2 ต้องชนะอย่างน้อยกี่ % ถึงไม่ขาดทุน?',
+         'ชนะ '+f(beEx,0)+'% (= 1 ÷ (1+2)) · แปลว่าผิดได้ถึง '+f(100-beEx,0)+'% ของไม้ทั้งหมดแล้วยังเสมอตัว — นี่คือเหตุผลที่ R:R สูงช่วยให้ระบบทนต่อการแพ้ติด ๆ กันได้'],
+        ['ระบบ A ชนะ 70% แต่ R:R 0.5 กับระบบ B ชนะ 40% แต่ R:R 2 — อันไหนดีกว่า?',
+         'คิด expectancy: A = 0.7×0.5 − 0.3×1 = +0.05R · B = 0.4×2 − 0.6×1 = +0.20R → B ดีกว่าราว 4 เท่าต่อไม้ ทั้งที่ชนะน้อยกว่า · อัตราชนะสูงหลอกตาได้ ต้องดู expectancy เสมอ'],
+        ['ทำไม expectancy เป็นบวกแล้วไม้เดี่ยว ๆ ยังขาดทุนได้?',
+         'เพราะ expectancy เป็นค่าเฉลี่ยระยะยาว ไม้ต่อไม้ยังสุ่มแพ้/ชนะ · edge จะเห็นผลเมื่อทำซ้ำหลายสิบ–ร้อยไม้ด้วยขนาดไม้คงที่ ไม่ใช่การันตีไม้ถัดไป — จึงต้องคุมขนาดไม้ (ดูบท Position Sizing) ให้พอร์ตอยู่รอดถึงตอนที่ edge ออกผล']
+      ];
+      document.getElementById('quizBox').innerHTML=qs.map(q=>
+        `<details><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
+    }
+
+    document.getElementById('foot').innerHTML =
+      `ข้อมูล: GOOGL รายวัน (yfinance) · as of ${E.META.as_of} · R:R/expectancy คำนวณสดจาก <span class="eq">_kit/engine.js</span> (แหล่งเดียว) · self-contained / offline · MyInvest Visual Library`;
+
+    renderHero(); renderRR(); renderBreakeven(); renderExp(); renderCalc(); renderQuiz();
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>

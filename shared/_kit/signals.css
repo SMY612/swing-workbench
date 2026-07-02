@@ -1,0 +1,38 @@
+/* shared/_kit/signals.css — การ์ด "⚡ สัญญาณ swing วันนี้" (shared component)
+   ============================================================================
+   ใช้ร่วม home (site-src/index.html) + สรุปเช้า (site-src/briefing.html).
+   คู่กับ shared/_kit/signals.js (window.SWSignals.render).
+   สีหลัก (--up/--text-faint/--font) มาจาก shared/_kit/tokens.css ที่ทั้ง 2 หน้าโหลดแล้ว.
+   token bento (--g-y/--y-ink/--hair) เดิม page-local → ยกมา self-contained ใต้ .swsig
+   (ค่าก๊อปจาก source เป๊ะ ทั้งมืด/สว่าง) → หน้าตาตรงกัน ไม่ leak ชน :root.
+   กฎสีการ์ด (design-log 2026-06-17): การ์ดเนื้อหา = กระจกใส neutral (host .bcard ทำพื้น) ·
+   component วาดแค่เนื้อใน · เขียว/เหลือง = บนป้าย(pill)/avatar เท่านั้น.
+   ============================================================================ */
+
+/* ---- token self-contained (scope .swsig · default = light) ---- */
+.swsig{
+  --g-y:rgba(240,214,96,.26);
+  --y-ink:#6b5a0e;
+  --hair:rgba(0,0,0,.07);
+  --row-hover:rgba(120,120,128,.07);
+}
+:root[data-theme="dark"] .swsig{
+  --g-y:rgba(157,134,18,.30);
+  --y-ink:#f0d65f;
+  --hair:rgba(255,255,255,.08);
+  --row-hover:rgba(120,120,128,.10);
+}
+
+/* ---- แถวสัญญาณ (avatar + ชื่อ + คำอธิบาย + ป้าย) · ยกจาก briefing.html verbatim ---- */
+.swsig .lrow{ display:flex; align-items:center; gap:11px; padding:.5rem 0; border-bottom:1px solid var(--hair); }
+.swsig .lrow:last-child{ border-bottom:0; }
+/* แถวคลิกได้ = <a> → reset link (กัน underline/สีลิงก์ UA · ไม่ใช่ <button> จึงไม่ต้อง appearance reset) */
+.swsig a.lrow{ text-decoration:none; color:inherit; cursor:pointer; transition:background .14s ease; }
+.swsig a.lrow:hover{ background:var(--row-hover); }
+.swsig .av{ width:32px; height:32px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex:none; }
+.swsig .lrow .nm{ font-size:.86rem; font-weight:600; margin:0; }
+.swsig .lrow .rl{ font-size:.73rem; color:var(--text-faint); margin:1px 0 0; }
+.swsig .pill{ margin-left:auto; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:999px; }
+.swsig .pill.go{ background:rgba(36,138,61,.18); color:var(--up); }
+.swsig .pill.near{ background:var(--g-y); color:var(--y-ink); }
+.swsig .sig-more{ font-size:.78rem; color:var(--text-faint); }

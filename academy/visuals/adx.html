@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th" data-shell-root="../.." data-skin="terminal" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../../shared/_kit/theme-boot.js?v=1782967287"></script>
+<title>ADX / +DI / −DI เจาะลึก — GOOGL | MyInvest</title>
+<link rel="stylesheet" href="./_kit/theme.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/shell.css?v=1782967287b">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal.css?v=1782967287">
+<link rel="stylesheet" href="../../shared/_kit/skin-terminal-academy.css?v=1782967287">
+</head>
+<body data-nav="academy">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero section--tint">
+    <div class="eyebrow">MyInvest · ห้องสมุดภาพการเรียนรู้</div>
+    <h1 class="hero-title">ADX</h1>
+    <p class="lead">วัด “เทรนด์แรงแค่ไหน” ด้วยเลขเส้นเดียว แล้วดูว่า “ใครคุม” ด้วย +DI / −DI
+      ทุกตัวเลขในหน้านี้คำนวณสดจากราคา GOOGL จริง · 19 พ.ค.–5 มิ.ย. 2026</p>
+    <div class="hero-card chartwrap"><svg id="heroChart" viewBox="0 0 700 230" width="100%" aria-label="กราฟ +DI/−DI/ADX ของ GOOGL"></svg></div>
+    <div class="legend" style="justify-content:center" id="heroLegend"></div>
+    <div class="kpis" id="heroKpis"></div>
+  </header>
+
+  <!-- ===== CHIP NAV ===== -->
+  <nav class="chipnav">
+    <a href="#atr" class="on">ATR (ฐาน)</a>
+    <a href="#calc">5 ขั้นคำนวณ</a>
+    <a href="#chart">กราฟ + ตาราง</a>
+    <a href="#whatif">ลองเปลี่ยนค่า</a>
+    <a href="#cross">DI cross + เกณฑ์เข้า</a>
+    <a href="#quiz">เช็กความเข้าใจ</a>
+  </nav>
+
+  <!-- ===== A · ATR RECAP ===== -->
+  <section id="atr" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ทุกอย่างเริ่มที่ True Range</h2>
+      <p class="lead">ก่อนรู้ว่าเทรนด์แรงแค่ไหน ต้องวัดก่อนว่า “วันนึงแกว่งจริงเท่าไหร่” = True Range (TR)
+        ATR คือค่าเฉลี่ยของ TR · และ TR ก็คือ <b>ขั้นที่ 1</b> ของ ADX พอดี</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col" style="flex:1.1"><svg id="atrCandle" viewBox="0 0 320 240" width="100%" aria-label="แท่งเทียน GOOGL 28–29 พ.ค."></svg></div>
+        <div class="col">
+          <h3>GOOGL ศุกร์ 29 พ.ค. (gap ลง)</h3>
+          <p class="muted" style="margin:8px 0 12px">เทียบ 3 ระยะ แล้วเอาตัวมากสุด — TR จับ “ช่องว่าง (gap)” ที่ราคากระโดดลงได้ ทั้งที่ตัวแท่งเองสั้น</p>
+          <div id="atrCalc"></div>
+          <div class="note">ATR ปัจจุบัน ≈ <b id="atrNow" class="accent"></b> /วัน → ใช้เป็น "ไม้บรรทัด" ของจุดตัดขาดทุน (stop):
+            กติกา canonical_v2 ให้ใช้แนวรับโครงสร้างที่ห่างในกรอบ <span class="eq" id="atrBandEq"></span> — แคบกว่านั้นถอยไปใช้ <span class="eq" id="atrFallbackEq"></span> (รายละเอียดในบท Stop · Target)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B · 5 STEPS ===== -->
+  <section id="calc" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">จากราคา → ADX ใน 5 ขั้น</h2>
+      <p class="lead">เลือกแท่งวันไหนก็ได้ แล้วกด <b>ถัดไป</b> เพื่อเดินทีละขั้น — ตัวเลขจริงของวันนั้นจะแทนลงสูตรให้เห็น</p>
+      <div class="card" style="margin-top:22px">
+        <div class="stepper">
+          <button id="stepPrev">‹ ก่อนหน้า</button>
+          <div class="dots" id="stepDots"></div>
+          <button id="stepNext">ถัดไป ›</button>
+          <span style="margin-left:auto;font-size:14px;color:var(--ink2)">แท่ง:
+            <select id="barPick"></select></span>
+        </div>
+        <div class="stepbody" id="stepBody"></div>
+      </div>
+      <div class="note">ADX ถูกเกลี่ยเรียบ <b>2 ชั้น</b> (ขั้น 3 และ 5) → ตอบช้า (lagging) · ส่วน DI cross (ขั้น 4) ไวกว่า แต่หลอกบ่อยตอน ADX&lt;25</div>
+    </div>
+  </section>
+
+  <!-- ===== C · CHART + TABLE ===== -->
+  <section id="chart" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เลื่อนเมาส์ดูได้ทุกวัน</h2>
+      <p class="lead">ชี้ที่กราฟ (หรือแถวในตาราง) แล้วอีกฝั่งจะไฮไลต์ตามทันที — เห็นความเชื่อมโยงของ “เส้น” กับ “ตัวเลข”</p>
+      <div class="card" style="margin-top:22px">
+        <div class="chartwrap"><svg id="mainChart" viewBox="0 0 700 280" width="100%" aria-label="กราฟ +DI/−DI/ADX แบบเลื่อนดู"></svg></div>
+        <div class="legend" id="mainLegend"></div>
+        <div class="scroll"><table class="adxtbl" id="adxTable"></table></div>
+      </div>
+      <div class="note">อ่านคอลัมน์ ADX จากบนลงล่าง: <b>49 → 31</b> ลดตลอด 3 สัปดาห์ = ความแรงเทรนด์เสื่อมลงเรื่อย ๆ <b>ทั้งที่ราคายังอยู่แถวยอด</b> → สัญญาณเตือนที่ราคาเปล่า ๆ ไม่บอก</div>
+    </div>
+  </section>
+
+  <!-- ===== D · WHAT-IF ===== -->
+  <section id="whatif" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">ขยับ High / Low / Close ดูว่า TR เปลี่ยนยังไง</h2>
+      <p class="lead">ฐานคือแท่ง 29 พ.ค. (เทียบกับ 28 พ.ค.) · ลากดูว่าทำไม “วันลง” ถึงให้ −DM และทำไม gap ถึงดัน TR</p>
+      <div class="card row" style="margin-top:22px">
+        <div class="col">
+          <div class="slider-row"><label>High</label><input type="range" id="wH"><span class="val" id="wHv"></span></div>
+          <div class="slider-row"><label>Low</label><input type="range" id="wL"><span class="val" id="wLv"></span></div>
+          <div class="slider-row"><label>Close</label><input type="range" id="wC"><span class="val" id="wCv"></span></div>
+          <div class="note">เทียบกับเมื่อวาน (28 พ.ค.): High 391.87 · Low 385.16 · Close 390.13 · clamp ให้ Low ≤ Close ≤ High เสมอ</div>
+        </div>
+        <div class="col" id="whatifOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== E · DI CROSS + GATE ===== -->
+  <section id="cross" class="section">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">DI cross + 5 ธงบริบท U·A·R·D·V</h2>
+      <p class="lead">ADX บอก “แรง” · DI cross บอก “เปลี่ยนฝั่ง” · ส่วนธง 5 ตัว (จาก <span class="eq">setups/_SCREENING.md</span>)
+        คือ<b>ชั้นบริบทไว้จัดอันดับตัวเฝ้า</b> (Stage 2→3) — <b>ไม่ใช่ประตูเข้า</b>:
+        ประตูจริงคือกติกา breakout canonical_v2 ที่เครื่องตรวจ <span class="eq">src/backtest/live.py</span></p>
+      <div class="card" style="margin-top:22px">
+        <div id="crossCallout"></div>
+      </div>
+      <h3 style="margin-top:28px">5 ธงบริบท (Stage 2→3) — GOOGL ณ 5 มิ.ย. <span id="gateScore" class="pill"></span></h3>
+      <div class="gate-grid" id="gateGrid"></div>
+      <div class="note" id="gateNote"></div>
+    </div>
+  </section>
+
+  <!-- ===== F · SELF CHECK ===== -->
+  <section id="quiz" class="section section--alt">
+    <div class="section-inner reveal">
+      <h2 class="sec-title">เช็กความเข้าใจ</h2>
+      <div class="selfcheck" id="quizBox"></div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+
+  <script src="./_kit/engine.js?v=1782967287"></script>
+  <script src="./_kit/canon.js?v=1782967287"></script>
+  <script src="./_kit/charts.js?v=1782967287"></script>
+  <script src="./_kit/ui.js?v=1782967287"></script>
+  <script>
+  (function(){
+    const E = window.ENGINE, CH = window.CHARTS, C = CH.C;
+    const ALL  = E.adx14(E.GOOGL);
+    const ROWS = E.sliceWindow(ALL, E.WINDOW.start, E.WINDOW.end);
+    const N = ROWS.length, LAST = N-1;
+    const startIdx = ALL.findIndex(r => r.date === E.WINDOW.start);
+    const prevOf = k => ALL[startIdx + k - 1];                 // always defined (startIdx≥1)
+    const CROSS_I = ROWS.findIndex(r => r.date === '2026-06-02');
+    const WALK_I  = ROWS.findIndex(r => r.date === '2026-05-29');
+    const f = (n,dp) => E.fmt(n,dp);
+    const dm = d => { const p=d.split('-'); return (+p[2])+'/'+(+p[1]); };
+
+    const state = { stepIdx:0, selBar:WALK_I, hoverIdx:LAST };
+
+    /* ---------- shared DI/ADX line scale ---------- */
+    function diScale(x,y,w,h){ return CH.makeScale({x,y,w,h,yMin:0,yMax:55,n:N}); }
+    const series = sc => [
+      {values:ROWS.map(r=>r.plusDI),  color:C.up,  width:2.6},
+      {values:ROWS.map(r=>r.minusDI), color:C.down, width:2.6},
+      {values:ROWS.map(r=>r.adx),     color:C.adx, width:2, dash:'5', opacity:.85}
+    ];
+
+    /* ---------- HERO ---------- */
+    function renderHero(){
+      const sc = diScale(16,16,668,180);
+      const cy = sc.sy((ROWS[CROSS_I].plusDI+ROWS[CROSS_I].minusDI)/2);
+      document.getElementById('heroChart').innerHTML =
+        CH.multiLine(series(sc),{scale:sc}) +
+        CH.crossMarker({scale:sc,x:sc.sx(CROSS_I),yCircle:cy,color:C.cross});
+      document.getElementById('heroLegend').innerHTML = CH.legend([
+        {color:C.up,label:'+DI (แรงฝั่งขึ้น)'},{color:C.down,label:'−DI (แรงฝั่งลง)'},{color:C.adx,label:'ADX (ความแรงเทรนด์)'}]);
+      const last = ROWS[LAST];
+      document.getElementById('heroKpis').innerHTML = [
+        ['ADX',f(last.adx),'ความแรงเทรนด์'],['+DI',f(last.plusDI),'แรงฝั่งขึ้น'],
+        ['−DI',f(last.minusDI),'แรงฝั่งลง'],['ATR',f(last.atr),'$/วัน']
+      ].map(k=>`<div class="kpi"><b>${k[1]}</b><span>${k[0]} · ${k[2]}</span></div>`).join('');
+    }
+
+    /* ---------- A · ATR candle ---------- */
+    function renderATR(){
+      const bar = ROWS[WALK_I], prev = prevOf(WALK_I);
+      const pMin=375,pMax=395,py=24,ph=176, sy=v=>py+ph-((v-pMin)/(pMax-pMin))*ph;
+      let svg='';
+      svg += `<line x1="40" y1="${sy(prev.c).toFixed(1)}" x2="300" y2="${sy(prev.c).toFixed(1)}" stroke="${C.warn}" stroke-width="1.2" stroke-dasharray="5"/>`;
+      svg += `<text x="296" y="${(sy(prev.c)-6).toFixed(1)}" text-anchor="end" class="vlbl" fill="${C.warn}">Close เมื่อวาน ${f(prev.c)}</text>`;
+      svg += CH.candle(prev,{cx:110,sy,w:32});
+      svg += CH.candle(bar,{cx:210,sy,w:32});
+      svg += `<text x="110" y="${(py+ph+18)}" text-anchor="middle" class="vlbl">28 พ.ค.</text>`;
+      svg += `<text x="210" y="${(py+ph+18)}" text-anchor="middle" class="vlbl">29 พ.ค.</text>`;
+      // TR measure = |Low - prevClose|
+      svg += `<line x1="250" y1="${sy(prev.c).toFixed(1)}" x2="250" y2="${sy(bar.l).toFixed(1)}" stroke="${C.down}" stroke-width="1.6"/>`;
+      svg += `<text x="256" y="${((sy(prev.c)+sy(bar.l))/2).toFixed(1)}" class="vlbl" fill="${C.down}">TR = ${f(bar.tr)}</text>`;
+      document.getElementById('atrCandle').innerHTML = svg;
+      const hl=bar.h-bar.l, hp=Math.abs(bar.h-prev.c), lp=Math.abs(bar.l-prev.c);
+      document.getElementById('atrCalc').innerHTML =
+        `<span class="eq b">TR = max( H−L , |H−prevC| , |L−prevC| )</span>`+
+        `<p class="muted">= max( ${f(hl)} , ${f(hp)} , <b class="real">${f(lp)}</b> ) → <b class="real">TR = ${f(bar.tr)}</b></p>`;
+      document.getElementById('atrNow').textContent = '$'+f(ROWS[LAST].atr);
+      const SR = window.CANON.stop, BR = window.CANON.breakout;
+      document.getElementById('atrBandEq').textContent = '['+SR.min_atr_mult+', '+SR.max_atr_mult+']×ATR';
+      document.getElementById('atrFallbackEq').textContent = 'entry − '+BR.k_atr+'×ATR';
+    }
+
+    /* ---------- B · 5-step stepper ---------- */
+    function stepHTML(k, idx){
+      const b = ROWS[idx], p = prevOf(idx);
+      const hl=b.h-b.l, hp=Math.abs(b.h-p.c), lp=Math.abs(b.l-p.c);
+      const up=b.h-p.h, down=p.l-b.l;
+      const blocks = [
+        ['True Range (TR)','ขนาดแกว่งจริง รวม gap',
+          `<span class="eq b">TR = max(H−L, |H−prevC|, |L−prevC|)</span>`+
+          `<p>= max(${f(hl)}, ${f(hp)}, ${f(lp)}) → <b class="real">TR = ${f(b.tr)}</b></p>`],
+        ['+DM / −DM','วันนี้ทะลุกรอบเมื่อวานด้านไหนมากกว่า',
+          `<span class="eq b">upMove = H−prevH = ${f(up)} · downMove = prevL−L = ${f(down)}</span>`+
+          `<p>ฝั่งที่มากกว่าและ &gt;0 ชนะ → <b class="real">+DM = ${f(b.plusDM)} · −DM = ${f(b.minusDM)}</b></p>`],
+        ['เกลี่ยเรียบ Wilder (14)','ลด noise รายวัน',
+          `<span class="eq b">ค่าเรียบ = (ค่าเรียบเมื่อวาน × 13 + ค่าวันนี้) ÷ 14</span>`+
+          `<p>ATR = <b class="real">${f(b.atr)}</b> · +DM เฉลี่ย = <b class="real">${f(b.sPlusDM)}</b> · −DM เฉลี่ย = <b class="real">${f(b.sMinusDM)}</b>`+
+          `<br><span class="tag">(แบบผลรวม ×14: TR14=${f(b.atr*14)} · +DM14=${f(b.sPlusDM*14)} · −DM14=${f(b.sMinusDM*14)})</span></p>`],
+        ['+DI / −DI → DX','แปลงเป็น % แล้ววัดว่าสองฝั่งต่างกันแค่ไหน',
+          `<span class="eq b">+DI = 100×(+DM÷ATR) · −DI = 100×(−DM÷ATR) · DX = 100×|+DI−−DI|÷(+DI+−DI)</span>`+
+          `<p>+DI = <b class="up">${f(b.plusDI)}</b> · −DI = <b class="down">${f(b.minusDI)}</b> → DX = <b class="real">${f(b.dx)}</b></p>`],
+        ['ADX','เกลี่ย DX เรียบอีกชั้น = ความแรงเทรนด์',
+          `<span class="eq b">ADX = (ADX เมื่อวาน × 13 + DX วันนี้) ÷ 14</span>`+
+          `<p>= (${f(p.adx)} × 13 + ${f(b.dx)}) ÷ 14 → <b class="real">ADX = ${f(b.adx)}</b> ${b.adx>=25?'<span class="pill g">เทรนด์แรง</span>':'<span class="pill y">อ่อน</span>'}</p>`]
+      ];
+      const s = blocks[k];
+      return `<div class="step"><div class="n">${k+1}</div><div class="b"><h4>${s[0]} <span class="tag">— ${s[1]}</span></h4>${s[2]}</div></div>`;
+    }
+    function renderStep(){
+      document.getElementById('stepBody').innerHTML = stepHTML(state.stepIdx, state.selBar);
+      document.getElementById('stepDots').innerHTML = [0,1,2,3,4].map(i=>`<i class="${i===state.stepIdx?'on':''}"></i>`).join('');
+      document.getElementById('stepPrev').disabled = state.stepIdx===0;
+      document.getElementById('stepNext').disabled = state.stepIdx===4;
+    }
+
+    /* ---------- C · main chart + table ---------- */
+    let mainScale;
+    function renderChart(){
+      const sc = mainScale = diScale(46,16,620,212);
+      const yt=[{v:0,label:'0'},{v:25,label:'25',strong:true,dash:true},{v:50,label:'50'}];
+      const xl=[0,WALK_I,CROSS_I,LAST].map(i=>({i,label:dm(ROWS[i].date),color:i===CROSS_I?C.cross:null}));
+      const cy = sc.sy((ROWS[CROSS_I].plusDI+ROWS[CROSS_I].minusDI)/2);
+      document.getElementById('mainChart').innerHTML =
+        CH.axis({scale:sc,yTicks:yt,xLabels:xl}) +
+        CH.multiLine(series(sc),{scale:sc}) +
+        CH.crossMarker({scale:sc,x:sc.sx(CROSS_I),yCircle:cy,color:C.cross,label:'2 มิ.ย. −DI ตัดขึ้น',labelDy:12}) +
+        `<g id="hoverG"></g>` + CH.scrubLayer(sc);
+      document.getElementById('mainLegend').innerHTML = CH.legend([
+        {color:C.up,label:'+DI'},{color:C.down,label:'−DI'},{color:C.adx,label:'ADX'}]);
+      // table
+      const head = `<thead><tr><th>วันที่</th><th>H</th><th>L</th><th>C</th><th>+DM</th><th>−DM</th><th>TR</th><th>+DI</th><th>−DI</th><th>DX</th><th>ADX</th></tr></thead>`;
+      const body = ROWS.map((r,i)=>{
+        const cls = i===WALK_I?'walk':(i===CROSS_I?'cross':'');
+        const di = r.plusDI>=r.minusDI ? `<b class="up">${f(r.plusDI)}</b>` : f(r.plusDI);
+        const mi = r.minusDI>r.plusDI ? `<b class="down">${f(r.minusDI)}</b>` : f(r.minusDI);
+        return `<tr data-i="${i}" class="${cls}"><td>${dm(r.date)}</td><td>${f(r.h)}</td><td>${f(r.l)}</td><td>${f(r.c)}</td>`+
+          `<td>${f(r.plusDM)}</td><td>${f(r.minusDM)}</td><td>${f(r.tr)}</td><td>${di}</td><td>${mi}</td><td>${f(r.dx)}</td><td>${f(r.adx)}</td></tr>`;
+      }).join('');
+      document.getElementById('adxTable').innerHTML = head + '<tbody>'+body+'</tbody>';
+    }
+    function setHover(i){
+      state.hoverIdx = i;
+      document.getElementById('hoverG').innerHTML = CH.hoverGuide(i, mainScale, [
+        {v:ROWS[i].plusDI,color:C.up},{v:ROWS[i].minusDI,color:C.down},{v:ROWS[i].adx,color:C.adx}]);
+      document.querySelectorAll('#adxTable tr[data-i]').forEach(tr=>tr.classList.toggle('hot', +tr.dataset.i===i));
+    }
+
+    /* ---------- D · what-if ---------- */
+    function renderWhatIf(){
+      const base = ROWS[WALK_I], prev = prevOf(WALK_I);
+      const setup=(id,val)=>{const el=document.getElementById(id); el.min=(val-12).toFixed(2); el.max=(val+12).toFixed(2); el.step=0.01; el.value=val;};
+      setup('wH',base.h); setup('wL',base.l); setup('wC',base.c);
+      const calc=()=>{
+        let h=+document.getElementById('wH').value, l=+document.getElementById('wL').value, c=+document.getElementById('wC').value;
+        if(l>h){l=h;document.getElementById('wL').value=l;}
+        if(c>h)c=h; if(c<l)c=l; document.getElementById('wC').value=c;
+        document.getElementById('wHv').textContent=f(h);
+        document.getElementById('wLv').textContent=f(l);
+        document.getElementById('wCv').textContent=f(c);
+        const bar={o:c,h,l,c};
+        const tr=E.trueRange(bar,prev), d=E.directionalMovement(bar,prev);
+        const hl=h-l,hp=Math.abs(h-prev.c),lp=Math.abs(l-prev.c),mx=Math.max(hl,hp,lp);
+        const w=(v,lab)=> v===mx?`<b class="real">${f(v)} ← ${lab} ชนะ</b>`:`${f(v)}`;
+        document.getElementById('whatifOut').innerHTML =
+          `<h3>ผลลัพธ์สด</h3>`+
+          `<p style="margin:10px 0 6px">3 ระยะของ TR:</p>`+
+          `<p class="muted">H−L = ${w(hl,'ช่วงวัน')}<br>|H−prevC| = ${w(hp,'gap บน')}<br>|L−prevC| = ${w(lp,'gap ล่าง')}</p>`+
+          `<div class="eq b" style="margin-top:10px">TR = ${f(tr)} · +DM = ${f(d.plusDM)} · −DM = ${f(d.minusDM)}</div>`+
+          `<p class="tag">${d.minusDM>0?'วันนี้คิดเป็น “ฝั่งลง” (−DM)':d.plusDM>0?'วันนี้คิดเป็น “ฝั่งขึ้น” (+DM)':'ไม่มี DM ฝั่งไหนเด่น (inside day)'}</p>`;
+      };
+      ['wH','wL','wC'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+      calc();
+    }
+
+    /* ---------- E · DI cross + gate ---------- */
+    function gateBadge(ok){ return ok==='warn'?'<span class="badge warn">ก้ำกึ่ง</span>':ok?'<span class="badge pass">ผ่าน</span>':'<span class="badge fail">ไม่ผ่าน</span>'; }
+    function renderGate(){
+      const x = ROWS[CROSS_I], last = ROWS[LAST];
+      document.getElementById('crossCallout').innerHTML =
+        `<h3 style="color:${C.cross}">2 มิ.ย. — −DI ตัดขึ้นเหนือ +DI</h3>`+
+        `<p class="muted" style="margin-top:8px">วันนั้น +DI ${f(x.plusDI)} &lt; −DI ${f(x.minusDI)} = <b>ฝั่งลงเข้าคุม</b> · ขณะ ADX ยัง ${f(x.adx)} (&gt;25) = ลงแบบ<b>มีแรงจริง</b> ไม่ใช่แค่แกว่งมั่ว</p>`+
+        `<p class="muted">ถัดมา 5 มิ.ย.: +DI ${f(last.plusDI)} vs −DI ${f(last.minusDI)} ยังไม่ตัดกลับ + ADX ลงเหลือ ${f(last.adx)} = ขาลงเริ่มหมดแรง/ลังเล</p>`;
+      const c=last.c, atr=last.atr, sma=E.SMA50_AS_OF;
+      const rr=E.rr({entry:c,stop:c-2*atr,target:E.SWING_HIGH}).rr;
+      const atrPct=atr/c*100;
+      const U=c>sma, A=last.adx>=25, D=last.plusDI>last.minusDI, V=(atrPct>=1.5&&atrPct<=4);
+      const Rok = rr>=2.05?true:(rr<1.95?false:'warn');
+      const gates=[
+        ['U','ขาขึ้น',`ราคา ${f(c)} ${U?'>':'<'} SMA50 ${f(sma)}`,U],
+        ['A','เทรนด์แรง',`ADX ${f(last.adx)} ${A?'≥':'<'} 25`,A],
+        ['R','คุ้มเสี่ยง (ธง legacy)',`R:R ≈ ${f(rr)} (เป้าเดโม่ ${f(E.SWING_HIGH)})`,Rok],
+        ['D','ยืนยันเด้ง',`+DI ${f(last.plusDI)} ${D?'>':'<'} −DI ${f(last.minusDI)}`,D],
+        ['V','ผันผวนพอดี',`ATR ${f(atrPct)}% (เกณฑ์ 1.5–4%)`,V]
+      ];
+      document.getElementById('gateGrid').innerHTML = gates.map(g=>
+        `<div class="gate"><div class="k">${g[0]}</div><div class="d">${g[1]}</div>${gateBadge(g[3])}<div class="tag" style="margin-top:8px">${g[2]}</div></div>`).join('');
+      const pass = gates.filter(g=>g[3]===true).length;
+      const sc=document.getElementById('gateScore'); sc.textContent=pass+'/5 ติด'; sc.className='pill '+(pass>=5?'g':pass>=3?'y':'r');
+      const X = window.CANON_X;
+      document.getElementById('gateNote').innerHTML =
+        `สรุป: GOOGL ติดธง <b>${pass}/5</b> — ขาดที่ <b>D</b> (−DI ยังเหนือ +DI = ฝั่งลงยังคุม)${Rok==='warn'?' และ <b>R</b> ก้ำกึ่งพอดีเส้น 1:2':''} → ในฐานะ "คะแนนบริบท" บอกว่ายังไม่ใช่ตัวน่าเฝ้าใกล้ชิด · ธง R คำนวณแบบ heuristic ไว้จัดอันดับเท่านั้น — R:R ของไม้จริงถูกตรึง 2.5 โดยสูตร target r2 · <b>การเข้าจริงมีทางเดียว: ผ่านกติกา breakout canonical_v2</b> (บท "กติกา Breakout v2") และอย่าลืมว่า Trend Pullback = <span class="pill r">PARKED</span> ห้ามเทรดจากผลสอบ P0 (${X.pullback_insample_r}R)`;
+    }
+
+    /* ---------- F · quiz ---------- */
+    function renderQuiz(){
+      const last=ROWS[LAST];
+      const qs=[
+        ['ADX ลงเหลือ '+f(last.adx)+' แต่ −DI ยังเหนือ +DI แปลว่าอะไร?',
+         'ยังเป็นฝั่งลงคุม (−DI&gt;+DI) แต่ “แรง” ของเทรนด์กำลังอ่อนลง (ADX ไหลลง) — โมเมนตัมขาลงเริ่มหมด ยังไม่ใช่สัญญาณกลับเป็นขึ้น'],
+        ['ทำไม DI cross วันที่ 2 มิ.ย. ถึงน่าเชื่อกว่าตอน ADX &lt; 25?',
+         'เพราะ 2 มิ.ย. ADX ยัง '+f(ROWS[CROSS_I].adx)+' (&gt;25) = มีเทรนด์จริงรองรับ · ถ้า ADX&lt;25 ตลาดมั่ว (choppy) DI จะตัดไปมาเป็นสัญญาณหลอกบ่อย'],
+        ['ถ้าวันนี้ High ทะลุ High เมื่อวาน แต่ Low ก็หลุด Low เมื่อวาน (outside day) → +DM/−DM เป็นเท่าไหร่?',
+         'เทียบ upMove (H−prevH) กับ downMove (prevL−L) ตัวไหนมากกว่าและ &gt;0 ได้ค่านั้นฝั่งเดียว อีกฝั่ง = 0 — Wilder นับเฉพาะฝั่งที่เด่นกว่า ไม่นับทั้งสองพร้อมกัน']
+      ];
+      document.getElementById('quizBox').innerHTML = qs.map(q=>
+        `<details><summary>${q[0]}</summary><p>${q[1]}</p></details>`).join('');
+    }
+
+    /* ---------- wire ---------- */
+    function wire(){
+      document.getElementById('stepPrev').onclick=()=>{state.stepIdx=Math.max(0,state.stepIdx-1);renderStep();};
+      document.getElementById('stepNext').onclick=()=>{state.stepIdx=Math.min(4,state.stepIdx+1);renderStep();};
+      const pick=document.getElementById('barPick');
+      pick.innerHTML=ROWS.map((r,i)=>`<option value="${i}" ${i===state.selBar?'selected':''}>${dm(r.date)}</option>`).join('');
+      pick.onchange=()=>{state.selBar=+pick.value;renderStep();};
+      const svg=document.getElementById('mainChart'), wrap=svg.closest('.chartwrap');
+      const tip=window.UI.tooltip('#chart .chartwrap');
+      function tipHTML(r){return `${dm(r.date)} 2026<br><b class="u">+DI ${f(r.plusDI)}</b> · <b class="d">−DI ${f(r.minusDI)}</b> · <b class="a">ADX ${f(r.adx)}</b>`;}
+      function place(i){const sc=svg.querySelector('.scrub[data-i="'+i+'"]'); if(!sc)return; const r=sc.getBoundingClientRect(),w=wrap.getBoundingClientRect();
+        const mv=Math.max(ROWS[i].plusDI,ROWS[i].minusDI,ROWS[i].adx); const yf=1-(mv-mainScale.yMin)/(mainScale.yMax-mainScale.yMin);
+        tip.show(tipHTML(ROWS[i]), r.left+r.width/2-w.left, r.top-w.top+yf*r.height);}
+      svg.addEventListener('mousemove',e=>{const t=e.target.closest('.scrub'); if(!t)return; const i=+t.dataset.i; setHover(i); place(i);});
+      svg.addEventListener('mouseleave',()=>tip.hide());
+      document.getElementById('adxTable').addEventListener('mouseover',e=>{const tr=e.target.closest('tr[data-i]'); if(!tr)return; const i=+tr.dataset.i; setHover(i); place(i);});
+      document.getElementById('adxTable').addEventListener('mouseleave',()=>tip.hide());
+    }
+
+    document.getElementById('foot').innerHTML =
+      `ข้อมูล: GOOGL รายวัน (yfinance) · as of ${E.META.as_of} · ทุกตัวเลขคำนวณสดจาก <span class="eq">_kit/engine.js</span> (แหล่งเดียว) · self-contained / offline · MyInvest Visual Library`;
+
+    renderHero(); renderATR(); renderStep(); renderChart(); setHover(LAST); renderWhatIf(); renderGate(); renderQuiz(); wire();
+    window.UI.reveal(); window.UI.chipNav();
+  })();
+  </script>
+  <script src="../../shared/_kit/nav.js?v=1782967287"></script>
+  <script src="../../shared/_kit/shell.js?v=1782967287"></script>
+  <script src="./lessons.js?v=1782967287d"></script>
+</body>
+</html>
