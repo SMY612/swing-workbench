@@ -1,0 +1,348 @@
+/* ============================================================================
+   shared/_kit/skin-terminal.css — TERMINAL skin (migration scaffold)
+   ----------------------------------------------------------------------------
+   โหลดเฉพาะหน้าที่ตั้ง <html data-skin="terminal"> → override design tokens
+   (tokens.css) เป็นภาษา "terminal" (edgeskool) + แบนเอฟเฟกต์กระจก (glass) ของ
+   เปลือกร่วม (shell.css) และการ์ด bento ในหน้า. หน้าที่ไม่ตั้ง data-skin = ไม่กระทบ.
+   ค่าพาเลต/ฟอนต์ = พอร์ตจาก design/terminal-proof.html (ล็อก 2026-06-30):
+     ธีมมืด = พาเลต user (bg ดำ AMOLED) · ธีมสว่าง = V5 clean.
+
+   *** ชั่วคราว (scaffold) ***: ย้ายทีละหน้า → ครบทุกหน้าแล้วค่อยเลื่อนเป็น default
+   (ลบ prefix [data-skin="terminal"] ทิ้ง) แล้วลบ glass เดิม. ของ glass อยู่ใน git.
+
+   หมายเหตุ 14-color contract: --up/--down/--ink/--line/--panel/--bg/--accent ฯลฯ
+   ใช้ 6-digit hex เสมอ (canvas board อ่านผ่าน util.js → hexToRgba ต้อง 6 หลัก).
+   ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1) TOKENS — override ตัวแปรสี/รูปทรง/ฟอนต์ ของ tokens.css
+   specificity :root[data-skin][data-theme] = (0,3,0) > tokens.css (0,2,0)
+   --------------------------------------------------------------------------- */
+
+/* ---- Geist + Geist Mono (self-hosted · OFL · Latin) → ออฟไลน์ 100% ---- */
+@font-face{font-family:'Geist';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/geist/geist-400.woff2') format('woff2');}
+@font-face{font-family:'Geist';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/geist/geist-500.woff2') format('woff2');}
+@font-face{font-family:'Geist';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/geist/geist-600.woff2') format('woff2');}
+@font-face{font-family:'Geist';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/geist/geist-700.woff2') format('woff2');}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/geist/geistmono-400.woff2') format('woff2');}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/geist/geistmono-500.woff2') format('woff2');}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/geist/geistmono-600.woff2') format('woff2');}
+
+/* mode-independent: ฟอนต์ + มุมคม + ไม่มีเงานุ่ม */
+:root[data-skin="terminal"]{
+  --font:"Geist","IBM Plex Sans Thai",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --mono:"Geist Mono","IBM Plex Sans Thai",ui-monospace,monospace;
+  --radius:2px; --radius-lg:2px; --radius-sm:2px; --radius-pill:2px;
+  --shadow:none; --shadow-lg:none;
+  background:var(--bg);
+}
+
+/* LIGHT = V5 clean terminal */
+:root[data-skin="terminal"][data-theme="light"]{
+  color-scheme:light;
+  --surface:#fbfbf8; --surface-2:#edece5; --surface-tint:none;
+  --text:#0d0d0b; --text-muted:#54544b; --text-faint:#7c7c6e;
+  --accent-ink:#fbfbf8; --accent-soft:rgba(0,0,0,.06);
+  --border:#1b1b18; --border-soft:rgba(0,0,0,.14);
+  --toggle-track:#cfcec6;
+  --ok-bg:rgba(26,127,55,.12);  --ok-line:#1a7f37; --ok-ink:#1a7f37;
+  --bad-bg:rgba(192,57,43,.10);  --bad-line:#c0392b; --bad-ink:#c0392b;
+  /* 14-color contract (hex) */
+  --up:#1a7f37; --down:#c0392b; --ink:#0d0d0b; --ink2:#54544b; --ink3:#7c7c6e;
+  --line:#1b1b18; --line2:#cfcec6; --panel:#fbfbf8; --bg:#d7d6d0;
+  --accent:#1b1b18; --blue:#2c6fd0; --amber:#946b00; --orange:#c0392b; --purple:#6d597a;
+}
+
+/* DARK = พาเลต user (terminal-on-black · AMOLED) */
+:root[data-skin="terminal"][data-theme="dark"]{
+  color-scheme:dark;
+  --surface:#0d0d0d; --surface-2:#181818; --surface-tint:none;
+  --text:#e9edc9; --text-muted:#cad2c5; --text-faint:#52796f;
+  --accent-ink:#161a2b; --accent-soft:rgba(184,184,255,.16);
+  --border:#33453d; --border-soft:#22312f;
+  --toggle-track:#182427;
+  --ok-bg:rgba(132,169,140,.16); --ok-line:#84a98c; --ok-ink:#84a98c;
+  --bad-bg:rgba(229,107,111,.16); --bad-line:#e56b6f; --bad-ink:#e56b6f;
+  --up:#84a98c; --down:#e56b6f; --ink:#e9edc9; --ink2:#cad2c5; --ink3:#52796f;
+  --line:#33453d; --line2:#22312f; --panel:#0d0d0d; --bg:#000000;
+  --accent:#b8b8ff; --blue:#9cc4ff; --amber:#edafb8; --orange:#e56b6f; --purple:#cdbef0;
+}
+
+/* ฐานหน้า: ฟอนต์ + สีพื้น/ตัวอักษร (ทับ inline base ของ briefing) */
+[data-skin="terminal"] body{
+  font-family:var(--font); background:var(--bg); color:var(--text);
+  letter-spacing:-.005em; -webkit-font-smoothing:antialiased;
+}
+[data-skin="terminal"] .mono,
+[data-skin="terminal"] .num,
+[data-skin="terminal"] .tk{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+/* ---------------------------------------------------------------------------
+   2) GLASS-KILL — แบนกระจกของเปลือกร่วม (shell.css) + การ์ด bento (briefing inline)
+   specificity [data-skin] .x = (0,2,0) > class เดี่ยว (0,1,0) → ชนะแน่
+   --------------------------------------------------------------------------- */
+
+/* ฉากพาสเทลหลังกระจก — terminal พื้นเรียบ ไม่ต้องมี */
+[data-skin="terminal"] .sw-scene{ display:none; }
+
+/* เปลือก sidebar/top/bottom: กระจกลอยมน → แผงเรียบเหลี่ยม */
+[data-skin="terminal"] .sw-shell-side,
+[data-skin="terminal"] .sw-shell-top,
+[data-skin="terminal"] .sw-shell-bottom{
+  background:var(--bg);                 /* nav กลืนพื้นเว็บ (flat · user 2026-06-30) */
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  border-color:var(--border); border-radius:0; box-shadow:none;
+  --sw-font:var(--font);
+}
+[data-skin="terminal"] .sw-shell-side{
+  margin:0; top:0; height:100vh; border-right:1px solid var(--border);
+}
+[data-skin="terminal"] .sw-nav-item{ border-radius:0; }
+[data-skin="terminal"] .sw-nav-item.active{ background:var(--surface-2); color:var(--text); box-shadow:none; }
+[data-skin="terminal"] .sw-iconbtn{ border-radius:0; }
+[data-skin="terminal"] .sw-logo-mark{
+  border-radius:0; background:none; border:1.5px solid var(--text); box-shadow:none; font-size:0;
+}
+/* โลโก้ 📈 → ตัวอักษร mono "SW" (มินิมอล แทน emoji) */
+[data-skin="terminal"] .sw-logo-mark::before{
+  content:"SW"; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--text);
+}
+
+/* การ์ด bento + รางขวา (briefing inline glass) → แผงเรียบมีกรอบบาง */
+[data-skin="terminal"] .bcard,
+[data-skin="terminal"] .bf-railcal,
+[data-skin="terminal"] .bf-tlcard{
+  border-radius:0; background:var(--surface);
+  border:1px solid var(--border); box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+[data-skin="terminal"] .bcard::before, [data-skin="terminal"] .bcard::after,
+[data-skin="terminal"] .bf-railcal::before, [data-skin="terminal"] .bf-railcal::after,
+[data-skin="terminal"] .bf-tlcard::before, [data-skin="terminal"] .bf-tlcard::after{ display:none; }
+
+/* bento tint hues → พื้น neutral (สงวนสีไว้เฉพาะขึ้น/ลง/สัญญาณ) */
+[data-skin="terminal"] .c-pk, [data-skin="terminal"] .c-y, [data-skin="terminal"] .c-bl,
+[data-skin="terminal"] .c-tl, [data-skin="terminal"] .c-lv, [data-skin="terminal"] .c-gr,
+[data-skin="terminal"] .c-co, [data-skin="terminal"] .c-or, [data-skin="terminal"] .c-plain{
+  background:var(--surface); color:var(--text);
+}
+
+/* ป้าย (pill) ทุกแบบ → เหลี่ยมคม มีกรอบบาง (คงสีสถานะ) */
+[data-skin="terminal"] .bf-reg,
+[data-skin="terminal"] .regch{ border-radius:0; border:1px solid currentColor; }
+[data-skin="terminal"] .swsig .pill{ border-radius:0; border:1px solid currentColor; }
+[data-skin="terminal"] #newsBlock .npill{ border-radius:0; border:1px solid var(--border); background:var(--surface-2); }
+
+/* ปุ่มบอท (accent) → เหลี่ยม + ตัวอักษรอ่านออกบนสองธีม */
+[data-skin="terminal"] .bot-btn{ border-radius:0; color:var(--accent-ink); box-shadow:none; }
+
+/* แท่ง/เกจ ในการ์ด → โทน terminal (เลี่ยงเหลือง/ฟ้า bento เดิม) */
+[data-skin="terminal"] .bars i{ border-radius:0; background:var(--text-faint); }
+[data-skin="terminal"] .gauge{ border-radius:0; background:var(--surface-2); }
+[data-skin="terminal"] .gauge i{ border-radius:0; background:var(--accent); }  /* เดิม var(--warn) = undefined ในธีม terminal → เติมล่องหน (refine #2) */
+
+/* โดนัท/ทูลทิป กราฟ → ตัดเงา/มุมมน (รายละเอียดเต็มในก้อนถัดไป) */
+[data-skin="terminal"] .donut-wrap{ filter:none; }
+[data-skin="terminal"] .cx-tip,
+[data-skin="terminal"] .sector-tip{ border-radius:0; }
+
+/* dropdown ปฏิทินในราง → แผงเรียบ (รายละเอียดปฏิทินเต็มในก้อนถัดไป) */
+[data-skin="terminal"] .bf-railcal .cal-menu{ background:var(--surface-2); box-shadow:none; border:1px solid var(--border); }
+
+/* ============================================================================
+   ก้อนที่ 2 — ลุค terminal เต็ม: typography mono + hatch + motion (port จาก proof)
+   ============================================================================ */
+
+/* hatch token (เส้นทแยงบั้ง — ลายเซ็น edgeskool) */
+:root[data-skin="terminal"][data-theme="light"]{ --hatch:rgba(0,0,0,.06); }
+:root[data-skin="terminal"][data-theme="dark"]{  --hatch:rgba(202,210,197,.05); }
+
+/* ---- hero: eyebrow mono + หัวคม + แถบ hatch คั่น ---- */
+[data-skin="terminal"] .bf-eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-faint); margin:0 0 12px; display:block;
+}
+[data-skin="terminal"] .bf-hello{ font-weight:600; letter-spacing:-.035em; }
+[data-skin="terminal"] .bf-asof{ font-family:var(--mono); font-size:.74rem; }
+[data-skin="terminal"] .bf-hatch{
+  height:22px; margin:20px 0 24px; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:repeating-linear-gradient(135deg,var(--border) 0 1px,transparent 1px 7px);
+}
+
+/* ---- หัวใจ "เท่": label + ค่า เป็น mono uppercase ---- */
+[data-skin="terminal"] .lab{
+  font-family:var(--mono); font-size:10px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);
+}
+[data-skin="terminal"] .lab .em{ font-size:.95em; opacity:.7; }
+/* emoji → ไอคอนเส้น mono (stroke = currentColor → คุมโทนตามตัวอักษร) */
+[data-skin="terminal"] .lab .em svg,
+[data-skin="terminal"] .ctitle > span:first-child svg,
+[data-skin="terminal"] .bot-btn > span svg{
+  width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round; vertical-align:-2px;
+}
+[data-skin="terminal"] .big,
+[data-skin="terminal"] .statrow .s{ font-family:var(--mono); font-weight:500; letter-spacing:-.02em; }
+[data-skin="terminal"] .statrow .sl{ font-family:var(--mono); font-size:.62rem; letter-spacing:.04em; text-transform:uppercase; }
+[data-skin="terminal"] .sub{ color:var(--text-muted); }
+
+/* ---- section-card headers (.ctitle) → mono + เส้นคั่น ---- */
+[data-skin="terminal"] .ctitle{
+  font-family:var(--mono); font-size:.72rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted);
+  padding-bottom:11px; margin-bottom:14px; border-bottom:1px solid var(--border-soft);
+}
+[data-skin="terminal"] .ctitle span:first-child{ opacity:.7; }
+
+/* regime/news → mono */
+[data-skin="terminal"] .bf-reg,
+[data-skin="terminal"] .regch{ font-family:var(--mono); font-size:.72rem; letter-spacing:.02em; text-transform:uppercase; }
+[data-skin="terminal"] #newsBlock .nsrc,
+[data-skin="terminal"] #newsBlock .npill{ font-family:var(--mono); }
+
+/* ---- motion: momentum (Lenis) + reveal/stagger (.t-reveal/.t-stagger) ----
+   class เฉพาะ t-* กันชน .reveal ของ components.css · ซ่อนเฉพาะเมื่อ html.io-ready
+   (สคริปต์ยืนยัน IntersectionObserver ก่อน) → ถ้า JS พัง เนื้อหายังเห็น */
+html.io-ready[data-skin="terminal"] .t-reveal{
+  opacity:0; transform:translateY(22px);
+  transition:opacity .87s cubic-bezier(.22,1,.36,1), transform .87s cubic-bezier(.22,1,.36,1);
+}
+html.io-ready[data-skin="terminal"] .t-reveal.in{ opacity:1; transform:none; }
+html.io-ready[data-skin="terminal"] .t-stagger > *{
+  opacity:0; transform:translateY(16px);
+  transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1);
+}
+html.io-ready[data-skin="terminal"] .t-stagger.in > *{ opacity:1; transform:none; }
+/* ทิศ reveal ผ่าน data-reveal (ไม่ใส่ = up เดิม) — อ้างอิง edgeskool.net (Framer)
+   ⚠️ บล็อกนี้ mirror ใน components.css (.reveal) + academy/visuals/_kit/theme.css (.reveal) — แก้ที่นี่ = ตรวจอีก 2 ที่ด้วย (3 engine reveal แยกตาม skin/dir) */
+html.io-ready[data-skin="terminal"] .t-reveal[data-reveal="left"]{ transform:translateX(-30px); }
+html.io-ready[data-skin="terminal"] .t-reveal[data-reveal="right"]{ transform:translateX(30px); }
+html.io-ready[data-skin="terminal"] .t-reveal[data-reveal="down"]{ transform:translateY(-22px); }
+html.io-ready[data-skin="terminal"] .t-reveal[data-reveal="fade"]{ transform:none; }
+html.io-ready[data-skin="terminal"] .t-reveal[data-reveal="scale"]{ transform:scale(.965); }
+html.io-ready[data-skin="terminal"] .t-reveal.in[data-reveal]{ opacity:1; transform:none; } /* .in ชนะทุกทิศ (specificity สูงกว่า variant) */
+@media (prefers-reduced-motion:reduce){
+  html.io-ready[data-skin="terminal"] .t-reveal,
+  html.io-ready[data-skin="terminal"] .t-stagger > *{ opacity:1 !important; transform:none !important; transition:none; }
+}
+[data-skin="terminal"].lenis, [data-skin="terminal"].lenis body{ height:auto; }
+[data-skin="terminal"].lenis.lenis-smooth{ scroll-behavior:auto !important; }
+[data-skin="terminal"].lenis.lenis-stopped{ overflow:hidden; }
+
+/* ============================================================================
+   refine 1 (feedback: ยังไม่ใกล้ edgeskool) — "ความหายใจ": ช่องไฟ/padding/เส้นจาง
+   edgeskool เด่นที่พื้นที่ว่าง + เส้นบางจาง + สีนิ่ง → ดันช่องไฟ + เส้นเบาลง (ไม่แตะพาเลต)
+   ============================================================================ */
+
+/* container กว้าง + หายใจขึ้น */
+[data-skin="terminal"] .bf-wrap{ max-width:1280px; padding:2.4rem 2.6rem 3.6rem; }
+
+/* hero ใหญ่ + โปร่ง (fixed scale ตาม product register · เลิก clamp) */
+[data-skin="terminal"] .bf-eyebrow{ margin-bottom:16px; }
+[data-skin="terminal"] .bf-hello{ font-size:2.5rem; line-height:1.04; margin:.1rem 0 0; }
+[data-skin="terminal"] .bf-sub{ font-size:1rem; margin-top:1rem; line-height:1.7; max-width:64ch; }
+[data-skin="terminal"] .bf-asof{ margin-top:.85rem; }
+[data-skin="terminal"] .bf-top{ margin-bottom:0; }
+[data-skin="terminal"] .bf-hatch{ margin:36px 0 38px; }
+
+/* การ์ดหายใจ: padding ใหญ่ + ช่องไฟกว้าง + เส้นจางลง (--border-soft) */
+[data-skin="terminal"] .bf-layout{ gap:26px; }
+[data-skin="terminal"] .bento{ gap:22px; }
+[data-skin="terminal"] .bcard{ padding:1.5rem 1.6rem; border-color:var(--border-soft); }
+[data-skin="terminal"] .bcard.span3{ padding:1.7rem 1.85rem; }
+[data-skin="terminal"] .bf-railcal,
+[data-skin="terminal"] .bf-tlcard{ padding:1.5rem 1.6rem; border-color:var(--border-soft); }
+
+/* จังหวะภายในการ์ด: หัว-ค่า-คำอธิบาย ห่างขึ้น */
+[data-skin="terminal"] .lab{ margin-bottom:1.05rem; }
+[data-skin="terminal"] .big{ font-size:2.15rem; margin-top:.1rem; }
+[data-skin="terminal"] .sub{ margin-top:.55rem; }
+[data-skin="terminal"] .ctitle{ margin-bottom:1.25rem; padding-bottom:.95rem; }
+
+/* แถวข่าว/สัญญาณ ห่างขึ้นนิด */
+[data-skin="terminal"] #newsBlock .nrow{ padding:.7rem 0; }
+[data-skin="terminal"] .swsig .lrow{ padding:.62rem 0; }
+
+/* ============================================================================
+   ก้อนที่ 3 — ลุค "กล่องโปร่ง" (flat · phase 2 · 2026-06-30) — แทน "กรอบรูปพาเนลดำ" เดิม
+   เนื้อหา/กราฟวางบนพื้นเว็บเลย: โปร่ง ไม่มีพื้น/เงา/กระจก เหลือแค่เส้นขอบสี่เหลี่ยม 1px
+   ยกขึ้นส่วนกลางจาก index page-local (#132) → briefing + ทุกหน้า terminal ใช้ร่วม
+   #sw-content (ID · มีทั้ง 2 หน้า) ชนะ specificity tint ราย nth-child + กรอบรูปเก่า
+   ============================================================================ */
+:root[data-skin="terminal"]{ background-color:var(--bg); }   /* พื้นเรียบ (เหมือน V5) */
+[data-skin="terminal"] body{ background:transparent; }
+
+/* การ์ดทุกใบ (bento / กราฟ / กระเบื้อง / ราง) → กล่องโปร่ง + เส้นขอบ
+   *ยกเว้น .bf-rail* — คนละความหมาย 2 หน้า (index=การ์ด · briefing=คอนเทนเนอร์) → คุมราย-หน้า */
+[data-skin="terminal"] #sw-content .bcard,
+[data-skin="terminal"] #sw-content .ccard,
+[data-skin="terminal"] #sw-content .mtile,
+[data-skin="terminal"] #sw-content .bf-railcal,
+[data-skin="terminal"] #sw-content .bf-tlcard{
+  background:transparent; border:1px solid var(--border);
+  border-radius:0; box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+/* ตัวเลข/ป้ายในการ์ด = กลาง (ลบสี ink ราย hue · คงเขียว/แดง = ขึ้น/ลง) */
+[data-skin="terminal"] #sw-content .mtile{ color:var(--text); }
+/* ปิด pseudo กระจก (sheen/rim) ของการ์ด */
+[data-skin="terminal"] #sw-content .bcard::before, [data-skin="terminal"] #sw-content .bcard::after,
+[data-skin="terminal"] #sw-content .ccard::before, [data-skin="terminal"] #sw-content .ccard::after,
+[data-skin="terminal"] #sw-content .mtile::before, [data-skin="terminal"] #sw-content .mtile::after,
+[data-skin="terminal"] #sw-content .bf-railcal::before, [data-skin="terminal"] #sw-content .bf-railcal::after,
+[data-skin="terminal"] #sw-content .bf-tlcard::before, [data-skin="terminal"] #sw-content .bf-tlcard::after{ display:none; }
+/* tooltip กราฟ (โดนัท/พื้นที่ full) ไม่ถูกขอบการ์ดตัด */
+[data-skin="terminal"] #sw-content .ccard{ overflow:visible; }
+
+/* กราฟเส้น minimal — ตัด gradient ใต้เส้น + เส้นบางคงที่ (non-scaling-stroke) + ไม่มีเงา */
+[data-skin="terminal"] #sw-content svg path[fill^="url("]{ display:none; }
+[data-skin="terminal"] #sw-content .cx-line{ stroke-width:1.4; filter:none; vector-effect:non-scaling-stroke; }
+[data-skin="terminal"] #sw-content .cx-grid line,
+[data-skin="terminal"] #sw-content .cx-base,
+[data-skin="terminal"] #sw-content .cx-cross{ vector-effect:non-scaling-stroke; }
+
+/* โดนัท terminal — วงบาง + ป้ายสี "กรอบกลวง" (สีพาเลตมิวต์ฉีดจาก JS หน้า) */
+[data-skin="terminal"] #sw-content .seg{ stroke-width:2; pointer-events:all; }
+[data-skin="terminal"] #sw-content .legend i{ border-radius:0; width:8px; height:8px; }
+[data-skin="terminal"] #sw-content .legend{ font-size:.68rem; gap:5px 10px; margin-top:8px; }
+
+/* ============================================================================
+   ก้อนที่ 4 — ปฏิทินงบ (.swec · shared component) flat (refine 2026-07-01 · #1/#5)
+   .swec ถือ token กระจกของตัวเอง (self-contained · ก๊อปจาก wb.css) → สกินไม่ถึง
+   neutralize + flatten ที่นี่ (briefing + board โหลด skin-terminal.css ทั้งคู่ → ตรงกัน)
+   tie-break: `[data-skin] .swec`=(0,2,0) เท่ากับ `:root[data-theme] .swec` → ชนะด้วย
+   ลำดับ (skin โหลดหลัง earnings-calendar.css ทั้ง 2 หน้า)
+   ============================================================================ */
+[data-skin="terminal"] .swec{
+  --glass-blur:none; --radius:2px;
+  --glass-panel:transparent; --frost:var(--surface);
+  --hairline:var(--border); --hairline2:var(--border-soft);
+  --shadow-1:none; --shadow-2:none;
+  --blue-soft:var(--accent-soft); --down-soft:var(--bad-bg); --row-hover:var(--surface-2);
+}
+/* ปุ่มเลือกเดือน/ปุ่มนำทาง → กล่องเรียบมีกรอบ (เลิกแคปซูล 999px + กระจก) */
+[data-skin="terminal"] .cal-msel,
+[data-skin="terminal"] .cal-nav{
+  border-radius:0; background:var(--surface-2);
+  -webkit-backdrop-filter:none; backdrop-filter:none; border-color:var(--border);
+}
+/* เมนู dropdown + ตัวเลือก → แผงเรียบคม (เลิก 14px/9px + frost-blur) */
+[data-skin="terminal"] .cal-menu{
+  border-radius:0; background:var(--surface);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+[data-skin="terminal"] .cal-mopt{ border-radius:0; }
+[data-skin="terminal"] .cal-mopt.sel{ background:var(--surface-2); color:var(--text); }
+/* การ์ดเดือน → กล่องโปร่ง + กรอบ (เหมือนการ์ด bento อื่น · เลิก 16px + กระจก) */
+[data-skin="terminal"] .cal-month{
+  border-radius:0; background:transparent;
+  -webkit-backdrop-filter:none; backdrop-filter:none; border-color:var(--border);
+}
+/* ช่องวัน + ป้าย event → เหลี่ยมคม (คงสีสถานะ มีงบ/ติดงบ ผ่าน token แล้ว) */
+[data-skin="terminal"] .cal-cell,
+[data-skin="terminal"] .cal-ev{ border-radius:0; }
+
+/* timeline "งบ+เหตุการณ์ใกล้" (briefing) — จุด marker เหลี่ยมคม + วงล้อมสีพื้นเว็บ
+   (เดิม border ขาว var(--surface) → "จุดแดงบนวงขาว" หลุดธีม · refine #4) */
+[data-skin="terminal"] .tl .ev::before{ border-radius:0; border-color:var(--bg); }

@@ -1,0 +1,113 @@
+/* shared/_kit/earnings-calendar.css — ปฏิทินงบรายเดือน (shared component)
+   ============================================================================
+   ใช้ร่วม board (workbench/index.html) + สรุปเช้า (site-src/briefing.html).
+   คู่กับ shared/_kit/earnings-calendar.js (window.SWEarnCal.render).
+
+   สี/ฟอนต์หลัก (--ink/--ink2/--ink3/--blue/--accent/--down/--font) มาจาก
+   shared/_kit/tokens.css ที่ทั้ง 2 หน้าโหลดอยู่แล้ว (theme-aware อัตโนมัติ).
+
+   token "กระจก/interaction" เฉพาะ board (--glass-panel/--frost/--blue-soft/
+   --down-soft/--row-hover/--hairline/--hairline2/--shadow-1/--shadow-2/--press/
+   --ease/--radius/--glass-blur) เดิมอยู่ใน wb.css :root — แต่ briefing ไม่มี →
+   ประกาศ self-contained scope ใต้ .swec ด้านล่าง (ค่าก๊อปจาก wb.css เป๊ะ ทั้ง
+   มืด/สว่าง) · render() เติม class .swec ให้ wrapEl อัตโนมัติ → ปฏิทินหน้าตา
+   ตรงกันทั้ง 2 หน้า โดยไม่ leak ไปชน :root ของกระดาน.
+   ============================================================================ */
+
+/* ---- token กระจก self-contained (scope .swec · default = light) ---- */
+.swec{
+  /* theme-independent */
+  --glass-blur:blur(22px) saturate(1.5);
+  --press:scale(.97);
+  --ease:cubic-bezier(.25,.46,.45,.94);
+  --radius:16px;
+  /* light (bare :root / [data-theme=light]) — ก๊อปจาก wb.css [data-theme=light] */
+  --glass-panel:rgba(255,255,255,.56);
+  --frost:rgba(246,246,248,.78);
+  --blue-soft:rgba(0,122,255,.10);
+  --down-soft:rgba(215,0,21,.10);
+  --row-hover:rgba(120,120,128,.07);
+  --hairline:rgba(0,0,0,.10);
+  --hairline2:rgba(0,0,0,.06);
+  --shadow-1:0 1px 3px rgba(0,0,0,.08);
+  --shadow-2:0 10px 30px rgba(0,0,0,.10);
+}
+:root[data-theme="dark"] .swec{   /* ก๊อปจาก wb.css :root (dark = board default) */
+  --glass-panel:rgba(28,28,30,.52);
+  --frost:rgba(8,8,10,.72);
+  --blue-soft:rgba(10,132,255,.14);
+  --down-soft:rgba(255,69,58,.14);
+  --row-hover:rgba(120,120,128,.10);
+  --hairline:rgba(255,255,255,.10);
+  --hairline2:rgba(255,255,255,.06);
+  --shadow-1:0 1px 3px rgba(0,0,0,.35);
+  --shadow-2:0 10px 30px rgba(0,0,0,.45);
+}
+
+/* ปฏิทินงบ (Pass 4 · user) — dropdown เลือกเดือน · แสดงทีละเดือน · ช่องวันใส่ days/ติดงบ
+   ยกจาก workbench/kit/wb.css verbatim (PR #50) */
+.cal-picker{ display:flex; gap:8px; align-items:center; flex-wrap:nowrap; margin-bottom:14px; }
+/* custom dropdown (กระจกตามธีม · เลี่ยง native select popup สีเทา) */
+.cal-seldd{ position:relative; flex:0 1 auto; min-width:0; }   /* dropdown ยืด-หด: กว้างพอ=ขนาดปกติ · แคบ=หดพอดี (คง ◂ dropdown ▸ แถวเดียว) */
+.cal-msel{
+  display:inline-flex; align-items:center; gap:10px; justify-content:space-between;
+  min-height:38px; min-width:0; max-width:100%; overflow:hidden; padding:5px 14px 5px 16px; border:1px solid var(--hairline); border-radius:999px;
+  background-color:var(--glass-panel); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  color:var(--ink); font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  transition:border-color 160ms var(--ease);
+}
+.cal-msel:hover, .cal-msel.open{ border-color:var(--accent); }
+.cal-chev{ flex:none; color:var(--ink2); transition:transform 180ms var(--ease); }
+.cal-msel > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }   /* label ตัด … เมื่อคอลัมน์แคบ (คง ▸ แถวเดียว ไม่ตก) */
+.cal-msel.open .cal-chev{ transform:rotate(180deg); }
+.cal-menu{
+  position:absolute; top:calc(100% + 6px); left:0; z-index:60;
+  min-width:100%; max-height:288px; overflow-y:auto; padding:6px;
+  background:var(--frost); -webkit-backdrop-filter:blur(28px) saturate(1.7); backdrop-filter:blur(28px) saturate(1.7);
+  border:1px solid var(--hairline); border-radius:14px; box-shadow:var(--shadow-2);
+}
+.cal-mopt{
+  display:block; width:100%; text-align:left; padding:8px 14px; border:none; border-radius:9px;
+  background:transparent; -webkit-appearance:none; appearance:none;   /* reset ปุ่ม UA (กันพื้นเทา/ขอบ outset โผล่หน้าที่ไม่มี button-reset) */
+  color:var(--ink); font:inherit; font-size:13px; font-weight:500; white-space:nowrap; cursor:pointer;
+  transition:background 130ms var(--ease), color 130ms var(--ease);
+}
+.cal-mopt:hover{ background:var(--row-hover); }
+.cal-mopt.sel{ background:var(--blue-soft); color:var(--accent); font-weight:600; }
+.cal-nav{
+  flex:none; min-height:38px; min-width:40px; padding:2px 12px; border:1px solid var(--hairline); border-radius:999px;
+  background-color:var(--glass-panel); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  color:var(--ink2); font-size:14px; font-weight:700;
+  transition:border-color 160ms var(--ease), color 160ms var(--ease), transform 120ms var(--ease);
+}
+.cal-nav:hover:not(:disabled){ border-color:var(--accent); color:var(--ink); }
+.cal-nav:active:not(:disabled){ transform:var(--press); }
+.cal-nav:disabled{ opacity:.35; cursor:not-allowed; }
+
+.cal-month{
+  max-width:600px;
+  background:var(--glass-panel); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  border:1px solid var(--hairline2); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:14px 16px;
+}
+.cal-mhead{ font-weight:600; font-size:14px; margin-bottom:10px; letter-spacing:-.01em; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal-wd{ text-align:center; font-size:10px; color:var(--ink3); font-weight:600; padding-bottom:3px; }
+.cal-cell{ min-height:44px; border-radius:7px; padding:3px 4px 4px; display:flex; flex-direction:column; gap:2px; }
+.cal-cell.empty{ background:transparent; }
+.cal-dnum{ font-size:10.5px; color:var(--ink3); font-variant-numeric:tabular-nums; padding-left:2px; }
+.cal-cell.has-earn{ background:var(--blue-soft); }
+.cal-cell.has-earn .cal-dnum{ color:var(--ink); font-weight:600; }
+.cal-cell.blocked{ background:var(--down-soft); }
+.cal-cdays{ font-size:9px; color:var(--ink2); font-variant-numeric:tabular-nums; padding-left:2px; line-height:1.2; }
+.cal-cblock{ font-size:8.5px; font-weight:700; color:var(--down); line-height:1.25; padding-left:1px; }
+.cal-evs{ display:flex; flex-direction:column; gap:2px; margin-top:1px; }
+.cal-ev{
+  font-size:9.5px; font-weight:700; padding:1px 3px; border:none; border-radius:4px; line-height:1.5;
+  background:var(--blue); color:#fff; -webkit-appearance:none; appearance:none;   /* reset ขอบ outset ของปุ่ม UA */
+  text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:filter 160ms var(--ease), transform 120ms var(--ease);
+}
+.cal-ev:hover{ filter:brightness(1.12); }
+.cal-ev:active{ transform:var(--press); }
+.cal-cell.blocked .cal-ev{ background:var(--down); }
+@media (max-width: 640px){ .cal-month{ max-width:none; } .cal-msel{ flex:1; min-width:0; } }
