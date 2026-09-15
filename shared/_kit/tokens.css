@@ -1,0 +1,159 @@
+/* ============================================================================
+   shared/_kit/tokens.css — Swing Workbench · unified design tokens (PRODUCTION)
+   ----------------------------------------------------------------------------
+   ONE semantic token layer for the whole site, switched by
+   <html data-theme="light|dark">. Replaces the two duplicated palettes that
+   used to ship separately:
+     · academy/visuals/_kit/theme.css   — Apple-Store LIGHT (welcome / teaching)
+     · workbench/kit/wb.css             — Apple TRUE-BLACK dark (the live board)
+
+   Consumed via @import by wb.css (board) and theme.css (academy). Change a
+   colour here once → both surfaces follow.  (Phase B1, plan: functional-juggling-papert)
+
+   DEFAULT MODE = LIGHT (bare :root). Surfaces that want dark-first set
+   <html data-theme="dark"> explicitly (the board does; util.js/app.js own the
+   board's toggle). Academy/landing keep the bare-:root light default.
+
+   OFFLINE 100%: self-hosted IBM Plex Sans Thai (OFL) — the same faces the
+   academy already ships. url() is RELATIVE to THIS file (shared/_kit/), so it
+   resolves identically whether served from a site root, from the built
+   site-cloud/ tree, or opened locally. Self-contained — no external network.
+   ============================================================================ */
+
+/* ---- self-hosted IBM Plex Sans Thai (relative → resolves from shared/_kit/) ---- */
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:400;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-thai-400.woff2") format("woff2");
+  unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC;}
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:400;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-latin-400.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:600;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-thai-600.woff2") format("woff2");
+  unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC;}
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:600;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-latin-600.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:700;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-thai-700.woff2") format("woff2");
+  unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC;}
+@font-face{font-family:"IBM Plex Sans Thai";font-style:normal;font-weight:700;font-display:swap;
+  src:url("../../academy/visuals/_kit/fonts/ibmplexsansthai-latin-700.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+
+/* ============================================================================
+   MODE-INDEPENDENT — type, shape, spacing, z-index (same in light + dark)
+   ============================================================================ */
+:root{
+  --font:"IBM Plex Sans Thai",-apple-system,"Segoe UI","Sarabun",system-ui,Tahoma,sans-serif;
+  --mono:"SF Mono",ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+
+  --radius:18px;
+  --radius-lg:28px;
+  --radius-sm:12px;
+  --radius-pill:980px;
+  --measure:42rem;            /* ~66ch readable line length */
+
+  /* fluid spacing scale */
+  --space-1:.5rem;  --space-2:.75rem;  --space-3:1.125rem;
+  --space-4:1.625rem; --space-5:2.5rem; --space-6:clamp(3rem,8vh,5.5rem);
+
+  /* semantic z-index scale (no magic 9999s) */
+  --z-base:0; --z-toggle:40; --z-toast:60;
+}
+
+/* ============================================================================
+   SEMANTIC LAYER — the cross-surface design contract the shared components
+   (components.css) and the landing/academy pages are authored against.
+   ============================================================================ */
+
+/* ---------- LIGHT = DEFAULT (welcome / academy; from academy theme.css) ---------- */
+:root,
+:root[data-theme="light"]{
+  color-scheme:light;
+  --surface:#ffffff;          /* cards / panels */
+  --surface-2:#fafbfd;        /* nested wells, stat strips */
+  --surface-tint:linear-gradient(180deg,#eef3fb,#ffffff);  /* hero wash */
+  --text:#1c1d22;             /* academy --ink */
+  --text-muted:#5a5e69;       /* academy --ink2 (~5:1 AA on white) */
+  --text-faint:#676c78;       /* academy --ink3 (~4.6:1 AA) */
+  --accent-ink:#0a4ea0;       /* darker accent for text-on-tint (AA) */
+  --accent-soft:#e9f1fd;      /* accent tint chip bg */
+  --border:#dcdee4;           /* academy --line */
+  --border-soft:#eaecf1;      /* academy --line2 */
+  --shadow:0 4px 20px rgba(28,42,74,.10);
+  --shadow-lg:0 14px 44px rgba(28,42,74,.16);
+  --toggle-track:#e7e9f0;
+  /* status tints (academy quiz/feedback · light) — pair กับ dark ด้านล่าง */
+  --ok-bg:#e6f6ec;   --ok-line:#157a3d; --ok-ink:#10592d;
+  --bad-bg:#fdeae8;  --bad-line:#b3261c; --bad-ink:#8c1d15;
+}
+
+/* ---------- DARK (the live board; from workbench wb.css) ---------- */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --surface:#1c1c1e;          /* wb.css --panel */
+  --surface-2:#2c2c2e;        /* wb.css --panel2 */
+  --surface-tint:linear-gradient(180deg,#0d0d0f,#000000);
+  --text:#f5f5f7;             /* wb.css --ink */
+  --text-muted:#b6b6be;       /* lightened for AA on dark glass (was #9c9ca3 ~3:1) */
+  --text-faint:#9a9aa2;       /* lightened for AA on dark glass (was #707078 ~2.8:1 → ~5:1) */
+  --accent-ink:#6cb6ff;       /* lighter accent for text on dark (AA) */
+  --accent-soft:rgba(10,132,255,.16);
+  --border:#3a3a3c;           /* wb.css --line */
+  --border-soft:#2a2a2c;      /* wb.css --line2 */
+  --shadow:0 1px 3px rgba(0,0,0,.45);
+  --shadow-lg:0 16px 40px rgba(0,0,0,.55);
+  --toggle-track:#2c2c2e;
+  /* status tints (academy quiz/feedback · dark) */
+  --ok-bg:rgba(48,209,88,.16);  --ok-line:#30d158; --ok-ink:#5be588;
+  --bad-bg:rgba(255,69,58,.16); --bad-line:#ff453a; --bad-ink:#ff8a82;
+}
+
+/* ============================================================================
+   THE 14-COLOR CONTRACT — NAMES FROZEN, 6-DIGIT HEX ONLY.
+   Read at runtime by the board's canvas charts
+   (workbench/kit/util.js → palette(); hexToRgba() requires 6-digit hex).
+   These 14 NAMES must never be renamed and must stay valid #rrggbb:
+     --up --down --ink --ink2 --ink3 --line --line2
+     --panel --bg --accent --blue --amber --orange --purple
+   (--bg / --accent are deliberately shared with the semantic layer above;
+   they are re-declared here so the contract block is the single source for
+   all 14 in BOTH modes. Values copied verbatim from the original wb.css.)
+   ============================================================================ */
+
+/* light = the contract's light equivalents (was wb.css [data-theme="light"]) */
+:root,
+:root[data-theme="light"]{
+  --up:#248a3d;
+  --down:#d70015;
+  --ink:#1d1d1f;
+  --ink2:#6e6e73;
+  --ink3:#86868b;
+  --line:#d1d1d6;
+  --line2:#e5e5ea;
+  --panel:#ffffff;
+  --bg:#f5f5f7;
+  --accent:#007aff;
+  --blue:#007aff;
+  --amber:#b25000;
+  --orange:#c93400;
+  --purple:#8944ab;
+}
+
+/* dark = the contract's native palette (was wb.css :root) */
+:root[data-theme="dark"]{
+  --up:#30d158;
+  --down:#ff453a;
+  --ink:#f5f5f7;
+  --ink2:#9c9ca3;
+  --ink3:#707078;
+  --line:#3a3a3c;
+  --line2:#2a2a2c;
+  --panel:#1c1c1e;
+  --bg:#000000;
+  --accent:#0a84ff;
+  --blue:#0a84ff;
+  --amber:#ffd60a;
+  --orange:#ff9f0a;
+  --purple:#bf5af2;
+}
