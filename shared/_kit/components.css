@@ -1,0 +1,105 @@
+/* ============================================================================
+   shared/_kit/components.css — Swing Workbench · shared component vocabulary
+   ----------------------------------------------------------------------------
+   ONE definition per cross-surface concept: card · pill · badge · table.
+   Lifted from the academy kit (the strongest design baseline in the repo) and
+   re-keyed onto the SEMANTIC tokens in tokens.css so the same components render
+   correctly in BOTH light and dark.
+
+   REQUIRES tokens.css to be loaded FIRST (it provides --surface, --text-*,
+   --border-*, --shadow, --radius*, --accent). Consumers @import tokens.css then
+   this file, in that order (see academy theme.css).
+
+   Scope note: the live board (wb.css) keeps its own dense, bespoke components
+   (.stat-card / .chip / .vbadge / .wb-table) — those are a specialised surface,
+   not the shared vocabulary, and intentionally stay local to wb.css.
+   The status-tint variants (.pill.g/.r/.y, .badge.pass/.fail/.warn) are tuned
+   for light surfaces (academy / landing); a dark surface that adopts them would
+   layer its own tints.
+   ============================================================================ */
+
+/* ---- card (flat surface, no nesting) ---- */
+.card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:1.5rem 1.625rem;
+}
+.card + .card{ margin-top:1.125rem; }
+
+/* ---- tile (interactive card; lifts on hover) ---- */
+.tile{
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:1.625rem;
+  transition:transform .35s cubic-bezier(.22,.61,.36,1),box-shadow .35s;
+}
+.tile:hover{ transform:translateY(-6px); box-shadow:var(--shadow-lg); }
+@media (prefers-reduced-motion: reduce){
+  .tile{ transition:none; }
+  .tile:hover{ transform:none; }
+}
+
+/* ---- pill (small rounded label) ---- */
+.pill{
+  display:inline-block;
+  padding:.1875rem .6875rem;
+  border-radius:var(--radius-pill);
+  font-size:.75rem;
+  font-weight:600;
+}
+.pill.g{ background:#e6f6ec; color:#157a3d; }
+.pill.r{ background:#fdeae8; color:#b3261c; }
+.pill.y{ background:#fbf0dd; color:#8a4a00; }
+
+/* ---- badge (status flag) ---- */
+.badge{
+  display:inline-block;
+  padding:.1875rem .625rem;
+  border-radius:var(--radius-pill);
+  font-size:.75rem;
+  font-weight:600;
+}
+.badge.pass{ background:#e6f6ec; color:#157a3d; }
+.badge.fail{ background:#fdeae8; color:#b3261c; }
+.badge.warn{ background:#fbf0dd; color:#8a4a00; }
+
+/* ---- table (comparison / data grid) ---- */
+.scroll{ overflow-x:auto; margin-top:.875rem; }
+table.adxtbl{
+  width:100%; border-collapse:collapse;
+  font-size:.78125rem; font-variant-numeric:tabular-nums; min-width:660px;
+}
+table.adxtbl th, table.adxtbl td{
+  padding:.4375rem .5625rem; text-align:right;
+  border-bottom:1px solid var(--border-soft); white-space:nowrap;
+}
+table.adxtbl th{
+  color:var(--text-muted); font-weight:600;
+  background:var(--surface-2); position:sticky; top:0;
+}
+table.adxtbl td:first-child, table.adxtbl th:first-child{ text-align:left; font-weight:600; }
+table.adxtbl tr.walk td{ background:#e6f6ec; }
+table.adxtbl tr.cross td{ background:#f3e9fb; }
+table.adxtbl tr.hot td{ background:#e1edfd; }
+table.adxtbl td b.up{ color:var(--up); }
+table.adxtbl td b.down{ color:var(--down); }
+
+/* ---- reveal-on-scroll (promoted from academy kit → shared · opt-in via class .reveal) ----
+   progressive enhancement: ซ่อนเฉพาะเมื่อ html.js ถูกตั้ง (ไม่มี JS = เห็นเนื้อหาทันที)
+   ใช้คู่กับ shared/_kit/reveal.js (IntersectionObserver เติม .in) · เคารพ reduced-motion */
+.js .reveal{ opacity:0; transform:translateY(24px);
+  transition:opacity .87s cubic-bezier(.22,.61,.36,1), transform .87s cubic-bezier(.22,.61,.36,1); }
+.js .reveal.in{ opacity:1; transform:none; }
+/* ทิศ reveal เลือกได้ผ่าน data-reveal (ไม่ใส่ = ขึ้น เดิม) — mirror .t-reveal ของ skin-terminal.css */
+.js .reveal[data-reveal="left"]{ transform:translateX(-30px); }
+.js .reveal[data-reveal="right"]{ transform:translateX(30px); }
+.js .reveal[data-reveal="down"]{ transform:translateY(-24px); }
+.js .reveal[data-reveal="fade"]{ transform:none; }
+.js .reveal[data-reveal="scale"]{ transform:scale(.965); }
+.js .reveal.in[data-reveal]{ opacity:1; transform:none; } /* .in ชนะทุกทิศ */
+@media (prefers-reduced-motion: reduce){ .js .reveal{ opacity:1; transform:none; transition:none; } }
+
+/* ---- hero subtitle (editorial framing helper — ให้หน้า dashboard ยืม feel academy ได้) ---- */
+.hero-sub{ font-size:.95rem; color:var(--text-muted); margin:.4rem 0 0; max-width:54ch; line-height:1.55; }
