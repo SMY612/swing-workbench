@@ -1,0 +1,201 @@
+/* ============================================================================
+   shared/_kit/skin-terminal-wb.css — TERMINAL skin · ชั้น Workbench (board + replay)
+   ----------------------------------------------------------------------------
+   โหลดคู่ skin-terminal.css บนหน้าที่ตั้ง <html data-skin="terminal"> เฉพาะ
+   board (workbench/index.html · ใช้ wb.css) + replay (workbench/replay.html ·
+   inline style) — สองหน้านี้ "คนละชุดคลาส" กับ site-src (ไม่มี .bcard/#sw-content
+   bento) → สกินกลางทำให้แค่ token สี/ฟอนต์/มุม + nav flat. ไฟล์นี้เก็บงานที่เหลือ:
+   ลบ "กระจก/เงา/มุมมน" เฉพาะของ workbench → การ์ดโปร่ง + เส้นขอบ 1px ตรงกับ
+   index/briefing flat (#132/#134).
+
+   กลไก: wb.css + replay-inline เขียนด้วย token เกือบหมด → "ลบล้าง token กลุ่ม
+   glass/frost/shadow/seg/fill ที่เดียว" แบนทั้งหน้าโดยไม่ต้องไล่ทีละคลาส.
+   specificity :root[data-skin="terminal"] = (0,2,0) ชนะ wb.css/replay :root (0,1,0).
+
+   ⚠️ ไม่แตะ 14-color contract (--up/--down/--ink/--panel/--bg/--accent ฯลฯ) —
+   อันนั้น skin-terminal.css override แล้ว · canvas (candles/backtest) อ่านชุดนั้น
+   → กราฟรีคัลเลอร์เป็นพาเลต terminal เอง.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1) NEUTRALIZE — token เฉพาะ board/replay (CSS-only · JS ไม่อ่าน) → ค่า flat
+   semantic token (--surface/--border/--bg ฯลฯ) สลับมืด-สว่างเองตาม data-theme
+   ที่ skin-terminal.css ตั้งไว้ → บล็อกนี้ใช้ค่าเดียวพอ (ไม่ต้องแยก 2 ธีม)
+   --------------------------------------------------------------------------- */
+:root[data-skin="terminal"]{
+  /* กระจก/ฝ้า → ไม่มี (การ์ดโปร่ง) */
+  --glass-panel:transparent; --glass-blur:none;
+  /* แถบ frost (header/sector/alert) → พื้นเว็บทึบ (กลืน · sticky ไม่โชว์เนื้อหาทะลุ) */
+  --frost:var(--bg);
+  /* หัวตารางเหนียว (sticky thead) ต้องทึบกันแถวเลื่อนทะลุ → surface-2 */
+  --thead:var(--surface-2);
+  /* เงาทุกชั้น → ไม่มี */
+  --shadow-1:none; --shadow-2:none; --seg-shadow:none;
+  /* เส้น hairline (ขาว/ดำโปร่ง) → เส้นขอบ terminal */
+  --hairline:var(--border); --hairline2:var(--border-soft);
+  /* segmented control (แท็บ/ช่วงเวลา) → รางเรียบ + ปุ่ม active พื้น surface */
+  --seg-bg:var(--surface-2); --seg-active:var(--surface);
+  /* ชิป/เม็ดสีเทา/fill bar → surface เรียบ */
+  --chip-bg:var(--surface-2); --gray-soft:var(--surface-2);
+  --fill:var(--surface-2); --fill2:var(--border-soft);
+  --row-hover:var(--surface-2); --sel-bg:var(--accent-soft);
+  /* มุม board-only (16px/8px/12px) → คม */
+  --radius:2px; --radius-s:2px;
+  /* alias เฉพาะ replay (replay.html inline) */
+  --panel-2:var(--surface-2); --faint:var(--text-faint);
+  --green-soft:var(--ok-bg); --red-soft:var(--bad-bg);
+  /* tint bento (การ์ดสถานะ stat-card/rule-box · การ์ดเลือกหุ้น replay .tcard ไล่สี)
+     → กลาง (สงวนสี = ขึ้น/ลง/สัญญาณ) */
+  --g-pk:transparent; --g-y:transparent; --g-bl:transparent; --g-tl:transparent;
+  --g-lv:transparent; --g-gr:transparent; --g-co:transparent; --g-or:transparent;
+  /* สีตัวอักษรในการ์ด bento ของ replay (*-ink) → ตัวอักษร terminal กลาง */
+  --pk-ink:var(--text); --y-ink:var(--text); --bl-ink:var(--text); --tl-ink:var(--text);
+  --lv-ink:var(--text); --gr-ink:var(--text); --co-ink:var(--text); --or-ink:var(--text);
+  /* banner (backtest/replay) tint → จาง neutral (คงเส้นขอบสีไว้บอกชนิด) */
+  --banner-amber-bg:transparent; --banner-blue-bg:transparent;
+  --rim:none; --sheen:none;
+}
+
+/* ---------------------------------------------------------------------------
+   2) FLATTEN radius — chrome ที่ฮาร์ดโค้ด border-radius (ไม่ได้ผ่าน --radius)
+   → เหลี่ยมคม. [data-skin] .x = (0,2,0) ชนะ wb.css .x (0,1,0) ไม่ต้อง !important
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .wb-header,
+[data-skin="terminal"] .sector-strip,
+[data-skin="terminal"] .alert-ribbon,
+[data-skin="terminal"] .tabbar,
+[data-skin="terminal"] .view-tabs,
+[data-skin="terminal"] .range-row,
+[data-skin="terminal"] .tab-btn,
+[data-skin="terminal"] .view-btn,
+[data-skin="terminal"] .range-btn,
+[data-skin="terminal"] .chip,
+[data-skin="terminal"] .icon-btn,
+[data-skin="terminal"] .fchip,
+[data-skin="terminal"] .search-box,
+[data-skin="terminal"] .sector-chip,
+[data-skin="terminal"] .alert-chip,
+[data-skin="terminal"] .vbadge,
+[data-skin="terminal"] .tr-chip,
+[data-skin="terminal"] .cal-tk,
+[data-skin="terminal"] .cal-block,
+[data-skin="terminal"] .cal-row,
+[data-skin="terminal"] .run-pill,
+[data-skin="terminal"] .jump-btn,
+[data-skin="terminal"] .mini-badge,
+[data-skin="terminal"] .rank-bar,
+[data-skin="terminal"] .rank-bar i,
+[data-skin="terminal"] .ms-bar,
+[data-skin="terminal"] .ms-bar i,
+[data-skin="terminal"] .cap-bar,
+[data-skin="terminal"] .cap-bar i,
+[data-skin="terminal"] .sec-count,
+[data-skin="terminal"] .sec-head,
+[data-skin="terminal"] .cl-toggle-all,
+[data-skin="terminal"] .card-sortbar select,
+[data-skin="terminal"] .card-sortdir,
+[data-skin="terminal"] .tkc-chip,
+[data-skin="terminal"] .live-mini,
+[data-skin="terminal"] .live-chip,
+[data-skin="terminal"] .bt-tag,
+[data-skin="terminal"] .lvl-dot,
+[data-skin="terminal"] code{ border-radius:0; }
+
+/* 2b) UN-FROST — blur() ที่ฮาร์ดโค้ดใน wb.css (ไม่ผ่าน token → ข้อ 1 เอื้อมไม่ถึง)
+   3 แถบตรึง + หัวตารางเหนียว. พื้นของมันคือ --frost/--thead ซึ่งข้อ 1 ตั้งเป็น --bg/--surface-2
+   = ทึบเต็มแล้ว → blur มองไม่เห็น (โดนพื้นทึบบัง) = GPU เปล่า + ยังนับเป็น "กระจก" ทางสายตา
+   ปิดให้ flat จริงตรง index/briefing (แพตเทิร์นเดียวกับ .toast ข้อ 5). specificity (0,2,0) ชนะ wb.css (0,1,0) */
+[data-skin="terminal"] .wb-header,
+[data-skin="terminal"] .sector-strip,
+[data-skin="terminal"] .alert-ribbon,
+[data-skin="terminal"] .wb-table th{ -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+/* ---------------------------------------------------------------------------
+   3) การ์ดที่พื้น = --panel ตรง ๆ (ไม่ผ่าน --glass-panel) → โปร่ง
+   (glass cards อื่น ๆ โปร่งแล้วผ่าน --glass-panel:transparent ข้อ 1)
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .table-wrap,
+[data-skin="terminal"] .chart-box,
+[data-skin="terminal"] .chart-empty,
+[data-skin="terminal"] .wb-noscript{ background:transparent; }
+
+/* เส้นขอบการ์ด: ใช้ --border เต็ม (เดิม hairline2 = จางมาก) ให้ "กล่อง" ชัดแบบ flat
+   + มุม 0 เป๊ะ (การ์ดพวกนี้ใช้ --radius=2px → บังคับ 0 ให้ตรง index/briefing) */
+[data-skin="terminal"] .table-wrap,
+[data-skin="terminal"] .chart-box,
+[data-skin="terminal"] .chart-empty,
+[data-skin="terminal"] .side-card,
+[data-skin="terminal"] .stat-card,
+[data-skin="terminal"] .panel-card,
+[data-skin="terminal"] .orient-card,
+[data-skin="terminal"] .rule-box,
+[data-skin="terminal"] .rule-group,
+[data-skin="terminal"] .bt-banner,
+[data-skin="terminal"] .cal-row{ border-color:var(--border); border-radius:0; }
+
+/* ---------------------------------------------------------------------------
+   4) chrome flat — header/แถบ = เส้นใต้บาง ไม่มีกล่องลอย · ปุ่ม segmented active
+   ใส่กรอบบางแทนเงา (ให้เห็นตัวที่เลือก)
+   --------------------------------------------------------------------------- */
+[data-skin="terminal"] .tab-btn.active,
+[data-skin="terminal"] .view-btn.active,
+[data-skin="terminal"] .range-btn.active{ border:1px solid var(--border); }
+[data-skin="terminal"] .fchip.active,
+[data-skin="terminal"] .run-pill.active{ border:1px solid currentColor; }
+
+/* ตัวเลข/หัวข้อ workbench → mono terminal (ตรงกับ index/briefing) */
+[data-skin="terminal"] .panel-title,
+[data-skin="terminal"] .chart-title .tk,
+[data-skin="terminal"] .stat-card .v,
+[data-skin="terminal"] .hd-logo{ letter-spacing:-.02em; }
+[data-skin="terminal"] .num,
+[data-skin="terminal"] .asof,
+[data-skin="terminal"] .stat-card .v,
+[data-skin="terminal"] .chart-title .px{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+/* ===========================================================================
+   5) REPLAY (workbench/replay.html · inline style · คลาสเฉพาะ ไม่อยู่ใน wb.css)
+   token-neutralize ข้างบนครอบ glass/frost/shadow แล้ว — เหลือ radius ฮาร์ดโค้ด +
+   การ์ดที่พื้น = --panel/--bg (ไม่ผ่าน --glass-panel) → โปร่ง + ตัวอักษร tcard กลาง
+   =========================================================================== */
+/* ปุ่ม/พิล/เม็ด radius 999px/10px/5px → คม */
+[data-skin="terminal"] .btn,
+[data-skin="terminal"] .poschip,
+[data-skin="terminal"] .discipline,
+[data-skin="terminal"] .end-stat,
+[data-skin="terminal"] .vs .side,
+[data-skin="terminal"] .toast,
+[data-skin="terminal"] kbd{ border-radius:0; }
+/* การ์ด replay → กล่องโปร่ง + เส้นขอบ + มุมคม */
+[data-skin="terminal"] .tcard,
+[data-skin="terminal"] .startpanel,
+[data-skin="terminal"] .hud,
+[data-skin="terminal"] .chartbox,
+[data-skin="terminal"] .scoreboard,
+[data-skin="terminal"] .endcard,
+[data-skin="terminal"] .note,
+[data-skin="terminal"] #bootError{ border-color:var(--border); border-radius:0; }
+/* chartbox พื้น = --bg → โปร่ง (กราฟวางบนพื้นเว็บเลย) */
+[data-skin="terminal"] .chartbox{ background:transparent; }
+/* ตัวอักษรการ์ดเลือกหุ้น → terminal กลาง (เดิม inherit สี bento ink) */
+[data-skin="terminal"] .tcard,
+[data-skin="terminal"] .tcard .tkr{ color:var(--text); }
+/* banner replay → เลิกมุมมน/เงา (เป็นแถบเส้นใต้บาง) */
+[data-skin="terminal"] .banner{ border-radius:0; box-shadow:none; }
+/* toast → แผงเรียบ (เดิม bg ดำตายตัว rgba(28,28,30) หลุดธีมสว่าง) · คงแถบซ้ายบอกชนิด */
+[data-skin="terminal"] .toast{
+  background:var(--surface); color:var(--text); box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+
+/* ===========================================================================
+   6) ICON — emoji ใน chrome (header/ลิงก์/ปุ่ม/ชิปกรอง) → ไอคอนเส้น mono inline
+   (refine #7 · เหมือน briefing แปลงเป็น SVG stroke=currentColor) · คุมโทน terminal
+   =========================================================================== */
+[data-skin="terminal"] .hd-left svg,
+[data-skin="terminal"] .chip-action svg,
+[data-skin="terminal"] .fchip svg,
+[data-skin="terminal"] .btn svg{
+  width:1.05em; height:1.05em; fill:none; stroke:currentColor; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round; vertical-align:-2px; flex:none;
+}
